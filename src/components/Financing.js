@@ -900,7 +900,7 @@ class Financing extends Component {
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({action_package})
     };
-    fetch('/training/send-training-data/financing', requestOptions)
+    fetch('https://spreadsheetactions.herokuapp.com/training/send-training-data/financing', requestOptions)
   }
 
   select_simulation = (e) => {
