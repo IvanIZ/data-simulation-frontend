@@ -32,7 +32,7 @@ class Utils {
             ATT_NUM = 7;
         }
 
-        let url = '/' + simulation + '/' + simulation_type + '/fetch-fifty-rows/' + index
+        let url = 'https://spreadsheetactions.herokuapp.com/' + simulation + '/' + simulation_type + '/fetch-fifty-rows/' + index
         fetch(url)
         .then(res => res.json())      
         .then(data => {

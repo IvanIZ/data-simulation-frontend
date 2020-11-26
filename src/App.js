@@ -20,6 +20,7 @@ import {
 import { BrowserRouter, Route, Switch, HashRouter } from 'react-router-dom';
 
 import Simulations from './components/Simulations';
+import Academic from './components/Academic';
 
 class App extends Component {
   render() { 
@@ -32,6 +33,7 @@ class App extends Component {
                   {/* <Navbar /> */}
                   <Switch>
                     <Route path="/" component={Simulations} exact/>
+                    <Route path="/academic" component={Academic}/>
                     {/* <Route path="/result" component={Result}/>
                     <Route path="/start" component={Start}/>
                     <Route path="/academic" component={Academic}/>
