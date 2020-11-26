@@ -137,60 +137,6 @@ class Simulation extends Component {
       // simulation_type: ""
     }
 
-    this.socket = io('localhost:3001');
-
-    this.socket.on('RECEIVE_MESSAGE', function(data){
-      addMessage(data);
-    });
-
-    this.socket.on('RECEIVE_ID', function(id){
-      change_id(id);
-    });
-
-    this.socket.on('REQUEST_SHARED_REJECT', function(shared_lock_reject){
-      toggleSharedLockReject(shared_lock_reject);
-    });
-
-    this.socket.on('REQUEST_SHARED_ACCEPT', function(shared_lock_accept){
-      let row = shared_lock_accept.row;
-      let col = shared_lock_accept.col;
-      
-      display_shared_lock(row, col);
-    });
-
-    this.socket.on('REQUEST_EXCLUSIVE_REJECT', function(exclusive_lock_reject){
-      let row = exclusive_lock_reject.row;
-      let col = exclusive_lock_reject.col;
-      
-      toggleExclusiveLockReject(row, col);
-    });
-
-    this.socket.on('REQUEST_EXCLUSIVE_ACCEPT', function(exclusive_lock_accept){
-      let row = exclusive_lock_accept.row;
-      let col = exclusive_lock_accept.col;
-      let id = exclusive_lock_accept.id
-      
-      if (id !== socket_id) {
-        display_exclusive_lock(row, col);
-      }
-    });
-
-    this.socket.on('CHANGE_CURRENT_USER', function(data) {
-      change_current_user(data);
-    });
-
-    this.socket.on('ADD_NEW_USER', function(data) {
-      addNewUser(data);
-    });
-
-    this.socket.on('RECEIVE_FREED_CELLS', function(free_cells_package) {
-      update_freed_cells(free_cells_package);
-    });
-
-    this.socket.on('UPDATE_EDIT_MESSAGE', function(message_package) {
-      update_edit_message(message_package);
-    });
-
     const update_edit_message = message_package => {
       this.setState({
         edit_message: message_package.new_message, 
@@ -443,7 +389,7 @@ class Simulation extends Component {
   }
 
   componentWillUnmount() {
-    this.socket.disconnect();
+    // this.socket.disconnect();
   }
 
   toggleNavbar = () => {
