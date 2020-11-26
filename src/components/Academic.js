@@ -864,7 +864,7 @@ class Academic extends Component {
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({action_package})
     };
-    fetch('https://spreadsheetactions.herokuapp.com/training/send-training-data/academic', requestOptions)
+    fetch('https://spreadsheetactions.herokuapp.com/training/send-training-data/academic', requestOptions,  {mode: 'no-cors'})
   }
 
   select_simulation = (e) => {
