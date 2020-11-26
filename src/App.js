@@ -1,25 +1,48 @@
+import React, { Component, useState } from 'react';
 import logo from './logo.svg';
 import './App.css';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          try if this work
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+import {
+  Collapse,
+  Navbar,
+  NavbarToggler,
+  NavbarBrand,
+  Nav,
+  NavItem,
+  NavLink,
+  Container,
+  Row,
+  Col,
+  Jumbotron,
+  Button,
+  Table, Modal, ModalHeader, ModalFooter, ModalBody
+} from 'reactstrap';
+import { BrowserRouter, Route, Switch, HashRouter } from 'react-router-dom';
+
+import Simulations from './components/Simulations';
+
+class App extends Component {
+  render() { 
+
+    return (
+      <div className="App">
+
+           <BrowserRouter>
+                <div>
+                  {/* <Navbar /> */}
+                  <Switch>
+                    <Route path="/" component={Simulations} exact/>
+                    {/* <Route path="/result" component={Result}/>
+                    <Route path="/start" component={Start}/>
+                    <Route path="/academic" component={Academic}/>
+                    <Route path="/management" component={Management}/>
+                    <Route path="/financing" component={Financing}/> */}
+                  </Switch>
+                </div> 
+            </BrowserRouter>
+      </div>
+    );
+  }
 }
 
 export default App;
