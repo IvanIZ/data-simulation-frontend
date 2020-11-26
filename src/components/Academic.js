@@ -28,6 +28,7 @@ import {
   Redirect
 } from "react-router-dom";
 import io from "socket.io-client";
+import { CSVLink, CSVDownload } from "react-csv";
 import classnames from 'classnames';
 
 const Utils = require('../utils');
@@ -147,7 +148,8 @@ class Academic extends Component {
       name: "", 
       curr_table: "attendance", 
 
-      isRestartModalOpen: false
+      isRestartModalOpen: false, 
+      user_actions: []
     }
 
     const update_edit_message = message_package => {
@@ -995,6 +997,10 @@ class Academic extends Component {
     this.toggleRestartModal();
   }
 
+  download = () => {
+    this.csvLink.link.click()
+  }
+
   render() {
     if (this.state.redirect) {
       return <Redirect to={this.state.redirect_link} />
@@ -1026,7 +1032,15 @@ class Academic extends Component {
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     {transaction_button}
                     &nbsp;&nbsp;&nbsp;&nbsp;
-                    <Button size='lg' className='display-button' color="info" onClick={this.store_training_data} >Complete Simulation</Button>
+                    {/* <Button size='lg' className='display-button' color="info" onClick={this.store_training_data} >Complete Simulation</Button> */}
+                    {/* <CSVLink className='display-button' color="info" data={user_actions}>Download me</CSVLink>; */}
+                    <Button size='lg' className='display-button' color="info" onClick={this.download} >Complete Simulation</Button>
+                    <CSVLink
+                        data={user_actions}
+                        filename="data.csv"
+                        className="hidden"
+                        ref={(r) => this.csvLink = r}
+                        target="_blank"/>
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     <Button size='lg' className='display-button' color="info" onClick={this.restart} >Restart Simulation</Button>
                     &nbsp;&nbsp;&nbsp;&nbsp;
