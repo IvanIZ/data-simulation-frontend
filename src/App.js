@@ -21,6 +21,8 @@ import { BrowserRouter, Route, Switch, HashRouter } from 'react-router-dom';
 
 import Simulations from './components/Simulations';
 import Academic from './components/Academic';
+import Financing from './components/Financing';
+import Management from './components/Management';
 
 class App extends Component {
   render() { 
@@ -34,6 +36,8 @@ class App extends Component {
                   <Switch>
                     <Route path="/" component={Simulations} exact/>
                     <Route path="/academic" component={Academic}/>
+                    <Route path="/financing" component={Financing}/>
+                    <Route path="/management" component={Management}/>
                     {/* <Route path="/result" component={Result}/>
                     <Route path="/start" component={Start}/>
                     <Route path="/academic" component={Academic}/>
