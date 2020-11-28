@@ -442,7 +442,7 @@ class Academic extends Component {
     if (change_detected) {
 
       // find current state
-      let state = "Y"; //  Y means in a transaction
+      let state = "Y"; //  Y means in a transaction 
       if (!this.state.transaction_mode) {
         state = "N";
       }
