@@ -1,163 +1,7 @@
 class Utils {
-    load_simulation = (index, simulation_type, buffer, buffer_copy, col_headers) => {
-        console.log("simulation type is: ", simulation_type);
-        this.fill_col_headers(col_headers, simulation_type);
-        let simulation = "";
-        if (simulation_type === "attendance" || simulation_type === "grade_book") {
-            simulation = "academic";
-        }
-        else if (simulation_type === "employee_schedule_v1" || simulation_type === "employee_schedule_v2" || simulation_type === "progress_log") {
-            simulation = "management";
-        } else if (simulation_type === "check_book" || simulation_type === "monthly_expense" || simulation_type === "monthly_income") {
-            simulation = "financing";
-        }
-
-        let ATT_NUM = 0;
-        if (simulation_type === "attendance") {
-            ATT_NUM = 9;
-        } else if (simulation_type === "grade_book") {
-            ATT_NUM = 17;
-        }
-        else if (simulation_type === "check_book") {
-            ATT_NUM = 7;
-        } else if (simulation_type === "monthly_expense") {
-            ATT_NUM = 14;
-        } else if (simulation_type === "monthly_income") {
-            ATT_NUM = 14;
-        } else if (simulation_type === "employee_schedule_v1") {
-            ATT_NUM = 9;
-        } else if (simulation_type === "employee_schedule_v2") {
-            ATT_NUM = 8;
-        } else if (simulation_type === "progress_log") {
-            ATT_NUM = 7;
-        }
-
-        let url = 'https://spreadsheetactions.herokuapp.com/' + simulation + '/' + simulation_type + '/fetch-fifty-rows/' + index
-        console.log("the fetch url is: ", url);
-        fetch(url)
-        .then(res => res.json())      
-        .then(data => {
-            if (data.length === 0) {
-                console.log("No data is fetched by fetchMoreRows function");
-                this.add_empty_rows(50, ATT_NUM, buffer, buffer_copy);
-            } else {
-                
-                //load returned data into the buffer
-                for (var i = 0; i < data.length; i++) {
-
-                    var temp = []
-                    for (var j = 0; j < ATT_NUM; j++) {
-                        if (simulation_type === "attendance") {  // attendance
-                            if (j === 0) {
-                                temp[j] = data[i]['ID'];
-                            }
-                            else if (j === 1) {
-                                temp[j] = data[i]['name'];
-                            }
-                            else {
-                                temp[j] = "";
-                            }
-                        }
-                        if (simulation_type === "grade_book") {      // grade book 
-                            if (j === 0) {temp[j] = data[i]['ID']}
-                            if (j === 1) {temp[j] = data[i]['name']}
-                            if (j === 2) {temp[j] = data[i]['MP1']}
-                            if (j === 3) {temp[j] = data[i]['MP2']}
-                            if (j === 4) {temp[j] = data[i]['MP3']}
-                            if (j === 5) {temp[j] = data[i]['MP4']}
-                            if (j === 6) {temp[j] = data[i]['Lab1']}
-                            if (j === 7) {temp[j] = data[i]['Lab2']}
-                            if (j === 8) {temp[j] = data[i]['Lab3']}
-                            if (j === 9) {temp[j] = data[i]['Lab4']}
-                            if (j === 10) {temp[j] = data[i]['Lab5']}
-                            if (j === 11) {temp[j] = data[i]['Lab6']}
-                            if (j === 12) {temp[j] = data[i]['Lab7']}
-                            if (j === 13) {temp[j] = data[i]['Exam1']}
-                            if (j === 14) {temp[j] = data[i]['Exam2']}
-                            if (j === 15) {temp[j] = data[i]['Final']}
-                            if (j === 16) {temp[j] = data[i]['Overall']}
-                        } else if (simulation_type === "check_book") {    // check book
-                            if (j === 0) {temp[j] = data[i]['id']}
-                            if (j === 1) {temp[j] = data[i]['number']}
-                            if (j === 2) {temp[j] = data[i]['date']}
-                            if (j === 3) {temp[j] = data[i]['transaction']}
-                            if (j === 4) {temp[j] = data[i]['withdraw']}
-                            if (j === 5) {temp[j] = data[i]['deposit']}
-                            if (j === 6) {temp[j] = data[i]['balance']}
-                        } else if (simulation_type === "monthly_expense") { // monthly expense
-                            if (j === 0) {temp[j] = data[i]['id']}
-                            if (j === 1) {temp[j] = data[i]['expenses']}
-                            if (j === 2) {temp[j] = data[i]['Jan']}
-                            if (j === 3) {temp[j] = data[i]['Feb']}
-                            if (j === 4) {temp[j] = data[i]['Mar']}
-                            if (j === 5) {temp[j] = data[i]['Apr']}
-                            if (j === 6) {temp[j] = data[i]['May']}
-                            if (j === 7) {temp[j] = data[i]['Jun']}
-                            if (j === 8) {temp[j] = data[i]['Jul']}
-                            if (j === 9) {temp[j] = data[i]['Aug']}
-                            if (j === 10) {temp[j] = data[i]['Sep']}
-                            if (j === 11) {temp[j] = data[i]['Oct']}
-                            if (j === 12) {temp[j] = data[i]['Nov']}
-                            if (j === 13) {temp[j] = data[i]['Dec']}
-                        } else if (simulation_type === "monthly_income") { // monthly income
-                            if (j === 0) {temp[j] = data[i]['id']}
-                            if (j === 1) {temp[j] = data[i]['income_type']}
-                            if (j === 2) {temp[j] = data[i]['Jan']}
-                            if (j === 3) {temp[j] = data[i]['Feb']}
-                            if (j === 4) {temp[j] = data[i]['Mar']}
-                            if (j === 5) {temp[j] = data[i]['Apr']}
-                            if (j === 6) {temp[j] = data[i]['May']}
-                            if (j === 7) {temp[j] = data[i]['Jun']}
-                            if (j === 8) {temp[j] = data[i]['Jul']}
-                            if (j === 9) {temp[j] = data[i]['Aug']}
-                            if (j === 10) {temp[j] = data[i]['Sep']}
-                            if (j === 11) {temp[j] = data[i]['Oct']}
-                            if (j === 12) {temp[j] = data[i]['Nov']}
-                            if (j === 13) {temp[j] = data[i]['Dec']}
-                        } else if (simulation_type === "employee_schedule_v1") {   // schedule v1
-                            if (j === 0) {temp[j] = data[i]['emp_id']}
-                            if (j === 1) {temp[j] = data[i]['name']}
-                            if (j === 2) {temp[j] = data[i]['Monday']}
-                            if (j === 3) {temp[j] = data[i]['Tuesday']}
-                            if (j === 4) {temp[j] = data[i]['Wednesday']}
-                            if (j === 5) {temp[j] = data[i]['Thursday']}
-                            if (j === 6) {temp[j] = data[i]['Friday']}
-                            if (j === 7) {temp[j] = data[i]['Saturday']}
-                            if (j === 8) {temp[j] = data[i]['Sunday']}
-                        } else if (simulation_type === "employee_schedule_v2") {   // schedule v2
-                            if (j === 1) {temp[j] = data[i]['time_slot']}
-                            if (j === 2) {temp[j] = data[i]['Monday']}
-                            if (j === 3) {temp[j] = data[i]['Tuesday']}
-                            if (j === 4) {temp[j] = data[i]['Wednesday']}
-                            if (j === 5) {temp[j] = data[i]['Thursday']}
-                            if (j === 6) {temp[j] = data[i]['Friday']}
-                            if (j === 7) {temp[j] = data[i]['Saturday']}
-                            if (j === 8) {temp[j] = data[i]['Sunday']}
-                        } else if (simulation_type === "progress_log") {  // progress log
-                            if (j === 0) {temp[j] = data[i]['task_id']}
-                            if (j === 1) {temp[j] = data[i]['task']}
-                            if (j === 2) {temp[j] = data[i]['deadline']}
-                            if (j === 3) {temp[j] = data[i]['emp_id']}
-                            if (j === 4) {temp[j] = data[i]['name']}
-                            if (j === 5) {temp[j] = data[i]['hour_spent']}
-                            if (j === 6) {temp[j] = data[i]['progress']}
-                        }
-                    }
-
-                    buffer[i] = temp;
-                    buffer_copy[i] = temp.slice()
-                    // return buffer;
-                }
-
-                this.add_empty_rows(10, ATT_NUM, buffer, buffer_copy);
-            }
-        });
-    }
-
     load_simulation_v2 = (index, simulation_type, buffer, buffer_copy, col_headers) => {
         console.log("simulation type is: ", simulation_type);
         this.fill_col_headers(col_headers, simulation_type);
-        // buffer.push(col_headers);
         let simulation = "";
         if (simulation_type === "attendance" || simulation_type === "grade_book" || simulation_type === "student_status") {
             simulation = "academic";
@@ -317,6 +161,159 @@ class Utils {
                 this.add_empty_rows(10, ATT_NUM, buffer, buffer_copy);
             }
         });
+    }
+
+    load_simulation_v3 = (index, simulation_type, buffer, buffer_copy, col_headers) => {
+        console.log("calling vs...");
+        console.log("simulation type is: ", simulation_type);
+        this.fill_col_headers(col_headers, simulation_type);
+
+        let ATT_NUM = 0;
+        if (simulation_type === "attendance") {
+            this.load_attendance(buffer);
+            this.load_attendance(buffer_copy);
+            ATT_NUM = 9;
+            this.add_empty_rows(10, ATT_NUM, buffer, buffer_copy);
+
+        } else if (simulation_type === "grade_book") {
+            this.load_gradebook(buffer);
+            this.load_gradebook(buffer_copy);
+            ATT_NUM = 17;
+            this.add_empty_rows(10, ATT_NUM, buffer, buffer_copy);
+
+        }
+        else if (simulation_type === "check_book") {
+            ATT_NUM = 7;
+            this.add_empty_rows(25, ATT_NUM, buffer, buffer_copy);
+
+        } else if (simulation_type === "monthly_expense") {
+            ATT_NUM = 14;
+            this.add_empty_rows(25, ATT_NUM, buffer, buffer_copy);
+
+        } else if (simulation_type === "monthly_income") {
+            ATT_NUM = 14;
+            this.add_empty_rows(25, ATT_NUM, buffer, buffer_copy);
+
+        } else if (simulation_type === "employee_schedule_v1") {
+            ATT_NUM = 9;
+            this.add_empty_rows(25, ATT_NUM, buffer, buffer_copy);
+
+        } else if (simulation_type === "employee_schedule_v2") {
+            ATT_NUM = 8;
+            this.add_empty_rows(25, ATT_NUM, buffer, buffer_copy);
+
+        } else if (simulation_type === "progress_log") {
+            ATT_NUM = 7;
+            this.add_empty_rows(25, ATT_NUM, buffer, buffer_copy);
+
+        } else if (simulation_type === "student_status") {
+            this.load_student_status(buffer);
+            this.load_student_status(buffer_copy);
+            ATT_NUM = 6;
+            this.add_empty_rows(10, ATT_NUM, buffer, buffer_copy);
+        }         
+    }
+
+    load_attendance = (buffer) => {
+        buffer.push(["00001", "Ivan", "", "", "", "", "", "", ""]);
+        buffer.push(["00002", "John", "", "", "", "", "", "", ""]);
+        buffer.push(["00003", "Rick", "", "", "", "", "", "", ""]);
+        buffer.push(["00004", "Brian", "", "", "", "", "", "", ""]);
+        buffer.push(["00005", "Arthur", "", "", "", "", "", "", ""]);
+        buffer.push(["00006", "Emily", "", "", "", "", "", "", ""]);
+        buffer.push(["00007", "Ken", "", "", "", "", "", "", ""]);
+        buffer.push(["00008", "Iris", "", "", "", "", "", "", ""]);
+        buffer.push(["00009", "Maggie", "", "", "", "", "", "", ""]);
+        buffer.push(["00010", "Hermosa", "", "", "", "", "", "", ""]);
+        buffer.push(["00011", "Henry", "", "", "", "", "", "", ""]);
+        buffer.push(["00012", "Oliver", "", "", "", "", "", "", ""]);
+        buffer.push(["00013", "Jack", "", "", "", "", "", "", ""]);
+        buffer.push(["00014", "Jacob", "", "", "", "", "", "", ""]);
+        buffer.push(["00015", "Charlie", "", "", "", "", "", "", ""]);
+        buffer.push(["00016", "Tomas", "", "", "", "", "", "", ""]);
+        buffer.push(["00017", "George", "", "", "", "", "", "", ""]);
+        buffer.push(["00018", "Joe", "", "", "", "", "", "", ""]);
+        buffer.push(["00019", "Reece", "", "", "", "", "", "", ""]);
+        buffer.push(["00020", "Daniel", "", "", "", "", "", "", ""]);
+        buffer.push(["00021", "Kyle", "", "", "", "", "", "", ""]);
+        buffer.push(["00022", "David", "", "", "", "", "", "", ""]);
+        buffer.push(["00023", "Oscar", "", "", "", "", "", "", ""]);
+        buffer.push(["00024", "Snow", "", "", "", "", "", "", ""]);
+        buffer.push(["00025", "Williams", "", "", "", "", "", "", ""]);
+        buffer.push(["00026", "Levy", "", "", "", "", "", "", ""]);
+        buffer.push(["00027", "Peter", "", "", "", "", "", "", ""]);
+        buffer.push(["00028", "Aoi", "", "", "", "", "", "", ""]);
+        buffer.push(["00029", "Tanaka", "", "", "", "", "", "", ""]);
+        buffer.push(["00030", "Jake", "", "", "", "", "", "", ""]);
+        buffer.push(["00031", "Isla", "", "", "", "", "", "", ""]);
+    }
+
+    load_gradebook = (buffer) => {
+        buffer.push(["00001", "Ivan", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+        buffer.push(["00002", "John", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+        buffer.push(["00003", "Rick", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+        buffer.push(["00004", "Brian", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+        buffer.push(["00005", "Arthur", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+        buffer.push(["00006", "Emily", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+        buffer.push(["00007", "Ken", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+        buffer.push(["00008", "Iris", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+        buffer.push(["00009", "Maggie", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+        buffer.push(["00010", "Hermosa", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+        buffer.push(["00011", "Henry", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+        buffer.push(["00012", "Oliver", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+        buffer.push(["00013", "Jack", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+        buffer.push(["00014", "Jacob", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+        buffer.push(["00015", "Charlie", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+        buffer.push(["00016", "Tomas", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+        buffer.push(["00017", "George", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+        buffer.push(["00018", "Joe", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+        buffer.push(["00019", "Reece", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+        buffer.push(["00020", "Daniel", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+        buffer.push(["00021", "Kyle", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+        buffer.push(["00022", "David", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+        buffer.push(["00023", "Oscar", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+        buffer.push(["00024", "Snow", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+        buffer.push(["00025", "Williams", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+        buffer.push(["00026", "Levy", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+        buffer.push(["00027", "Peter", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+        buffer.push(["00028", "Aoi", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+        buffer.push(["00029", "Tanaka", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+        buffer.push(["00030", "Jake", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+        buffer.push(["00031", "Isla", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+    }
+
+    load_student_status = (buffer) => {
+        buffer.push(["00001", "Ivan", "", "", "", ""]);
+        buffer.push(["00002", "John", "", "", "", ""]);
+        buffer.push(["00003", "Rick", "", "", "", ""]);
+        buffer.push(["00004", "Brian", "", "", "", ""]);
+        buffer.push(["00005", "Arthur", "", "", "", ""]);
+        buffer.push(["00006", "Emily", "", "", "", ""]);
+        buffer.push(["00007", "Ken", "", "", "", ""]);
+        buffer.push(["00008", "Iris", "", "", "", ""]);
+        buffer.push(["00009", "Maggie", "", "", "", ""]);
+        buffer.push(["00010", "Hermosa", "", "", "", ""]);
+        buffer.push(["00011", "Henry", "", "", "", ""]);
+        buffer.push(["00012", "Oliver", "", "", "", ""]);
+        buffer.push(["00013", "Jack", "", "", "", ""]);
+        buffer.push(["00014", "Jacob", "", "", "", ""]);
+        buffer.push(["00015", "Charlie", "", "", "", ""]);
+        buffer.push(["00016", "Tomas", "", "", "", ""]);
+        buffer.push(["00017", "George", "", "", "", ""]);
+        buffer.push(["00018", "Joe", "", "", "", ""]);
+        buffer.push(["00019", "Reece", "", "", "", ""]);
+        buffer.push(["00020", "Daniel", "", "", "", ""]);
+        buffer.push(["00021", "Kyle", "", "", "", ""]);
+        buffer.push(["00022", "David", "", "", "", ""]);
+        buffer.push(["00023", "Oscar", "", "", "", ""]);
+        buffer.push(["00024", "Snow", "", "", "", ""]);
+        buffer.push(["00025", "Williams", "", "", "", ""]);
+        buffer.push(["00026", "Levy", "", "", "", ""]);
+        buffer.push(["00027", "Peter", "", "", "", ""]);
+        buffer.push(["00028", "Aoi", "", "", "", ""]);
+        buffer.push(["00029", "Tanaka", "", "", "", ""]);
+        buffer.push(["00030", "Jake", "", "", "", ""]);
+        buffer.push(["00031", "Isla", "", "", "", ""]);
     }
 
     fill_col_headers = (col_head, simulation_type) => {

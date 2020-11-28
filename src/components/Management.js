@@ -135,106 +135,9 @@ class Management extends Component {
       isRedirectConfirmOpen: false, 
       redirect: false, 
 
-      isRestartModalOpen: false
+      isRestartModalOpen: false, 
+      isNameModalOpen: false
     }
-
-    const cell_read_only = () => {
-      console.log("setting to read only...")
-      this.hotTableComponent.current.hotInstance.updateSettings({
-        cells: function(row, col, prop){
-         var cellProperties = {};
-         console.log("undefined is: ", data_display[row][col], " ", row, " ", col)
-           if(data_display[row][col] !== null && data_display[row][col].length !== 0 &&  (data_display[row][col] === "-----" || data_display[row][col].charAt(0) === "*")){
-             cellProperties.readOnly = 'true'
-           }
-         return cellProperties
-       }
-     })
-    }
-
-    const display_shared_lock = (row, col) => {
-      if (row < data_display.length) {
-  
-        let cell_data = this.hotTableComponent.current.hotInstance.getDataAtCell(row, col);
-  
-        // if there is a shared lock displaying already, do nothing
-        if (cell_data.charAt(0) === "*") {
-          return;
-        } else {
-          let new_data = "*" + cell_data
-          this.hotTableComponent.current.hotInstance.setDataAtCell(row, col, new_data);
-        }
-        cell_read_only();
-      }
-    }
-
-    const display_exclusive_lock = (row, col) => {
-      if (row < data_display.length) {
-        console.log(row)
-        console.log(col)
-        let new_value = "-----";
-        this.hotTableComponent.current.hotInstance.setDataAtCell(row, col, new_value);
-        cell_read_only();
-      }
-    }
-
-    const toggleSharedLockReject = data => {
-      this.setState({
-        isSharedLockRejectOpen: !this.state.isSharedLockRejectOpen
-      })
-    }
-
-    const toggleExclusiveLockReject = data => {
-      this.setState({
-        isExclusiveLockRejectOpen: !this.state.isExclusiveLockRejectOpen
-      })
-    }
-
-    const change_current_user = data => {
-      this.setState({
-        users: data
-      });
-      let new_user_text = "Currently Online: ";
-      for (var i = 0; i < this.state.users.length; i++) {
-        if (i === this.state.users.length - 1) {
-          new_user_text += this.state.users[i]
-        } else {
-          new_user_text += this.state.users[i] + ", "
-        }
-      }
-      this.setState({
-        user_text_block: new_user_text
-      });
-    }
-
-    const addMessage = data => {
-
-        let change_table = data.data
-        for (var x = 0; x < change_table.length; x++) {
-          // Extract data
-          let j = change_table[x][0] - 1   // 0 --> y_coord
-          let value = change_table[x][1] // 1 --> actual value
-          let i = change_table[x][2] - 1 // 2 --> x_coord
-
-          // Update spreadsheet
-          if (i < data_display.length) {
-            data_display[i][j] = value     
-            this.state.data_original[i][j] = value
-          }
-
-          // check buffer
-          else if ((i + 1) < current_fetch_index) {
-            i++; // change i and j to 1-based index
-            if (buffer_copy[i + PREFETCH_SIZE - current_fetch_index][j] != value) {
-              buffer_copy[i + PREFETCH_SIZE - current_fetch_index][j] = value  // update both buffer and buffer_copy
-              buffer[i + PREFETCH_SIZE - current_fetch_index][j] = value
-            }
-          }
-        }
-        this.setState({
-          test_block: data.try_message
-        });
-    };
 
     this.toggleSelectionPrompt = this.toggleSelectionPrompt.bind()
     this.toggleShowHistory = this.toggleShowHistory.bind()
@@ -855,9 +758,9 @@ class Management extends Component {
       this.toggleInstructionModal();
     } else {
       table_loaded = true;
-      utils.load_simulation_v2(1, "employee_schedule_v1", schedule_v1_display, buffer_copy, schedule_v1_col_headers);
-      utils.load_simulation_v2(1, "employee_schedule_v2", schedule_v2_display, buffer_copy, schedule_v2_col_headers);
-      utils.load_simulation_v2(1, "progress_log", progress_display, buffer_copy, progress_col_headers);
+      utils.load_simulation_v3(1, "employee_schedule_v1", schedule_v1_display, buffer_copy, schedule_v1_col_headers);
+      utils.load_simulation_v3(1, "employee_schedule_v2", schedule_v2_display, buffer_copy, schedule_v2_col_headers);
+      utils.load_simulation_v3(1, "progress_log", progress_display, buffer_copy, progress_col_headers);
       setTimeout(() => {
           schedule_v1_display = [schedule_v1_col_headers].concat(schedule_v1_display);
           schedule_v2_display = [schedule_v2_col_headers].concat(schedule_v2_display);
@@ -870,9 +773,9 @@ class Management extends Component {
   }
 
   reload_tables = () => {
-    utils.load_simulation_v2(1, "employee_schedule_v1", schedule_v1_display, buffer_copy, schedule_v1_col_headers);
-    utils.load_simulation_v2(1, "employee_schedule_v2", schedule_v2_display, buffer_copy, schedule_v2_col_headers);
-    utils.load_simulation_v2(1, "progress_log", progress_display, buffer_copy, progress_col_headers);
+    utils.load_simulation_v3(1, "employee_schedule_v1", schedule_v1_display, buffer_copy, schedule_v1_col_headers);
+    utils.load_simulation_v3(1, "employee_schedule_v2", schedule_v2_display, buffer_copy, schedule_v2_col_headers);
+    utils.load_simulation_v3(1, "progress_log", progress_display, buffer_copy, progress_col_headers);
     setTimeout(() => {
         schedule_v1_display = [schedule_v1_col_headers].concat(schedule_v1_display);
         schedule_v2_display = [schedule_v2_col_headers].concat(schedule_v2_display);
@@ -1063,7 +966,7 @@ class Management extends Component {
                 <h4>
                     Employee Weekly Schedule
                 </h4> 
-                <div id = "display_portion" onScroll={e => this.track_action(e, "scroll")}  tabIndex="1">
+                <div id = "display_portion" onScrollCapture={e => this.track_action(e, "scroll")}  tabIndex="1">
                     <HotTable className="handsontable" id ="display_table" data={schedule_v1_display} ref={this.hotTableComponent} id={this.id}
                         colHeaders={true} 
                         rowHeaders={true} 
@@ -1082,7 +985,7 @@ class Management extends Component {
                 <h4>
                     Employee Shifts Schedule
                 </h4> 
-                <div id = "display_portion" onScroll={e => this.track_action(e, "scroll")}  tabIndex="1">
+                <div id = "display_portion" onScrollCapture={e => this.track_action(e, "scroll")}  tabIndex="1">
                     <HotTable className="handsontable" id ="display_table" data={schedule_v2_display} ref={this.hotTableComponent1} id={this.id}
                         colHeaders={true} 
                         rowHeaders={true} 
@@ -1101,7 +1004,7 @@ class Management extends Component {
                 <h4>
                     Projects Progress Table
                 </h4> 
-                <div id = "display_portion" onScroll={e => this.track_action(e, "scroll")}  tabIndex="1">
+                <div id = "display_portion" onScrollCapture={e => this.track_action(e, "scroll")}  tabIndex="1">
                     <HotTable className="handsontable" id ="display_table" data={progress_display} ref={this.hotTableComponent2} id={this.id}
                         colHeaders={true} 
                         rowHeaders={true} 

@@ -130,7 +130,8 @@ class Financing extends Component {
       isRedirectConfirmOpen: false, 
       redirect: false, 
 
-      isRestartModalOpen: false
+      isRestartModalOpen: false, 
+      isNameModalOpen: false
     }
 
     this.toggleSelectionPrompt = this.toggleSelectionPrompt.bind()
@@ -755,9 +756,9 @@ class Financing extends Component {
       this.toggleInstructionModal();
     } else {
       table_loaded = true;
-      utils.load_simulation_v2(1, "monthly_expense", monthly_expense_display, buffer_copy, monthly_expense_col_headers);
-      utils.load_simulation_v2(1, "monthly_income", monthly_income_display, buffer_copy, monthly_income_col_headers);
-      utils.load_simulation_v2(1, "check_book", check_book_display, buffer_copy, check_book_col_headers);
+      utils.load_simulation_v3(1, "monthly_expense", monthly_expense_display, buffer_copy, monthly_expense_col_headers);
+      utils.load_simulation_v3(1, "monthly_income", monthly_income_display, buffer_copy, monthly_income_col_headers);
+      utils.load_simulation_v3(1, "check_book", check_book_display, buffer_copy, check_book_col_headers);
       setTimeout(() => {
           monthly_expense_display = [monthly_expense_col_headers].concat(monthly_expense_display);
           monthly_income_display = [monthly_income_col_headers].concat(monthly_income_display);
@@ -770,9 +771,9 @@ class Financing extends Component {
   }
 
   reload_tables = () => {
-    utils.load_simulation_v2(1, "monthly_expense", monthly_expense_display, buffer_copy, monthly_expense_col_headers);
-    utils.load_simulation_v2(1, "monthly_income", monthly_income_display, buffer_copy, monthly_income_col_headers);
-    utils.load_simulation_v2(1, "check_book", check_book_display, buffer_copy, check_book_col_headers);
+    utils.load_simulation_v3(1, "monthly_expense", monthly_expense_display, buffer_copy, monthly_expense_col_headers);
+    utils.load_simulation_v3(1, "monthly_income", monthly_income_display, buffer_copy, monthly_income_col_headers);
+    utils.load_simulation_v3(1, "check_book", check_book_display, buffer_copy, check_book_col_headers);
     setTimeout(() => {
         monthly_expense_display = [monthly_expense_col_headers].concat(monthly_expense_display);
         monthly_income_display = [monthly_income_col_headers].concat(monthly_income_display);
@@ -957,7 +958,7 @@ class Financing extends Component {
                 <h4>
                     Monthly Expenses Table
                 </h4> 
-                <div id = "display_portion" onScroll={e => this.track_action(e, "scroll")}  tabIndex="1">
+                <div id = "display_portion" onScrollCapture={e => this.track_action(e, "scroll")}  tabIndex="1">
                     <HotTable className="handsontable" id ="display_table" data={monthly_expense_display} ref={this.hotTableComponent} id={this.id}
                         colHeaders={true} 
                         rowHeaders={true} 
@@ -976,7 +977,7 @@ class Financing extends Component {
                 <h4>
                     Monthly Income Table
                 </h4> 
-                <div id = "display_portion" onScroll={e => this.track_action(e, "scroll")}  tabIndex="1">
+                <div id = "display_portion" onScrollCapture={e => this.track_action(e, "scroll")}  tabIndex="1">
                     <HotTable className="handsontable" id ="display_table" data={monthly_income_display} ref={this.hotTableComponent1} id={this.id}
                         colHeaders={true} 
                         rowHeaders={true} 
@@ -995,7 +996,7 @@ class Financing extends Component {
                 <h4>
                     Transaction Log
                 </h4> 
-                <div id = "display_portion" onScroll={e => this.track_action(e, "scroll")}  tabIndex="1">
+                <div id = "display_portion" onScrollCapture={e => this.track_action(e, "scroll")}  tabIndex="1">
                     <HotTable className="handsontable" id ="display_table" data={check_book_display} ref={this.hotTableComponent2} id={this.id}
                         colHeaders={true} 
                         rowHeaders={true} 

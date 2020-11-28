@@ -585,12 +585,6 @@ class Simulation extends Component {
         redirect_financing_page: true
       })
     }
-    // console.log("simulation type is: ", simulation_type);
-    // this.toggleSelectionPrompt();
-
-    // buffer = [];
-    // buffer_copy = [];
-    // utils.load_simulation(1, simulation_type, buffer, buffer_copy, col_headers);
   }
 
 
@@ -651,7 +645,7 @@ class Simulation extends Component {
                             <Col sm="6">
                                 <Card body>
                                 <CardTitle tag="h5">Academic Simulation</CardTitle>
-                                <CardText>Simulation on a university class environment</CardText>
+                                <CardText>Simulation on a university class environmenH</CardText>
                                 <Button color="primary" name="academic" id="academic" onClick={e => this.select_simulation(e)}> Choose This Simulation</Button>
                                 </Card>
                             </Col>

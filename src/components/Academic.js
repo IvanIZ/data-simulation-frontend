@@ -1,12 +1,14 @@
 import React, { Component, useState } from 'react';
 import ReactDOM from "react-dom"
 import { HotTable } from '@handsontable/react';
-// import Handsontable from 'handsontable';
 import 'handsontable/dist/handsontable.full.css';
 import '../App.css';
 import {
   Collapse,
   Navbar,
+  NavbarToggler,
+  NavbarBrand,
+  Container,
   Row,
   Col,
   Jumbotron,
@@ -14,13 +16,14 @@ import {
   NavItem,
   NavLink,
   Button,
-  Modal, ModalHeader, ModalFooter, ModalBody, Form, FormGroup, Label, Input, TabContent, TabPane, ButtonDropdown, DropdownToggle, DropdownMenu, DropdownItem
+  Table, Modal, ModalHeader, ModalFooter, ModalBody, Form, FormGroup, Label, Input, ListGroup, Card, CardTitle, CardText, TabContent, TabPane, ButtonDropdown, Dropdown, DropdownToggle, DropdownMenu, DropdownItem
 } from 'reactstrap';
 import {
   BrowserRouter as Router,
   Route,
   Link,
-  Redirect 
+  useHistory,
+  Redirect
 } from "react-router-dom";
 import { CSVLink } from "react-csv";
 import classnames from 'classnames';
@@ -542,6 +545,8 @@ class Academic extends Component {
     // handle scroll actions
     if (action_type === "scroll") {
 
+      console.log("i'm scorlling rn!!!");
+
       let scroll_diff = prev_scrolltop - e.target.scrollTop;
       let action_length = user_actions.length;
 
@@ -728,9 +733,9 @@ class Academic extends Component {
       this.toggleInstructionModal();
     } else {
       table_loaded = true;
-      utils.load_simulation_v2(1, "attendance", attendance_display, buffer_copy, attendance_col_headers);
-      utils.load_simulation_v2(1, "grade_book", greadebook_display, buffer_copy, grade_book_col_headers);
-      utils.load_simulation_v2(1, "student_status", student_status_display, buffer_copy, student_status_col_headers);
+      utils.load_simulation_v3(1, "attendance", attendance_display, buffer_copy, attendance_col_headers);
+      utils.load_simulation_v3(1, "grade_book", greadebook_display, buffer_copy, grade_book_col_headers);
+      utils.load_simulation_v3(1, "student_status", student_status_display, buffer_copy, student_status_col_headers);
       setTimeout(() => {
           attendance_display = [attendance_col_headers].concat(attendance_display);
           greadebook_display = [grade_book_col_headers].concat(greadebook_display);
@@ -741,16 +746,15 @@ class Academic extends Component {
           })
       }, 500);
       col_headers = attendance_col_headers;
-      // this.toggleNameModal();
       this.setState({
-        isNameModalOpen: false
+        isNameModalOpen: true
       })
     }
   }
 
   reload_tables = () => {
     table_loaded = true;
-    utils.load_simulation_v2(1, "attendance", attendance_display, buffer_copy, attendance_col_headers);
+    utils.load_simulation_v3(1, "attendance", attendance_display, buffer_copy, attendance_col_headers);
     utils.load_simulation_v2(1, "grade_book", greadebook_display, buffer_copy, grade_book_col_headers);
     utils.load_simulation_v2(1, "student_status", student_status_display, buffer_copy, student_status_col_headers);
     setTimeout(() => {
@@ -809,6 +813,10 @@ class Academic extends Component {
     this.csvLink.link.click()
   }
 
+  test = () => {
+    console.log("IT'S FIRING!!!!!!!");
+  }
+
   render() {
     if (this.state.redirect) {
       return <Redirect to={this.state.redirect_link} />
@@ -836,7 +844,6 @@ class Academic extends Component {
                   <p className="lead">This is a simple web interface that allows you to upload spreadsheets and retrieve data.</p>
                   <hr className="my-2" />
                   <p className="lead">
-                    {/* <Button size='lg' className='display-button' color="info" onClick={this.toggleShowHistory} >Edit History</Button> */}
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     {transaction_button}
                     &nbsp;&nbsp;&nbsp;&nbsp;
@@ -964,7 +971,7 @@ class Academic extends Component {
                 <h4>
                     Attendance
                 </h4> 
-                <div id = "display_portion" onScroll={e => this.track_action(e, "scroll")}  tabIndex="1">
+                <div id = "display_portion" onScrollCapture={e => this.track_action(e, "scroll")}  tabIndex="1">
                     <HotTable className="handsontable" id ="display_table" data={attendance_display} ref={this.hotTableComponent} id={this.id}
                         colHeaders={true} 
                         rowHeaders={true} 
@@ -983,7 +990,7 @@ class Academic extends Component {
                 <h4>
                     Gradebook
                 </h4> 
-                <div id = "display_portion" onScroll={e => this.track_action(e, "scroll")}  tabIndex="1">
+                <div id = "display_portion" onScrollCapture={e => this.track_action(e, "scroll")}  tabIndex="2">
                     <HotTable className="handsontable" id ="display_table" data={greadebook_display} ref={this.hotTableComponent1} id={this.id}
                         colHeaders={true} 
                         rowHeaders={true} 
@@ -1002,7 +1009,7 @@ class Academic extends Component {
                 <h4>
                     Student Status Table
                 </h4> 
-                <div id = "display_portion" onScroll={e => this.track_action(e, "scroll")}  tabIndex="1">
+                <div id = "display_portion" onScrollCapture={e => this.track_action(e, "scroll")}  tabIndex="3">
                     <HotTable className="handsontable" id ="display_table" data={student_status_display} ref={this.hotTableComponent2} id={this.id}
                         colHeaders={true} 
                         rowHeaders={true} 
