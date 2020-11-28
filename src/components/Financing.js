@@ -6,11 +6,7 @@ import 'handsontable/dist/handsontable.full.css';
 import logo from '../logo.svg';
 import '../App.css';
 import {
-  Collapse,
   Navbar,
-  NavbarToggler,
-  NavbarBrand,
-  Container,
   Row,
   Col,
   Jumbotron,
@@ -18,16 +14,14 @@ import {
   NavItem,
   NavLink,
   Button,
-  Table, Modal, ModalHeader, ModalFooter, ModalBody, Form, FormGroup, Label, Input, ListGroup, Card, CardTitle, CardText, TabContent, TabPane, ButtonDropdown, Dropdown, DropdownToggle, DropdownMenu, DropdownItem
+  Modal, ModalHeader, ModalFooter, ModalBody, Form, FormGroup, Label, Input, TabContent, TabPane, ButtonDropdown, Dropdown, DropdownToggle, DropdownMenu, DropdownItem
 } from 'reactstrap';
 import {
   BrowserRouter as Router,
   Route,
   Link,
-  useHistory,
   Redirect
 } from "react-router-dom";
-import io from "socket.io-client";
 import classnames from 'classnames';
 
 const Utils = require('../utils');
@@ -89,8 +83,6 @@ let pending_changes = {
   try_message: "SENT MESSAGE! SUCCESS!", 
   user: ""
 }
-
-let socket_id = "";
 
 class Financing extends Component {
 
@@ -174,10 +166,6 @@ class Financing extends Component {
         }
       }
       cell_read_only();
-    }
-
-    const change_id = id => {
-      socket_id = id;
     }
 
     const addNewUser = data => {
@@ -501,28 +489,6 @@ class Financing extends Component {
     });
   }
 
-  request_shared_lock = () => {
-    // send request for a shared lock to backend
-    let shared_lock_request = {
-      row: select_i,
-      col: select_j
-    }
-    this.socket.emit('REQUEST_SHARED_LOCK', shared_lock_request);
-  }
-
-  request_exclusive_lock = (i, j) => {
-    // send request for a exclusive lock to backend
-    let exclusive_lock_request = {
-      row: i,
-      col: j
-    }
-    this.socket.emit('REQUEST_EXCLUSIVE_LOCK', exclusive_lock_request);
-  }
-
-  componentWillUnmount() {
-    // this.socket.disconnect();
-  }
-
   toggleRestartModal = () => {
     this.setState({
       isRestartModalOpen: !this.state.isRestartModalOpen
@@ -609,10 +575,6 @@ class Financing extends Component {
     console.log(change_detected);
   }
 
-  sendMessage = (message) => {
-    this.socket.emit('SEND_MESSAGE', message);
-  }
-
   check_cell_change = () => {
     // create a message to socket
     if (change_detected) {
@@ -669,24 +631,6 @@ class Financing extends Component {
     this.setState({
         [e.target.name]: e.target.value
     })
-  }
-
-  send_default_username = () => {
-    let name_package = {
-      user_name: "anonymous user"
-    }
-    this.socket.emit('SEND_USERNAME', name_package);
-    this.toggleUserNamePrompt()
-  }
-
-  onSelectionSubmit = (e) => {
-      e.preventDefault();
-      console.log("call username")
-      let name_package = {
-        user_name: this.state.user_name
-      }
-      this.socket.emit('SEND_USERNAME', name_package);
-      this.toggleUserNamePrompt();
   }
 
   resolve_conflict = (e) => {

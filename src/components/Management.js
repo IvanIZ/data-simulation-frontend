@@ -27,7 +27,6 @@ import {
   useHistory,
   Redirect
 } from "react-router-dom";
-import io from "socket.io-client";
 import classnames from 'classnames';
 
 const Utils = require('../utils');
@@ -90,8 +89,6 @@ let pending_changes = {
   user: ""
 }
 
-let socket_id = "";
-
 class Management extends Component {
 
   constructor() {
@@ -140,24 +137,6 @@ class Management extends Component {
       redirect: false, 
 
       isRestartModalOpen: false
-    }
-
-    const update_edit_message = message_package => {
-      this.setState({
-        edit_message: message_package.new_message, 
-        history: message_package.history
-      })
-    }
-
-    const change_id = id => {
-      socket_id = id;
-    }
-
-    const addNewUser = data => {
-      this.setState({
-        history: data.history
-      })
-      change_current_user(data.current_users);
     }
 
     const cell_read_only = () => {
@@ -475,28 +454,6 @@ class Management extends Component {
     });
   }
 
-  request_shared_lock = () => {
-    // send request for a shared lock to backend
-    let shared_lock_request = {
-      row: select_i,
-      col: select_j
-    }
-    this.socket.emit('REQUEST_SHARED_LOCK', shared_lock_request);
-  }
-
-  request_exclusive_lock = (i, j) => {
-    // send request for a exclusive lock to backend
-    let exclusive_lock_request = {
-      row: i,
-      col: j
-    }
-    this.socket.emit('REQUEST_EXCLUSIVE_LOCK', exclusive_lock_request);
-  }
-
-  componentWillUnmount() {
-    // this.socket.disconnect();
-  }
-
   toggleRestartModal = () => {
     this.setState({
       isRestartModalOpen: !this.state.isRestartModalOpen
@@ -583,9 +540,6 @@ class Management extends Component {
     console.log(change_detected);
   }
 
-  sendMessage = (message) => {
-    this.socket.emit('SEND_MESSAGE', message);
-  }
 
   check_cell_change = () => {
     // create a message to socket
@@ -641,24 +595,6 @@ class Management extends Component {
     this.setState({
         [e.target.name]: e.target.value
     })
-  }
-
-  send_default_username = () => {
-    let name_package = {
-      user_name: "anonymous user"
-    }
-    this.socket.emit('SEND_USERNAME', name_package);
-    this.toggleUserNamePrompt()
-  }
-
-  onSelectionSubmit = (e) => {
-      e.preventDefault();
-      console.log("call username")
-      let name_package = {
-        user_name: this.state.user_name
-      }
-      this.socket.emit('SEND_USERNAME', name_package);
-      this.toggleUserNamePrompt();
   }
 
   resolve_conflict = (e) => {

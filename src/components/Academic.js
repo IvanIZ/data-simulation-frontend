@@ -8,9 +8,6 @@ import '../App.css';
 import {
   Collapse,
   Navbar,
-  NavbarToggler,
-  NavbarBrand,
-  Container,
   Row,
   Col,
   Jumbotron,
@@ -18,16 +15,14 @@ import {
   NavItem,
   NavLink,
   Button,
-  Table, Modal, ModalHeader, ModalFooter, ModalBody, Form, FormGroup, Label, Input, ListGroup, Card, CardTitle, CardText, TabContent, TabPane, ButtonDropdown, Dropdown, DropdownToggle, DropdownMenu, DropdownItem
+  Modal, ModalHeader, ModalFooter, ModalBody, Form, FormGroup, Label, Input, TabContent, TabPane, ButtonDropdown, Dropdown, DropdownToggle, DropdownMenu, DropdownItem
 } from 'reactstrap';
 import {
   BrowserRouter as Router,
   Route,
   Link,
-  useHistory,
   Redirect
 } from "react-router-dom";
-import io from "socket.io-client";
 import { CSVLink, CSVDownload } from "react-csv";
 import classnames from 'classnames';
 
@@ -37,8 +32,6 @@ let utils = new Utils();
 let attendance_display = [];
 let greadebook_display = [];
 let student_status_display = [];
-
-let simulation_type = "";
 
 // A JSON object that keeps track of previous layout changes
 let layout_changes = {
@@ -73,11 +66,6 @@ let current_i = -1;
 let current_j = -1;
 let currently_editing = false;
 
-let conflict_i = -1;
-let conflict_j = -1;
-let incoming_value = "";
-let conflict_message = "";
-
 let select_i = -1; 
 let select_j = -1;
 
@@ -90,12 +78,6 @@ let pending_changes = {
   try_message: "SENT MESSAGE! SUCCESS!", 
   user: ""
 }
-
-let socket_id = "";
-
-let ref1 = "";
-let ref2 = "";
-let ref3 = "";
 
 class Academic extends Component {
 
@@ -151,123 +133,6 @@ class Academic extends Component {
       isRestartModalOpen: false, 
       user_actions: []
     }
-
-    const update_edit_message = message_package => {
-      this.setState({
-        edit_message: message_package.new_message, 
-        history: message_package.history
-      })
-    }
-
-    const change_id = id => {
-      socket_id = id;
-    }
-
-    const addNewUser = data => {
-      this.setState({
-        history: data.history
-      })
-      change_current_user(data.current_users);
-    }
-
-    const cell_read_only = () => {
-      console.log("setting to read only...")
-      this.hotTableComponent.current.hotInstance.updateSettings({
-        cells: function(row, col, prop){
-         var cellProperties = {};
-         console.log("undefined is: ", data_display[row][col], " ", row, " ", col)
-           if(data_display[row][col] !== null && data_display[row][col].length !== 0 &&  (data_display[row][col] == "-----" || data_display[row][col].charAt(0) === "*")){
-             cellProperties.readOnly = 'true'
-           }
-         return cellProperties
-       }
-     })
-    }
-
-    const display_shared_lock = (row, col) => {
-      if (row < data_display.length) {
-  
-        let cell_data = this.hotTableComponent.current.hotInstance.getDataAtCell(row, col);
-  
-        // if there is a shared lock displaying already, do nothing
-        if (cell_data.charAt(0) === "*") {
-          return;
-        } else {
-          let new_data = "*" + cell_data
-          this.hotTableComponent.current.hotInstance.setDataAtCell(row, col, new_data);
-        }
-        cell_read_only();
-      }
-    }
-
-    const display_exclusive_lock = (row, col) => {
-      if (row < data_display.length) {
-        console.log(row)
-        console.log(col)
-        let new_value = "-----";
-        this.hotTableComponent.current.hotInstance.setDataAtCell(row, col, new_value);
-        cell_read_only();
-      }
-    }
-
-    const toggleSharedLockReject = data => {
-      this.setState({
-        isSharedLockRejectOpen: !this.state.isSharedLockRejectOpen
-      })
-    }
-
-    const toggleExclusiveLockReject = data => {
-      this.setState({
-        isExclusiveLockRejectOpen: !this.state.isExclusiveLockRejectOpen
-      })
-    }
-
-    const change_current_user = data => {
-      this.setState({
-        users: data
-      });
-      let new_user_text = "Currently Online: ";
-      for (var i = 0; i < this.state.users.length; i++) {
-        if (i == this.state.users.length - 1) {
-          new_user_text += this.state.users[i]
-        } else {
-          new_user_text += this.state.users[i] + ", "
-        }
-      }
-      this.setState({
-        user_text_block: new_user_text
-      });
-    }
-
-    const addMessage = data => {
-
-        let change_table = data.data
-        for (var x = 0; x < change_table.length; x++) {
-          // Extract data
-          let j = change_table[x][0] - 1   // 0 --> y_coord
-          let value = change_table[x][1] // 1 --> actual value
-          let i = change_table[x][2] - 1 // 2 --> x_coord
-
-          // Update spreadsheet
-          if (i < data_display.length) {
-            data_display[i][j] = value     
-            this.state.data_original[i][j] = value
-          }
-
-          // check buffer
-          else if ((i + 1) < current_fetch_index) {
-            i++; // change i and j to 1-based index
-            if (buffer_copy[i + PREFETCH_SIZE - current_fetch_index][j] != value) {
-              buffer_copy[i + PREFETCH_SIZE - current_fetch_index][j] = value  // update both buffer and buffer_copy
-              buffer[i + PREFETCH_SIZE - current_fetch_index][j] = value
-            }
-          }
-        }
-        console.log("after socket, buffer_copy is: ", buffer_copy)
-        this.setState({
-          test_block: data.try_message
-        });
-    };
 
     this.toggleSelectionPrompt = this.toggleSelectionPrompt.bind()
     this.toggleShowHistory = this.toggleShowHistory.bind()
@@ -487,10 +352,6 @@ class Academic extends Component {
     });
   }
 
-  componentWillUnmount() {
-    // this.socket.disconnect();
-  }
-
   toggleRestartModal = () => {
     this.setState({
       isRestartModalOpen: !this.state.isRestartModalOpen
@@ -577,10 +438,6 @@ class Academic extends Component {
     console.log(change_detected);
   }
 
-  sendMessage = (message) => {
-    this.socket.emit('SEND_MESSAGE', message);
-  }
-
   check_cell_change = () => {
     // create a message to socket
     if (change_detected) {
@@ -618,54 +475,10 @@ class Academic extends Component {
     }
   }
 
-  cell_read_only = (input_row, input_col) => {
-    this.hotTableComponent.current.hotInstance.updateSettings({
-      cells: function(row, col, prop){
-       var cellProperties = {};
-         if(row == input_row && col == input_col){
-           cellProperties.readOnly = 'true'
-         }
-       return cellProperties
-     }
-   })
-  }
-
-
   hangleUsername = (e) => {
     this.setState({
         [e.target.name]: e.target.value
     })
-  }
-
-  send_default_username = () => {
-    let name_package = {
-      user_name: "anonymous user"
-    }
-    this.socket.emit('SEND_USERNAME', name_package);
-    this.toggleUserNamePrompt()
-  }
-
-  onSelectionSubmit = (e) => {
-      e.preventDefault();
-      console.log("call username")
-      let name_package = {
-        user_name: this.state.user_name
-      }
-      this.socket.emit('SEND_USERNAME', name_package);
-      this.toggleUserNamePrompt();
-  }
-
-  resolve_conflict = (e) => {
-      e.preventDefault();
-      data_display[conflict_i][conflict_j] = incoming_value;
-      this.state.data_original[conflict_i][conflict_j] = incoming_value;
-
-      // reset conflict records
-      conflict_i = -1;
-      conflict_j = -1;
-      incoming_value = -1;
-      conflict_message = "";
-      this.toggleConflictModal();
   }
 
   start_transaction = () => {
