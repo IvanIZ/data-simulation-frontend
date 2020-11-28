@@ -439,7 +439,6 @@ class Academic extends Component {
   }
 
   check_cell_change = () => {
-    // create a message to socket
     if (change_detected) {
 
       // find current state

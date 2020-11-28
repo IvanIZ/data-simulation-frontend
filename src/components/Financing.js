@@ -268,7 +268,6 @@ class Financing extends Component {
             }
           }
         }
-        console.log("after socket, buffer_copy is: ", buffer_copy)
         this.setState({
           test_block: data.try_message
         });
@@ -576,7 +575,6 @@ class Financing extends Component {
   }
 
   check_cell_change = () => {
-    // create a message to socket
     if (change_detected) {
 
       // find current state

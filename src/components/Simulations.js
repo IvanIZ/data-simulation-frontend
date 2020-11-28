@@ -27,7 +27,6 @@ import {
   Redirect
 } from "react-router-dom";
 
-import io from "socket.io-client";
 const Utils = require('../utils');
 let utils = new Utils();
 
@@ -79,8 +78,6 @@ let pending_changes = {
   try_message: "SENT MESSAGE! SUCCESS!", 
   user: ""
 }
-
-let socket_id = "";
 
 class Simulation extends Component {
 
@@ -135,51 +132,6 @@ class Simulation extends Component {
       isExclusiveLockRejectOpen: false, 
 
       // simulation_type: ""
-    }
-
-    const update_edit_message = message_package => {
-      this.setState({
-        edit_message: message_package.new_message, 
-        history: message_package.history
-      })
-    }
-
-    const update_freed_cells = free_cells_package => {
-
-      let free_cells = free_cells_package.free_cells;
-      let disconnect = free_cells_package.disconnect;
-
-      console.log("the free cells are ", free_cells);
-
-      for (var i = 0; i < free_cells.length; i++) {
-        let location = free_cells[i];
-        if (location[0] < data_display.length) {
-          
-          let cell_data = this.hotTableComponent.current.hotInstance.getDataAtCell(location[0], location[1]);
-
-          // update read-only cells
-          if (cell_data[0] == "*") {
-            let new_data = cell_data.substring(1);
-            this.hotTableComponent.current.hotInstance.setDataAtCell(location[0], location[1], new_data);
-          }
-
-          if (cell_data == "-----" && disconnect == true) {
-            data_display[location[0], location[1]] = this.state.data_original[location[0], location[1]];
-          }
-        }
-      }
-      cell_read_only();
-    }
-
-    const change_id = id => {
-      socket_id = id;
-    }
-
-    const addNewUser = data => {
-      this.setState({
-        history: data.history
-      })
-      change_current_user(data.current_users);
     }
 
     const cell_read_only = () => {
@@ -275,7 +227,6 @@ class Simulation extends Component {
             }
           }
         }
-        console.log("after socket, buffer_copy is: ", buffer_copy)
         this.setState({
           test_block: data.try_message
         });
@@ -370,28 +321,6 @@ class Simulation extends Component {
     });
   }
 
-  request_shared_lock = () => {
-    // send request for a shared lock to backend
-    let shared_lock_request = {
-      row: select_i,
-      col: select_j
-    }
-    this.socket.emit('REQUEST_SHARED_LOCK', shared_lock_request);
-  }
-
-  request_exclusive_lock = (i, j) => {
-    // send request for a exclusive lock to backend
-    let exclusive_lock_request = {
-      row: i,
-      col: j
-    }
-    this.socket.emit('REQUEST_EXCLUSIVE_LOCK', exclusive_lock_request);
-  }
-
-  componentWillUnmount() {
-    // this.socket.disconnect();
-  }
-
   toggleNavbar = () => {
     this.setState({
       collapsed: !this.state.collapsed
@@ -466,12 +395,7 @@ class Simulation extends Component {
     console.log(change_detected);
   }
 
-  sendMessage = (message) => {
-    this.socket.emit('SEND_MESSAGE', message);
-  }
-
   check_cell_change = () => {
-    // create a message to socket
     if (change_detected) {
 
       // find current state
@@ -528,24 +452,6 @@ class Simulation extends Component {
     })
   }
 
-  send_default_username = () => {
-    let name_package = {
-      user_name: "anonymous user"
-    }
-    this.socket.emit('SEND_USERNAME', name_package);
-    this.toggleUserNamePrompt()
-  }
-
-  onSelectionSubmit = (e) => {
-      e.preventDefault();
-      console.log("call username")
-      let name_package = {
-        user_name: this.state.user_name
-      }
-      this.socket.emit('SEND_USERNAME', name_package);
-      this.toggleUserNamePrompt();
-  }
-
   resolve_conflict = (e) => {
       e.preventDefault();
       data_display[conflict_i][conflict_j] = incoming_value;
@@ -578,7 +484,6 @@ class Simulation extends Component {
     transaction_button = <Button size='lg' className='display-button' color="primary" onClick={this.start_transaction} >Start Transaction</Button>
 
     // tell the backend that transaction is completed
-    // this.socket.emit('FINISH_TRANSACTION');
   }
 
   track_action = (e, action_type) => {
