@@ -1,9 +1,8 @@
 import React, { Component, useState } from 'react';
 import ReactDOM from "react-dom"
 import { HotTable } from '@handsontable/react';
-import Handsontable from 'handsontable';
+// import Handsontable from 'handsontable';
 import 'handsontable/dist/handsontable.full.css';
-import logo from '../logo.svg';
 import '../App.css';
 import {
   Navbar,
@@ -134,145 +133,6 @@ class Financing extends Component {
       isRestartModalOpen: false
     }
 
-    const update_edit_message = message_package => {
-      this.setState({
-        edit_message: message_package.new_message, 
-        history: message_package.history
-      })
-    }
-
-    const update_freed_cells = free_cells_package => {
-
-      let free_cells = free_cells_package.free_cells;
-      let disconnect = free_cells_package.disconnect;
-
-      console.log("the free cells are ", free_cells);
-
-      for (var i = 0; i < free_cells.length; i++) {
-        let location = free_cells[i];
-        if (location[0] < data_display.length) {
-          
-          let cell_data = this.hotTableComponent.current.hotInstance.getDataAtCell(location[0], location[1]);
-
-          // update read-only cells
-          if (cell_data[0] == "*") {
-            let new_data = cell_data.substring(1);
-            this.hotTableComponent.current.hotInstance.setDataAtCell(location[0], location[1], new_data);
-          }
-
-          if (cell_data == "-----" && disconnect == true) {
-            data_display[location[0], location[1]] = this.state.data_original[location[0], location[1]];
-          }
-        }
-      }
-      cell_read_only();
-    }
-
-    const addNewUser = data => {
-      this.setState({
-        history: data.history
-      })
-      change_current_user(data.current_users);
-    }
-
-    const cell_read_only = () => {
-      console.log("setting to read only...")
-      this.hotTableComponent.current.hotInstance.updateSettings({
-        cells: function(row, col, prop){
-         var cellProperties = {};
-         console.log("undefined is: ", data_display[row][col], " ", row, " ", col)
-           if(data_display[row][col] !== null && data_display[row][col].length !== 0 &&  (data_display[row][col] == "-----" || data_display[row][col].charAt(0) === "*")){
-             cellProperties.readOnly = 'true'
-           }
-         return cellProperties
-       }
-     })
-    }
-
-    const display_shared_lock = (row, col) => {
-      if (row < data_display.length) {
-  
-        let cell_data = this.hotTableComponent.current.hotInstance.getDataAtCell(row, col);
-  
-        // if there is a shared lock displaying already, do nothing
-        if (cell_data.charAt(0) === "*") {
-          return;
-        } else {
-          let new_data = "*" + cell_data
-          this.hotTableComponent.current.hotInstance.setDataAtCell(row, col, new_data);
-        }
-        cell_read_only();
-      }
-    }
-
-    const display_exclusive_lock = (row, col) => {
-      if (row < data_display.length) {
-        console.log(row)
-        console.log(col)
-        let new_value = "-----";
-        this.hotTableComponent.current.hotInstance.setDataAtCell(row, col, new_value);
-        cell_read_only();
-      }
-    }
-
-    const toggleSharedLockReject = data => {
-      this.setState({
-        isSharedLockRejectOpen: !this.state.isSharedLockRejectOpen
-      })
-    }
-
-    const toggleExclusiveLockReject = data => {
-      this.setState({
-        isExclusiveLockRejectOpen: !this.state.isExclusiveLockRejectOpen
-      })
-    }
-
-    const change_current_user = data => {
-      this.setState({
-        users: data
-      });
-      let new_user_text = "Currently Online: ";
-      for (var i = 0; i < this.state.users.length; i++) {
-        if (i == this.state.users.length - 1) {
-          new_user_text += this.state.users[i]
-        } else {
-          new_user_text += this.state.users[i] + ", "
-        }
-      }
-      this.setState({
-        user_text_block: new_user_text
-      });
-    }
-
-    const addMessage = data => {
-
-        let change_table = data.data
-        for (var x = 0; x < change_table.length; x++) {
-          // Extract data
-          let j = change_table[x][0] - 1   // 0 --> y_coord
-          let value = change_table[x][1] // 1 --> actual value
-          let i = change_table[x][2] - 1 // 2 --> x_coord
-
-          // Update spreadsheet
-          if (i < data_display.length) {
-            data_display[i][j] = value     
-            this.state.data_original[i][j] = value
-          }
-
-          // check buffer
-          else if ((i + 1) < current_fetch_index) {
-            i++; // change i and j to 1-based index
-            if (buffer_copy[i + PREFETCH_SIZE - current_fetch_index][j] != value) {
-              buffer_copy[i + PREFETCH_SIZE - current_fetch_index][j] = value  // update both buffer and buffer_copy
-              buffer[i + PREFETCH_SIZE - current_fetch_index][j] = value
-            }
-          }
-        }
-        this.setState({
-          test_block: data.try_message
-        });
-    };
-
     this.toggleSelectionPrompt = this.toggleSelectionPrompt.bind()
     this.toggleShowHistory = this.toggleShowHistory.bind()
     this.toggleNavbar = this.toggleNavbar.bind()
@@ -325,7 +185,7 @@ class Financing extends Component {
 
     this.hotTableComponent.current.hotInstance.addHook('afterCreateRow', function(index, amount, source) {
       console.log("insert index is: ", index);
-      if (source == "ContextMenu.rowBelow") {
+      if (source === "ContextMenu.rowBelow") {
         layout_changes.layout_changed = true;
         layout_changes.changes.push(["insert_r", "below", index]);
       } else {
@@ -336,7 +196,7 @@ class Financing extends Component {
 
     this.hotTableComponent.current.hotInstance.addHook('afterCreateCol', function(index, amount, source) {
       console.log("insert index is: ", index);
-      if (source == "ContextMenu.columnRight") {
+      if (source === "ContextMenu.columnRight") {
         layout_changes.layout_changed = true;
         layout_changes.changes.push(["insert_c", "right", index]);
       } else {
@@ -391,7 +251,7 @@ class Financing extends Component {
 
     this.hotTableComponent1.current.hotInstance.addHook('afterCreateRow', function(index, amount, source) {
       console.log("insert index is: ", index);
-      if (source == "ContextMenu.rowBelow") {
+      if (source === "ContextMenu.rowBelow") {
         layout_changes.layout_changed = true;
         layout_changes.changes.push(["insert_r", "below", index]);
       } else {
@@ -402,7 +262,7 @@ class Financing extends Component {
 
     this.hotTableComponent1.current.hotInstance.addHook('afterCreateCol', function(index, amount, source) {
       console.log("insert index is: ", index);
-      if (source == "ContextMenu.columnRight") {
+      if (source === "ContextMenu.columnRight") {
         layout_changes.layout_changed = true;
         layout_changes.changes.push(["insert_c", "right", index]);
       } else {
@@ -457,7 +317,7 @@ class Financing extends Component {
 
     this.hotTableComponent2.current.hotInstance.addHook('afterCreateRow', function(index, amount, source) {
       console.log("insert index is: ", index);
-      if (source == "ContextMenu.rowBelow") {
+      if (source === "ContextMenu.rowBelow") {
         layout_changes.layout_changed = true;
         layout_changes.changes.push(["insert_r", "below", index]);
       } else {
@@ -468,7 +328,7 @@ class Financing extends Component {
 
     this.hotTableComponent2.current.hotInstance.addHook('afterCreateCol', function(index, amount, source) {
       console.log("insert index is: ", index);
-      if (source == "ContextMenu.columnRight") {
+      if (source === "ContextMenu.columnRight") {
         layout_changes.layout_changed = true;
         layout_changes.changes.push(["insert_c", "right", index]);
       } else {
@@ -548,7 +408,7 @@ class Financing extends Component {
     })
 
     // fill in column headers and row headers
-    if (data_display.length == 0) {
+    if (data_display.length === 0) {
       data_display.push(col_headers);
     }
     data_display = data_display.concat(buffer_copy) 
@@ -616,7 +476,7 @@ class Financing extends Component {
     this.hotTableComponent.current.hotInstance.updateSettings({
       cells: function(row, col, prop){
        var cellProperties = {};
-         if(row == input_row && col == input_col){
+         if(row === input_row && col === input_col){
            cellProperties.readOnly = 'true'
          }
        return cellProperties
@@ -677,7 +537,7 @@ class Financing extends Component {
     if (idle_duration > 3) {
 
       // check if we can merge two idle periods together
-      if (user_actions.length > 0 && user_actions[user_actions.length - 1][1] == "idle") {
+      if (user_actions.length > 0 && user_actions[user_actions.length - 1][1] === "idle") {
         let prev_idle_time = user_actions[user_actions.length - 1][2];
         user_actions.pop();
         user_actions.push([this.state.name, "idle", parseInt(idle_duration) + prev_idle_time, null, null, this.state.curr_table, null, null, state]);
@@ -690,7 +550,7 @@ class Financing extends Component {
     if (layout_changes.layout_changed) { 
       
       // remove prev idle action
-      if (user_actions.length > 0 && user_actions[user_actions.length - 1][1] == "idle") {
+      if (user_actions.length > 0 && user_actions[user_actions.length - 1][1] === "idle") {
         user_actions.pop();
       }
 
@@ -708,7 +568,7 @@ class Financing extends Component {
     }
 
     // handle scroll actions
-    if (action_type == "scroll") {
+    if (action_type === "scroll") {
 
       let scroll_diff = prev_scrolltop - e.target.scrollTop;
       let action_length = user_actions.length;
@@ -784,7 +644,7 @@ class Financing extends Component {
     }
 
     // calculate click action
-    else if (action_type == "click") {
+    else if (action_type === "click") {
 
       if (currently_editing) {
         
@@ -808,16 +668,16 @@ class Financing extends Component {
     }
 
     // calculate kepress action
-    else if (action_type == "key_press") {
+    else if (action_type === "key_press") {
 
       if (change_detected) {
         // handle enter press
-        if (e.key == "Enter") {
+        if (e.key === "Enter") {
           user_actions.push([this.state.name, "keyPress_enter", chn_copy[0][0], chn_copy[0][1], null, this.state.curr_table, chn_copy[0][0] + 1, col_headers[chn_copy[0][1]], state ]);
         }
 
         // handle tab press
-        else if (e.key == "Tab") {
+        else if (e.key === "Tab") {
           user_actions.push([this.state.name, "keyPress_tab", chn_copy[0][0], chn_copy[0][1], null, this.state.curr_table, chn_copy[0][0] + 1, col_headers[chn_copy[0][1]], state]);
         }
 
@@ -847,17 +707,17 @@ class Financing extends Component {
 
   select_simulation = (e) => {
     // e.preventDefault();
-    if (e.target.name == "academic") {
+    if (e.target.name === "academic") {
       this.setState({
         redirect_link: '/academic'
       })
     }
-    if (e.target.name == "financing") {
+    if (e.target.name === "financing") {
       this.setState({
         redirect_link: '/financing'
       })
     }
-    if (e.target.name == "management") {
+    if (e.target.name === "management") {
       this.setState({
         redirect_link: '/management'
       })

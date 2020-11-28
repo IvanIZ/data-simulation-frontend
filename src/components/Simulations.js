@@ -1,7 +1,7 @@
 import React, { Component, useState } from 'react';
 import ReactDOM from "react-dom"
 import { HotTable } from '@handsontable/react';
-import Handsontable from 'handsontable';
+// import Handsontable from 'handsontable';
 import 'handsontable/dist/handsontable.full.css';
 import '../App.css';
 import {
@@ -26,9 +26,6 @@ import {
   useHistory,
   Redirect
 } from "react-router-dom";
-
-const Utils = require('../utils');
-let utils = new Utils();
 
 let simulation_type = "";
 
@@ -134,104 +131,6 @@ class Simulation extends Component {
       // simulation_type: ""
     }
 
-    const cell_read_only = () => {
-      console.log("setting to read only...")
-      this.hotTableComponent.current.hotInstance.updateSettings({
-        cells: function(row, col, prop){
-         var cellProperties = {};
-         console.log("undefined is: ", data_display[row][col], " ", row, " ", col)
-           if(data_display[row][col] !== null && data_display[row][col].length !== 0 &&  (data_display[row][col] == "-----" || data_display[row][col].charAt(0) === "*")){
-             cellProperties.readOnly = 'true'
-           }
-         return cellProperties
-       }
-     })
-    }
-
-    const display_shared_lock = (row, col) => {
-      if (row < data_display.length) {
-  
-        let cell_data = this.hotTableComponent.current.hotInstance.getDataAtCell(row, col);
-  
-        // if there is a shared lock displaying already, do nothing
-        if (cell_data.charAt(0) === "*") {
-          return;
-        } else {
-          let new_data = "*" + cell_data
-          this.hotTableComponent.current.hotInstance.setDataAtCell(row, col, new_data);
-        }
-        cell_read_only();
-      }
-    }
-
-    const display_exclusive_lock = (row, col) => {
-      if (row < data_display.length) {
-        console.log(row)
-        console.log(col)
-        let new_value = "-----";
-        this.hotTableComponent.current.hotInstance.setDataAtCell(row, col, new_value);
-        cell_read_only();
-      }
-    }
-
-    const toggleSharedLockReject = data => {
-      this.setState({
-        isSharedLockRejectOpen: !this.state.isSharedLockRejectOpen
-      })
-    }
-
-    const toggleExclusiveLockReject = data => {
-      this.setState({
-        isExclusiveLockRejectOpen: !this.state.isExclusiveLockRejectOpen
-      })
-    }
-
-    const change_current_user = data => {
-      this.setState({
-        users: data
-      });
-      let new_user_text = "Currently Online: ";
-      for (var i = 0; i < this.state.users.length; i++) {
-        if (i == this.state.users.length - 1) {
-          new_user_text += this.state.users[i]
-        } else {
-          new_user_text += this.state.users[i] + ", "
-        }
-      }
-      this.setState({
-        user_text_block: new_user_text
-      });
-    }
-
-    const addMessage = data => {
-
-        let change_table = data.data
-        for (var x = 0; x < change_table.length; x++) {
-          // Extract data
-          let j = change_table[x][0] - 1   // 0 --> y_coord
-          let value = change_table[x][1] // 1 --> actual value
-          let i = change_table[x][2] - 1 // 2 --> x_coord
-
-          // Update spreadsheet
-          if (i < data_display.length) {
-            data_display[i][j] = value     
-            this.state.data_original[i][j] = value
-          }
-
-          // check buffer
-          else if ((i + 1) < current_fetch_index) {
-            i++; // change i and j to 1-based index
-            if (buffer_copy[i + PREFETCH_SIZE - current_fetch_index][j] != value) {
-              buffer_copy[i + PREFETCH_SIZE - current_fetch_index][j] = value  // update both buffer and buffer_copy
-              buffer[i + PREFETCH_SIZE - current_fetch_index][j] = value
-            }
-          }
-        }
-        this.setState({
-          test_block: data.try_message
-        });
-    };
-
     this.toggleSelectionPrompt = this.toggleSelectionPrompt.bind()
     this.toggleShowHistory = this.toggleShowHistory.bind()
     this.toggleConflictModal = this.toggleConflictModal.bind()
@@ -284,7 +183,7 @@ class Simulation extends Component {
 
     this.hotTableComponent.current.hotInstance.addHook('afterCreateRow', function(index, amount, source) {
       console.log("insert index is: ", index);
-      if (source == "ContextMenu.rowBelow") {
+      if (source === "ContextMenu.rowBelow") {
         layout_changes.layout_changed = true;
         layout_changes.changes.push(["insert_r", "below", index]);
       } else {
@@ -295,7 +194,7 @@ class Simulation extends Component {
 
     this.hotTableComponent.current.hotInstance.addHook('afterCreateCol', function(index, amount, source) {
       console.log("insert index is: ", index);
-      if (source == "ContextMenu.columnRight") {
+      if (source === "ContextMenu.columnRight") {
         layout_changes.layout_changed = true;
         layout_changes.changes.push(["insert_c", "right", index]);
       } else {
@@ -369,7 +268,7 @@ class Simulation extends Component {
     })
 
     // fill in column headers and row headers
-    if (data_display.length == 0) {
+    if (data_display.length === 0) {
       data_display.push(col_headers);
     }
     data_display = data_display.concat(buffer_copy) 
@@ -437,7 +336,7 @@ class Simulation extends Component {
     this.hotTableComponent.current.hotInstance.updateSettings({
       cells: function(row, col, prop){
        var cellProperties = {};
-         if(row == input_row && col == input_col){
+         if(row === input_row && col === input_col){
            cellProperties.readOnly = 'true'
          }
        return cellProperties
@@ -500,7 +399,7 @@ class Simulation extends Component {
     if (idle_duration > 3) {
 
       // check if we can merge two idle periods together
-      if (user_actions.length > 0 && user_actions[user_actions.length - 1][0] == "idle") {
+      if (user_actions.length > 0 && user_actions[user_actions.length - 1][0] === "idle") {
         let prev_idle_time = user_actions[user_actions.length - 1][1];
         user_actions.pop();
         user_actions.push(["idle", parseInt(idle_duration) + prev_idle_time, null, null, null, null, state]);
@@ -513,7 +412,7 @@ class Simulation extends Component {
     if (layout_changes.layout_changed) { 
       
       // remove prev idle action
-      if (user_actions.length > 0 && user_actions[user_actions.length - 1][0] == "idle") {
+      if (user_actions.length > 0 && user_actions[user_actions.length - 1][0] === "idle") {
         user_actions.pop();
       }
 
@@ -531,7 +430,7 @@ class Simulation extends Component {
     }
 
     // handle scroll actions
-    if (action_type == "scroll") {
+    if (action_type === "scroll") {
 
       let scroll_diff = prev_scrolltop - e.target.scrollTop;
       let action_length = user_actions.length;
@@ -607,7 +506,7 @@ class Simulation extends Component {
     }
 
     // calculate click action
-    else if (action_type == "click") {
+    else if (action_type === "click") {
 
       if (currently_editing) {
         
@@ -631,16 +530,16 @@ class Simulation extends Component {
     }
 
     // calculate kepress action
-    else if (action_type == "key_press") {
+    else if (action_type === "key_press") {
 
       if (change_detected) {
         // handle enter press
-        if (e.key == "Enter") {
+        if (e.key === "Enter") {
           user_actions.push(["keyPress_enter", chn_copy[0][0], chn_copy[0][1], null, chn_copy[0][0] + 1, col_headers[chn_copy[0][1]], state ]);
         }
 
         // handle tab press
-        else if (e.key == "Tab") {
+        else if (e.key === "Tab") {
           user_actions.push(["keyPress_tab", chn_copy[0][0], chn_copy[0][1], null, chn_copy[0][0] + 1, col_headers[chn_copy[0][1]], state]);
         }
 
@@ -671,17 +570,17 @@ class Simulation extends Component {
   select_simulation = (e) => {
     e.preventDefault();
     simulation_type = e.target.name;
-    if (simulation_type == "academic") {
+    if (simulation_type === "academic") {
       this.setState({
         redirect_academic_page: true
       })
     }
-    if (simulation_type == "management") {
+    if (simulation_type === "management") {
       this.setState({
         redirect_management_page: true
       })
     }
-    if (simulation_type == "financing") {
+    if (simulation_type === "financing") {
       this.setState({
         redirect_financing_page: true
       })

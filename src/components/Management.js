@@ -1,9 +1,8 @@
 import React, { Component, useState } from 'react';
 import ReactDOM from "react-dom"
 import { HotTable } from '@handsontable/react';
-import Handsontable from 'handsontable';
+// import Handsontable from 'handsontable';
 import 'handsontable/dist/handsontable.full.css';
-import logo from '../logo.svg';
 import '../App.css';
 import {
   Collapse,
@@ -145,7 +144,7 @@ class Management extends Component {
         cells: function(row, col, prop){
          var cellProperties = {};
          console.log("undefined is: ", data_display[row][col], " ", row, " ", col)
-           if(data_display[row][col] !== null && data_display[row][col].length !== 0 &&  (data_display[row][col] == "-----" || data_display[row][col].charAt(0) === "*")){
+           if(data_display[row][col] !== null && data_display[row][col].length !== 0 &&  (data_display[row][col] === "-----" || data_display[row][col].charAt(0) === "*")){
              cellProperties.readOnly = 'true'
            }
          return cellProperties
@@ -197,7 +196,7 @@ class Management extends Component {
       });
       let new_user_text = "Currently Online: ";
       for (var i = 0; i < this.state.users.length; i++) {
-        if (i == this.state.users.length - 1) {
+        if (i === this.state.users.length - 1) {
           new_user_text += this.state.users[i]
         } else {
           new_user_text += this.state.users[i] + ", "
@@ -290,7 +289,7 @@ class Management extends Component {
 
     this.hotTableComponent.current.hotInstance.addHook('afterCreateRow', function(index, amount, source) {
       console.log("insert index is: ", index);
-      if (source == "ContextMenu.rowBelow") {
+      if (source === "ContextMenu.rowBelow") {
         layout_changes.layout_changed = true;
         layout_changes.changes.push(["insert_r", "below", index]);
       } else {
@@ -301,7 +300,7 @@ class Management extends Component {
 
     this.hotTableComponent.current.hotInstance.addHook('afterCreateCol', function(index, amount, source) {
       console.log("insert index is: ", index);
-      if (source == "ContextMenu.columnRight") {
+      if (source === "ContextMenu.columnRight") {
         layout_changes.layout_changed = true;
         layout_changes.changes.push(["insert_c", "right", index]);
       } else {
@@ -356,7 +355,7 @@ class Management extends Component {
 
     this.hotTableComponent1.current.hotInstance.addHook('afterCreateRow', function(index, amount, source) {
       console.log("insert index is: ", index);
-      if (source == "ContextMenu.rowBelow") {
+      if (source === "ContextMenu.rowBelow") {
         layout_changes.layout_changed = true;
         layout_changes.changes.push(["insert_r", "below", index]);
       } else {
@@ -367,7 +366,7 @@ class Management extends Component {
 
     this.hotTableComponent1.current.hotInstance.addHook('afterCreateCol', function(index, amount, source) {
       console.log("insert index is: ", index);
-      if (source == "ContextMenu.columnRight") {
+      if (source === "ContextMenu.columnRight") {
         layout_changes.layout_changed = true;
         layout_changes.changes.push(["insert_c", "right", index]);
       } else {
@@ -422,7 +421,7 @@ class Management extends Component {
 
     this.hotTableComponent2.current.hotInstance.addHook('afterCreateRow', function(index, amount, source) {
       console.log("insert index is: ", index);
-      if (source == "ContextMenu.rowBelow") {
+      if (source === "ContextMenu.rowBelow") {
         layout_changes.layout_changed = true;
         layout_changes.changes.push(["insert_r", "below", index]);
       } else {
@@ -433,7 +432,7 @@ class Management extends Component {
 
     this.hotTableComponent2.current.hotInstance.addHook('afterCreateCol', function(index, amount, source) {
       console.log("insert index is: ", index);
-      if (source == "ContextMenu.columnRight") {
+      if (source === "ContextMenu.columnRight") {
         layout_changes.layout_changed = true;
         layout_changes.changes.push(["insert_c", "right", index]);
       } else {
@@ -513,7 +512,7 @@ class Management extends Component {
     })
 
     // fill in column headers and row headers
-    if (data_display.length == 0) {
+    if (data_display.length === 0) {
       data_display.push(col_headers);
     }
     data_display = data_display.concat(buffer_copy) 
@@ -580,7 +579,7 @@ class Management extends Component {
     this.hotTableComponent.current.hotInstance.updateSettings({
       cells: function(row, col, prop){
        var cellProperties = {};
-         if(row == input_row && col == input_col){
+         if(row === input_row && col === input_col){
            cellProperties.readOnly = 'true'
          }
        return cellProperties
@@ -637,7 +636,7 @@ class Management extends Component {
     if (idle_duration > 3) {
 
       // check if we can merge two idle periods together
-      if (user_actions.length > 0 && user_actions[user_actions.length - 1][1] == "idle") {
+      if (user_actions.length > 0 && user_actions[user_actions.length - 1][1] === "idle") {
         let prev_idle_time = user_actions[user_actions.length - 1][2];
         user_actions.pop();
         user_actions.push([this.state.name, "idle", parseInt(idle_duration) + prev_idle_time, null, null, this.state.curr_table, null, null, state]);
@@ -650,7 +649,7 @@ class Management extends Component {
     if (layout_changes.layout_changed) { 
       
       // remove prev idle action
-      if (user_actions.length > 0 && user_actions[user_actions.length - 1][1] == "idle") {
+      if (user_actions.length > 0 && user_actions[user_actions.length - 1][1] === "idle") {
         user_actions.pop();
       }
 
@@ -668,7 +667,7 @@ class Management extends Component {
     }
 
     // handle scroll actions
-    if (action_type == "scroll") {
+    if (action_type === "scroll") {
 
       let scroll_diff = prev_scrolltop - e.target.scrollTop;
       let action_length = user_actions.length;
@@ -744,7 +743,7 @@ class Management extends Component {
     }
 
     // calculate click action
-    else if (action_type == "click") {
+    else if (action_type === "click") {
 
       if (currently_editing) {
         
@@ -768,16 +767,16 @@ class Management extends Component {
     }
 
     // calculate kepress action
-    else if (action_type == "key_press") {
+    else if (action_type === "key_press") {
 
       if (change_detected) {
         // handle enter press
-        if (e.key == "Enter") {
+        if (e.key === "Enter") {
           user_actions.push([this.state.name, "keyPress_enter", chn_copy[0][0], chn_copy[0][1], null, this.state.curr_table, chn_copy[0][0] + 1, col_headers[chn_copy[0][1]], state ]);
         }
 
         // handle tab press
-        else if (e.key == "Tab") {
+        else if (e.key === "Tab") {
           user_actions.push([this.state.name, "keyPress_tab", chn_copy[0][0], chn_copy[0][1], null, this.state.curr_table, chn_copy[0][0] + 1, col_headers[chn_copy[0][1]], state]);
         }
 
@@ -808,17 +807,17 @@ class Management extends Component {
   select_simulation = (e) => {
     // e.preventDefault();
 
-    if (e.target.name == "academic") {
+    if (e.target.name === "academic") {
       this.setState({
         redirect_link: '/academic'
       })
     }
-    if (e.target.name == "financing") {
+    if (e.target.name === "financing") {
       this.setState({
         redirect_link: '/financing'
       })
     }
-    if (e.target.name == "management") {
+    if (e.target.name === "management") {
       this.setState({
         redirect_link: '/management'
       })
