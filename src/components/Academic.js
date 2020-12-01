@@ -97,7 +97,6 @@ class Academic extends Component {
       resultItems: Array.from({ length: 0 }), 
       load_result_from_buffer_to_matrix: false, 
 
-      redirect_import_page: false, 
       import_page_link: '/result', 
 
       data_original: [], 
@@ -136,9 +135,7 @@ class Academic extends Component {
     }
 
     this.toggleSelectionPrompt = this.toggleSelectionPrompt.bind()
-    this.toggleShowHistory = this.toggleShowHistory.bind()
     this.toggleNavbar = this.toggleNavbar.bind()
-    this.toggleExclusiveLockReject = this.toggleExclusiveLockReject.bind();
     this.toggleInstructionModal = this.toggleInstructionModal.bind();
     this.toggleRedirectConfirmModal = this.toggleRedirectConfirmModal.bind();
     this.toggleNameModal = this.toggleNameModal.bind();
@@ -384,18 +381,6 @@ class Academic extends Component {
     })
   }
 
-  toggleExclusiveLockReject = () => {
-    this.setState({
-      isExclusiveLockRejectOpen: !this.state.isExclusiveLockRejectOpen
-    })
-  }
-
-  toggleShowHistory = () => {
-    this.setState({
-      isShowHistoryOpen: !this.state.isShowHistoryOpen
-    })
-  }
-
   toggleSelectionPrompt = () => {
     this.setState({
         isSelectPromptOpen: !this.state.isSelectPromptOpen
@@ -427,23 +412,12 @@ class Academic extends Component {
     console.log("data display is: ", data_display);
   }
 
-  redirect_import = () => {
-    this.setState( {
-      redirect_import_page: true
-    })
-  }
-
   handleScroll = (e) => {
     const bottom = e.target.scrollHeight - e.target.scrollTop === e.target.clientHeight;
     if (bottom) {
       // this.display()
     }
     prev_scrolltop = e.target.scrollTop;
-  }
-
-  show_state = () => {
-    console.log(chn_copy);
-    console.log(change_detected);
   }
 
   check_cell_change = () => {
@@ -482,30 +456,25 @@ class Academic extends Component {
     }
   }
 
-  hangleUsername = (e) => {
-    this.setState({
-        [e.target.name]: e.target.value
-    })
-  }
-
   start_transaction = () => {
     pending_changes.data = []
     this.setState({
       transaction_mode: true
     })
-    user_actions.push(["START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", ]);
     transaction_button = <Button size='lg' className='display-button' color="primary" onClick={this.end_transaction} >End Transaction</Button> 
+    setTimeout(() => {
+      user_actions.push(["START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", ]);
+    }, 200);
   }
 
   end_transaction = () => {
-    // setTimeout(() => {
-    //   this.commit_transaction();
-    // }, 500);
     this.setState({
       transaction_mode: false
     });
-    user_actions.push(["END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION"]);
     transaction_button = <Button size='lg' className='display-button' color="primary" onClick={this.start_transaction} >Start Transaction</Button>
+    setTimeout(() => {
+      user_actions.push(["END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION"]);
+    }, 200);
   }
 
   track_action = (e, action_type) => {
@@ -768,8 +737,8 @@ class Academic extends Component {
   reload_tables = () => {
     table_loaded = true;
     utils.load_simulation_v3(1, "attendance", attendance_display, buffer_copy, attendance_col_headers);
-    utils.load_simulation_v2(1, "grade_book", greadebook_display, buffer_copy, grade_book_col_headers);
-    utils.load_simulation_v2(1, "student_status", student_status_display, buffer_copy, student_status_col_headers);
+    utils.load_simulation_v3(1, "grade_book", greadebook_display, buffer_copy, grade_book_col_headers);
+    utils.load_simulation_v3(1, "student_status", student_status_display, buffer_copy, student_status_col_headers);
     setTimeout(() => {
         attendance_display = [attendance_col_headers].concat(attendance_display);
         greadebook_display = [grade_book_col_headers].concat(greadebook_display);
@@ -783,6 +752,18 @@ class Academic extends Component {
     this.setState({
       redirect: true
     })
+
+    // reset all display
+    attendance_display = [];
+    greadebook_display = [];
+    student_status_display = [];
+    attendance_col_headers = [];
+    grade_book_col_headers = [];
+    student_status_col_headers = [];
+
+    // clear recorded actions
+    user_actions = [];
+    table_loaded = false;
   }
 
   onNameSubmit = (e) => {
@@ -868,14 +849,6 @@ class Academic extends Component {
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     <Button size='lg' className='display-button' color="info" onClick={this.store_training_data} >Complete Simulation</Button>
                     {/* <CSVLink className='display-button' color="info" data={user_actions}>Download me</CSVLink>; */}
-                    {/* <Button size='lg' className='display-button' color="info" onClick={this.download} >Complete Simulation</Button>
-                    <CSVLink
-                        data={user_actions}
-                        asyncOnClick={false}
-                        filename="data.csv"
-                        className="hidden"
-                        ref={(r) => this.csvLink = r}
-                        /> */}
                     {/* <CSVLink data={user_actions}>Download me</CSVLink>; */}
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     <Button size='lg' className='display-button' color="info" onClick={this.restart} >Restart Simulation</Button>

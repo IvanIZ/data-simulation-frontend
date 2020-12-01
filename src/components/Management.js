@@ -107,7 +107,6 @@ class Management extends Component {
       resultItems: Array.from({ length: 0 }), 
       load_result_from_buffer_to_matrix: false, 
 
-      redirect_import_page: false, 
       import_page_link: '/result', 
 
       data_original: [], 
@@ -138,13 +137,13 @@ class Management extends Component {
       isRestartModalOpen: false, 
       isNameModalOpen: false, 
 
-      isCompleteConfirmationModalOpen: false
+      isCompleteConfirmationModalOpen: false, 
+      name: "", 
+      curr_table: "schedule_v1"
     }
 
     this.toggleSelectionPrompt = this.toggleSelectionPrompt.bind()
-    this.toggleShowHistory = this.toggleShowHistory.bind()
     this.toggleNavbar = this.toggleNavbar.bind()
-    this.toggleExclusiveLockReject = this.toggleExclusiveLockReject.bind();
     this.toggleInstructionModal = this.toggleInstructionModal.bind();
     this.toggleRedirectConfirmModal = this.toggleRedirectConfirmModal.bind();
     this.toggleNameModal = this.toggleNameModal.bind();
@@ -388,18 +387,6 @@ class Management extends Component {
     })
   }
 
-  toggleExclusiveLockReject = () => {
-    this.setState({
-      isExclusiveLockRejectOpen: !this.state.isExclusiveLockRejectOpen
-    })
-  }
-
-  toggleShowHistory = () => {
-    this.setState({
-      isShowHistoryOpen: !this.state.isShowHistoryOpen
-    })
-  }
-
   toggleSelectionPrompt = () => {
     this.setState({
         isSelectPromptOpen: !this.state.isSelectPromptOpen
@@ -431,12 +418,6 @@ class Management extends Component {
     console.log("data display is: ", data_display);
   }
 
-  redirect_import = () => {
-    this.setState( {
-      redirect_import_page: true
-    })
-  }
-
   handleScroll = (e) => {
     const bottom = e.target.scrollHeight - e.target.scrollTop === e.target.clientHeight;
     if (bottom) {
@@ -444,12 +425,6 @@ class Management extends Component {
     }
     prev_scrolltop = e.target.scrollTop;
   }
-
-  show_state = () => {
-    console.log(chn_copy);
-    console.log(change_detected);
-  }
-
 
   check_cell_change = () => {
     if (change_detected) {
@@ -487,40 +462,25 @@ class Management extends Component {
     }
   }
 
-  cell_read_only = (input_row, input_col) => {
-    this.hotTableComponent.current.hotInstance.updateSettings({
-      cells: function(row, col, prop){
-       var cellProperties = {};
-         if(row === input_row && col === input_col){
-           cellProperties.readOnly = 'true'
-         }
-       return cellProperties
-     }
-   })
-  }
-
-
-  hangleUsername = (e) => {
-    this.setState({
-        [e.target.name]: e.target.value
-    })
-  }
-
   start_transaction = () => {
     pending_changes.data = []
     this.setState({
       transaction_mode: true
     });
-    user_actions.push(["START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", ]);
     transaction_button = <Button size='lg' className='display-button' color="primary" onClick={this.end_transaction} >End Transaction</Button> 
+    setTimeout(() => {
+      user_actions.push(["START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", ]);
+    }, 200);
   }
 
   end_transaction = () => {
     this.setState({
       transaction_mode: false
     });
-    user_actions.push(["END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION"]);
     transaction_button = <Button size='lg' className='display-button' color="primary" onClick={this.start_transaction} >Start Transaction</Button>
+    setTimeout(() => {
+      user_actions.push(["END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION"]);
+    }, 200);
   }
 
   track_action = (e, action_type) => {
@@ -790,6 +750,18 @@ class Management extends Component {
     this.setState({
       redirect: true
     })
+
+    // reset all display
+    schedule_v1_display = [];
+    schedule_v2_display = [];
+    progress_display = [];
+    schedule_v1_col_headers = [];
+    schedule_v2_col_headers = [];
+    progress_col_headers = [];
+
+    // clear recorded actions
+    user_actions = [];
+    table_loaded = false;
   }
 
   onNameSubmit = (e) => {
@@ -861,7 +833,6 @@ class Management extends Component {
                   <p className="lead">This is a simple web interface that allows you to upload spreadsheets and retrieve data.</p>
                   <hr className="my-2" />
                   <p className="lead">
-                    {/* <Button size='lg' className='display-button' color="info" onClick={this.toggleShowHistory} >Edit History</Button> */}
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     {transaction_button}
                     &nbsp;&nbsp;&nbsp;&nbsp;
