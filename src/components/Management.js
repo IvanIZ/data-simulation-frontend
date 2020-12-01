@@ -136,7 +136,9 @@ class Management extends Component {
       redirect: false, 
 
       isRestartModalOpen: false, 
-      isNameModalOpen: false
+      isNameModalOpen: false, 
+
+      isCompleteConfirmationModalOpen: false
     }
 
     this.toggleSelectionPrompt = this.toggleSelectionPrompt.bind()
@@ -147,6 +149,7 @@ class Management extends Component {
     this.toggleRedirectConfirmModal = this.toggleRedirectConfirmModal.bind();
     this.toggleNameModal = this.toggleNameModal.bind();
     this.toggleRestartModal = this.toggleRestartModal.bind();
+    this.toggleCompleteConfirmModal = this.toggleCompleteConfirmModal.bind();
   }
 
   // fetch 50 rows of data into the buffer
@@ -355,6 +358,12 @@ class Management extends Component {
     });
   }
 
+  toggleCompleteConfirmModal = () => {
+    this.setState({
+      isCompleteConfirmationModalOpen: !this.state.isCompleteConfirmationModalOpen
+    })
+  }
+
   toggleRestartModal = () => {
     this.setState({
       isRestartModalOpen: !this.state.isRestartModalOpen
@@ -497,31 +506,20 @@ class Management extends Component {
     })
   }
 
-  resolve_conflict = (e) => {
-      e.preventDefault();
-      data_display[conflict_i][conflict_j] = incoming_value;
-      this.state.data_original[conflict_i][conflict_j] = incoming_value;
-
-      // reset conflict records
-      conflict_i = -1;
-      conflict_j = -1;
-      incoming_value = -1;
-      conflict_message = "";
-      this.toggleConflictModal();
-  }
-
   start_transaction = () => {
     pending_changes.data = []
     this.setState({
       transaction_mode: true
-    })
+    });
+    user_actions.push(["START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", ]);
     transaction_button = <Button size='lg' className='display-button' color="primary" onClick={this.end_transaction} >End Transaction</Button> 
   }
 
   end_transaction = () => {
     this.setState({
       transaction_mode: false
-    })
+    });
+    user_actions.push(["END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION"]);
     transaction_button = <Button size='lg' className='display-button' color="primary" onClick={this.start_transaction} >Start Transaction</Button>
   }
 
@@ -704,7 +702,10 @@ class Management extends Component {
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({action_package})
     };
-    fetch('https://spreadsheetactions.herokuapp.com/training/send-training-data/management', requestOptions)
+    fetch('https://spreadsheetactions.herokuapp.com/training/send-training-data/management', requestOptions);
+
+    // bring up the confirmation modal
+    this.toggleCompleteConfirmModal();
   }
 
   select_simulation = (e) => {
@@ -828,6 +829,11 @@ class Management extends Component {
     this.toggleRestartModal();
   }
 
+  close_confirmation = () => {
+    user_actions = []
+    this.toggleCompleteConfirmModal();
+  }
+
   render() {
     if (this.state.redirect) {
       return <Redirect to={this.state.redirect_link} />
@@ -931,6 +937,17 @@ class Management extends Component {
                     </ModalBody>
                     <ModalFooter>
                       <Button size='lg' className='display-button' color="info" onClick={this.toggleRestartModal}>Got It</Button>
+                    </ModalFooter>
+                  </Modal>
+
+                  <Modal size='lg' isOpen={this.state.isCompleteConfirmationModalOpen} toggle={this.toggleCompleteConfirmModal}>
+                    <ModalHeader toggle={this.toggleRestartModal}>Complete Confirmation</ModalHeader>
+                    <ModalBody>
+                      The simulation has been completed and submitted! You can simply close this webpage. If you submitted by mistake or 
+                      need to report an error, please contact ninghan2@illinois.edu 
+                    </ModalBody>
+                    <ModalFooter>
+                      <Button size='lg' className='display-button' color="info" onClick={this.close_confirmation}>Got It</Button>
                     </ModalFooter>
                   </Modal>
                         

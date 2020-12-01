@@ -164,7 +164,6 @@ class Utils {
     }
 
     load_simulation_v3 = (index, simulation_type, buffer, buffer_copy, col_headers) => {
-        console.log("calling vs...");
         console.log("simulation type is: ", simulation_type);
         this.fill_col_headers(col_headers, simulation_type);
 
@@ -183,15 +182,15 @@ class Utils {
 
         }
         else if (simulation_type === "check_book") {
-            ATT_NUM = 7;
+            ATT_NUM = 6;
             this.add_empty_rows(25, ATT_NUM, buffer, buffer_copy);
 
         } else if (simulation_type === "monthly_expense") {
-            ATT_NUM = 14;
+            ATT_NUM = 13;
             this.add_empty_rows(25, ATT_NUM, buffer, buffer_copy);
 
         } else if (simulation_type === "monthly_income") {
-            ATT_NUM = 14;
+            ATT_NUM = 13;
             this.add_empty_rows(25, ATT_NUM, buffer, buffer_copy);
 
         } else if (simulation_type === "employee_schedule_v1") {
@@ -349,16 +348,14 @@ class Utils {
         }
         if (simulation_type === "check_book") {  // check book
             col_head.push("ID");
-            col_head.push("number");
-            col_head.push("date");
+            col_head.push("Date");
             col_head.push("Transaction");
             col_head.push("Withdraw");
             col_head.push("Deposit");
             col_head.push("Balance");
         }
         if (simulation_type === "monthly_expense") { // monthly expense
-            col_head.push("ID");
-            col_head.push("expenses");
+            col_head.push("Category");
             col_head.push("Jan");
             col_head.push("Feb");
             col_head.push("Mar");
@@ -373,8 +370,7 @@ class Utils {
             col_head.push("Dec");
         }
         if (simulation_type === "monthly_income") { // monthly income
-            col_head.push("ID");
-            col_head.push("income");
+            col_head.push("Category");
             col_head.push("Jan");
             col_head.push("Feb");
             col_head.push("Mar");

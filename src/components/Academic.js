@@ -130,7 +130,9 @@ class Academic extends Component {
       curr_table: "attendance", 
 
       isRestartModalOpen: false, 
-      user_actions: []
+      user_actions: [], 
+
+      isCompleteConfirmationModalOpen: false
     }
 
     this.toggleSelectionPrompt = this.toggleSelectionPrompt.bind()
@@ -141,6 +143,7 @@ class Academic extends Component {
     this.toggleRedirectConfirmModal = this.toggleRedirectConfirmModal.bind();
     this.toggleNameModal = this.toggleNameModal.bind();
     this.toggleRestartModal = this.toggleRestartModal.bind();
+    this.toggleCompleteConfirmModal = this.toggleCompleteConfirmModal.bind();
   }
 
   // fetch 50 rows of data into the buffer
@@ -351,6 +354,12 @@ class Academic extends Component {
     });
   }
 
+  toggleCompleteConfirmModal = () => {
+    this.setState({
+      isCompleteConfirmationModalOpen: !this.state.isCompleteConfirmationModalOpen
+    })
+  }
+
   toggleRestartModal = () => {
     this.setState({
       isRestartModalOpen: !this.state.isRestartModalOpen
@@ -484,8 +493,8 @@ class Academic extends Component {
     this.setState({
       transaction_mode: true
     })
+    user_actions.push(["START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", ]);
     transaction_button = <Button size='lg' className='display-button' color="primary" onClick={this.end_transaction} >End Transaction</Button> 
-    //apply_read_only_lock_button = <Button size='lg' className='display-button' color="primary" onClick={this.request_shared_lock} >Apply Read-Only Lock</Button> 
   }
 
   end_transaction = () => {
@@ -494,7 +503,8 @@ class Academic extends Component {
     // }, 500);
     this.setState({
       transaction_mode: false
-    })
+    });
+    user_actions.push(["END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION"]);
     transaction_button = <Button size='lg' className='display-button' color="primary" onClick={this.start_transaction} >Start Transaction</Button>
   }
 
@@ -680,6 +690,9 @@ class Academic extends Component {
       body: JSON.stringify({action_package})
     };
     fetch('https://spreadsheetactions.herokuapp.com/training/send-training-data/academic', requestOptions,  {mode: 'no-cors'})
+
+    // bring up confirmation modal
+    this.toggleCompleteConfirmModal();
   }
 
   select_simulation = (e) => {
@@ -810,11 +823,17 @@ class Academic extends Component {
   }
 
   download = () => {
+    console.log("downloading!!!!");
+    user_actions.push([this.state.name, "END_TRAINING_DATA", null, null, null, this.state.curr_table, null, null, "END"]);
+    this.setState({
+      user_actions: user_actions
+    })
     this.csvLink.link.click()
   }
 
-  test = () => {
-    console.log("IT'S FIRING!!!!!!!");
+  close_confirmation = () => {
+    user_actions = []
+    this.toggleCompleteConfirmModal();
   }
 
   render() {
@@ -847,15 +866,17 @@ class Academic extends Component {
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     {transaction_button}
                     &nbsp;&nbsp;&nbsp;&nbsp;
-                    {/* <Button size='lg' className='display-button' color="info" onClick={this.store_training_data} >Complete Simulation</Button> */}
+                    <Button size='lg' className='display-button' color="info" onClick={this.store_training_data} >Complete Simulation</Button>
                     {/* <CSVLink className='display-button' color="info" data={user_actions}>Download me</CSVLink>; */}
-                    <Button size='lg' className='display-button' color="info" onClick={this.download} >Complete Simulation</Button>
+                    {/* <Button size='lg' className='display-button' color="info" onClick={this.download} >Complete Simulation</Button>
                     <CSVLink
                         data={user_actions}
+                        asyncOnClick={false}
                         filename="data.csv"
                         className="hidden"
                         ref={(r) => this.csvLink = r}
-                        target="_blank"/>
+                        /> */}
+                    {/* <CSVLink data={user_actions}>Download me</CSVLink>; */}
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     <Button size='lg' className='display-button' color="info" onClick={this.restart} >Restart Simulation</Button>
                     &nbsp;&nbsp;&nbsp;&nbsp;
@@ -935,6 +956,17 @@ class Academic extends Component {
                     </ModalBody>
                     <ModalFooter>
                       <Button size='lg' className='display-button' color="info" onClick={this.toggleRestartModal}>Got It</Button>
+                    </ModalFooter>
+                  </Modal>
+
+                  <Modal size='lg' isOpen={this.state.isCompleteConfirmationModalOpen} toggle={this.toggleCompleteConfirmModal}>
+                    <ModalHeader toggle={this.toggleRestartModal}>Complete Confirmation</ModalHeader>
+                    <ModalBody>
+                      The current part of the simulation has been completed and submitted. If you have completed Part 1, you can work on Part 2 now. 
+                      If you have completed Part 2, you can simply close this webpage. If you submitted by mistake or you need to report an error, please contact ninghan2@illinois.edu 
+                    </ModalBody>
+                    <ModalFooter>
+                      <Button size='lg' className='display-button' color="info" onClick={this.close_confirmation}>Got It</Button>
                     </ModalFooter>
                   </Modal>
                   
