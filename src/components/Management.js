@@ -848,27 +848,45 @@ class Management extends Component {
                     <ModalBody>
                         <h2>Welcome</h2>
                         Welcome to Management Simulation! This instruction can be accessed at any time by clicking the "Instruction" button on this webpage. 
-                        Under this simulation, there are three tables: an employee schedule table, an enployee shifts table, and a task list. This simulation has 
+                        Under this simulation, there are three tables: an "Employee Schedule" table, an "Employee Shifts" table, and a "Task List" table. This simulation has 
                         three parts.  
                         <hr className="my-2" />
                         
+
                         <p className="margin-one">
                         <h2>Part 1</h2>
-                        For Part 1 of this simulation, you are to fill out the employee schedule table. Based on the "weekly employee working schedule" we emailed you (if 
-                        you did not receive our email, please contact ninghan2@illinois.edu), fill out the weekly schedule table for each employee. 
+                        For Part 1 of this simulation, you are to fill out the "Employee Schedule" table based on the descriptions in "Story 1" under the "Story" section in the 
+                        instruction document we sent you via email. If you did not receive the document, please contact ninghan2@illinois.edu. Inside the “Employee Schedule” table, 
+                        the columns “Employee ID” and “Name” refer to the id's and names of the employees, respectively. All the other fields are self-explanatory.
+                        <br/>
                         <h5>Note: </h5>
-                        Make sure to fill out the employee schedule table employee-by-employee (i.e. row-by-row). It is not necessary to order the employees the same 
-                        way as they are ordered in our emailed schedule, but please follow a row-by-row manner when filling out this table. 
+                        When you finish this part, press the “Complete Simulation” button on your screen to submit and start the next part. 
                         </p>
                         <hr className="my-2" />
 
+
                         <p className="margin-one">
                         <h2>Part 2</h2>
-                        In part 2, you are to fill out the employee shift table based the "daily employee shifts" we emailed you (again, if you did not received the 
-                        email, please contact ninghan2@illinois.edu). 
+                        For part 2 of this simulation, you are to fill out the “Employee Shifts” table based on the descriptions in “Story 2” under the “Story” section in the 
+                        instruction document we sent you via email. If you did not received the document, please contact ninghan2@illinois.edu. All the fields in the “Employee Shifts” 
+                        table are quite self-explanatory.   
+                        <br/>
                         <h5>Note: </h5>
-                        Make sure to fill out the employee shifts table day-by-day. That is, you need to fill out all the shifts on Monday before starting to fill out 
-                        the shifts on Tuesday. 
+                        When you finish this part, press the “Complete Simulation” button on your screen to submit and start the next part. 
+                        </p>
+
+                        <p className="margin-one">
+                        <h2>Part 3</h2>
+                        For part 3 of this simulation, you are to fill out the “Task List” table based on the descriptions in “Story 3” under the “Story” section in the 
+                        instruction document we sent you via email. If you did not received the document, please contact ninghan2@illinois.edu. Inside the “Task List” table, 
+                        the “Task ID” column is the feature that differentiates each task, and it is your choice to fill in whatever id system you want (E.g. “one”, 
+                        “two”, … or “001”, “002”…), as long as it is logical. The “Task” column is a description of the task, which you can write in your own words. The 
+                        “Deadline” column is the deadline of the corresponding task. The “Employee ID” and “Name” columns refer to the employee id and employee name of 
+                        the employee that is responsible for that task, respectively. The “Hour Spent” column is the approximate hours that the responsible employee has spent 
+                        on this task. The “Status” column refers to the current progress of the task, which you can also write in your own words, but should be logical. 
+                        <br/>
+                        <h5>Note: </h5>
+                        When you finish this part, press the “Complete Simulation” button on your screen to submit. 
                         </p>
 
                     </ModalBody>
@@ -952,7 +970,7 @@ class Management extends Component {
         <TabContent activeTab={this.state.activeTab}>
             <TabPane tabId="1">
                 <h4>
-                    Employee Weekly Schedule
+                    Employee Schedule Table
                 </h4> 
                 <div id = "display_portion" onScrollCapture={e => this.track_action(e, "scroll")}  tabIndex="1">
                     <HotTable className="handsontable" id ="display_table" data={schedule_v1_display} ref={this.hotTableComponent} id={this.id}
@@ -971,7 +989,7 @@ class Management extends Component {
             </TabPane>
             <TabPane tabId="2">
                 <h4>
-                    Employee Shifts Schedule
+                    Employee Shifts Table
                 </h4> 
                 <div id = "display_portion" onScrollCapture={e => this.track_action(e, "scroll")}  tabIndex="1">
                     <HotTable className="handsontable" id ="display_table" data={schedule_v2_display} ref={this.hotTableComponent1} id={this.id}
@@ -990,7 +1008,7 @@ class Management extends Component {
             </TabPane>
             <TabPane tabId="3">
                 <h4>
-                    Projects Progress Table
+                    Task List Table
                 </h4> 
                 <div id = "display_portion" onScrollCapture={e => this.track_action(e, "scroll")}  tabIndex="1">
                     <HotTable className="handsontable" id ="display_table" data={progress_display} ref={this.hotTableComponent2} id={this.id}

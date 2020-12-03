@@ -861,36 +861,40 @@ class Academic extends Component {
                     <ModalBody>
                         <h2>Welcome</h2>
                         Welcome to Academic Simulation! This instruction can be accessed at any time by clicking the "Instruction" button on this webpage. 
-                        Under this simulation, there are three tables: attendance table, gradebook table, and a student status table. This simulation has two parts.  
+                        Under this simulation, there are three tables: "Attendance" table, "Gradebook" table, and a "Student Status" table. This simulation has two parts.  
                         <hr className="my-2" />
                         
+
                         <p className="margin-one">
                         <h2>Part 1</h2>
-                        Part 1 simulates a seven-day period. For each day from Monday to Friday, you are to fill our the attendance table and then the student status table. 
-                        First, you will pretend it is a Monday, and you are to fill out the attendance table for Monday on all of your 
-                        students. After taking the Monday's attendance, you will open up the student status table, and increment the number of tardies and 
-                        absents for each student based on Monday's attendance in the following manner: First, 3 tardies count as 1 absent. For example, a student with 
-                        4 tardies and 1 absent will be updated to have 1 tardy and 2 absent. Second, 3 absents result in a disciplinary action, so a student with 
-                        3 absent and 1 disciplinary action will be updated to 1 absent and 2 disciplinary action. Third, update the status based on how many 
-                        disciplinary action the student has. If the student has 1 disciplinary action, the status will be changed to "warning"; for 2 
-                        disciplinary actions, the status will be "final warning"; for 3 disciplinary actions, the status will be "drop out". Next, you will pretend that 
-                        the day is Tuesday, and you will need repeat the above procedures for this day. You need to complete the same procedures for each day from Monday to 
-                        Friday. 
+                        You are going to simulate a 5-day period of attendance taking based on “Story 1” under the “Story” section in the instruction document.
+                        As you go through the events in "Story 1", you are going to fill out the "Attendance" table and update the "Student Status" table. In the 
+                        "Attendance" table, a student can be “Present”, “Tardy”, “Absent”, or “Excused”. Whether to enter those exact words or their initials (i.e. 
+                        “P”, “T”, “A”, “E”) is your choice, but a student can only be in one of these four states. When you are updating the "Student Status" table, please
+                        follow the rules described in the instruction document. Further details of the instruction are also included in that document we sent you via email. 
+                        If you did not received the document, please contact ninghan2@illinois.edu.
+                        <br/>
                         <h5>Note: </h5>
-                        Make sure to follow the procedures day-by-day! That is, fill out Monday attendance, and the update student status; then fill our Tuesday attendance, and 
-                        then update student status; then Wednesday attendance... etc. Do not jump ahead. 
+                        After you finish this part, press the “Complete Simulation” button on your screen and start the next part.  
                         </p>
                         <hr className="my-2" />
 
+
+                        <p className="margin-one">
                         <h2>Part 2</h2>
-                        In part 2, you need to log each students' grade into the grade book. The grades for each assignment for each individual student is included in the email
-                        we sent you. If you did not get the email, please exit the simulation and contact ninghan2@illinois.edu. Note we are simulating the course progress in chronological 
-                        order, where MP1 is due, and then MP2, then MP3, then MP4, then Lab1...etc. So, when filling out the gradebook, please make sure to fill out the table
-                        assignment-by-assignment. That is. fill out all students' score for a particular assignment before moving to the next assignment. After filling out all the assignment, 
-                        please calculate each students' final grade (by hand, since we don't support formula function here). The total score for the course is 1000 points, and the students' final
-                        grade is in percentage. After filling out the grade book, you will go to the student status table and update it in the following manner. For each student that has a final 
-                        grade less than 60%, update that student's status to "warning" if the student's current status is normal. If that student's current status is not normal, don't change anything
-                        for that student. 
+                        In this part. you are going to fill out the "Gradebook" table and update the "Student Status" table based on the events described in "Story 2" under the 
+                        "Story" section in the instruction document. For the "Gradebook" table, you will need to fill out the grade for each assignment for every student as each 
+                        assignment dues. At the end of the story (i.e. end of the semester), you will need to calculate the final grade for each student. The final grade is 
+                        calculated as (total_points_earned/total_possible_points) * 100, where the total_points_earned is the sum of the points from all assignments, and the 
+                        total_possible_ponts is 1000. For example, if a student earned a total of 850 points, the final grade will be 85. After the semester ends and after you 
+                        calculate the final grades for each student, you are going to update the Student Status table (the same table you worked on in Part 1). The rules for how to 
+                        update it are described in the instruction document. Further details of the instruction are also included in that document we sent you via email. If you did not 
+                        received the document, please contact ninghan2@illinois.edu.
+                        <br/>
+                        <h5>Note: </h5>
+                        After you finish this part, press the “Complete Simulation” button on your screen.  
+                        </p>
+                        <hr className="my-2" />
 
                     </ModalBody>
                     <ModalFooter>

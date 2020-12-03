@@ -838,26 +838,41 @@ class Financing extends Component {
                   </p>
 
                   <Modal size='lg' isOpen={this.state.isInstructionOpen} >
-                    {/* <ModalHeader ><header>Simulation Instruction</header>  </ModalHeader> */}
                     <ModalBody>
                         <h2>Welcome</h2>
                         Welcome to Academic Simulation! This instruction can be accessed at any time by clicking the "Instruction" button on this webpage. 
-                        Under this simulation, there are three tables: a monthly expense table, a monthly income table, and a transaction table
+                        Under this simulation, there are three tables: a "Monthly Expenses" table, a "Monthly Income" table, and a "Transaction Log" table. This simulation has only one part 
+                        but there are two tasks to complete within this part. 
                         <hr className="my-2" />
                         
                         <p className="margin-one">
-                        <h2>Procedures</h2>
-                        You are given a list of expenditures and earnings with corresponding data and discriptions from our email (If you didn't receive our email for the list, please contact 
-                        ninghan2@illinois.edu). Following that list from top to bottom (i.e. oldest to most recent), for each entry, you are to first log that entry into the 
-                        transanction table by filling out the corresponding coloum. For an expenditure, leave the "deposit" plank, and for an income, leave the "withdraw" plank. Also 
-                        for each entry, you need to manually calculate the remaining balance, assuming that your initial balance is $10,000. For each entry that you log into the transaction
-                        table, update the monthly income table or monthly expense table, depending on whether the entry is an expenditure or income. 
-                        <h5>Note: </h5>
-                        Make sure to follow the procedures entry-by-entry from the list we send you from our email. That is, for each entry from the list (from top to bottom), log that 
-                        entry into the transaction table first, and then update either monthly expense or monthly income table with the correct month and expense/income category. After that, 
-                        move on the the next entry from the list, and log it into the transaction table...etc. Make sure do not skip procedures. Specifically, DO NOT log multiple entry from 
-                        the list into the transaction table and do multiple updates on monthly expense or monthly income at once. 
+                        <h2>Task 1</h2>
+                        For task 1, you need to go through the expenses and incomes for a 6-month preiod described in the "Story" section in the introduction document, and for each one, log it into 
+                        the "Transaction Log" table. Inside the Transaction Log table, the “ID” column is the feature that differentiates each transaction, and it’s your choice to fill in whatever 
+                        id system you want (E.g. “one”, “two”, … or “001”, “002”…), as long as it is logical. The “date” column corresponds to the date that an expense or income occurs. The “Transaction” 
+                        column is a description of the expense or income, which you can write in your own words. For the “Withdraw” and “Deposit” columns, if the event is an expense, you should 
+                        write the monetary amount to the “Withdraw” column, and leave the “Deposit” plank; if the event is an income, you should write the monetary amount to the “Deposit” column 
+                        and leave the “Withdraw” blank. For each entry into the Transaction Log, you also need to manually calculate the remaining balance in the “Balance” column. A deposit 
+                        increases the balance by the deposit amount, and a withdraw decreases the balance by the withdraw amount. You will assume that the original balance is $2,000. Further details 
+                        of the instruction are also included in that document we sent you via email. If you did not received the document, please contact ninghan2@illinois.edu.
+                        <br/>
                         </p>
+                        <hr className="my-2" />
+
+                        <p className="margin-one">
+                        <h2>Task 2</h2>
+                        As you are going through each expense and income from the "Story" section from the introduction document, you also need to update the "Monthly Expenses" table and "Monthly Income" table 
+                        accordingly. The general rule is that if the event is an expense, you should reflect it in the Monthly Expenses table, and if the event is an income, you should reflect 
+                        it in the Monthly Income table. For both "Montly Expenses" and "Monthly Income" table, the “Category” column indicates the category of each expense or income. A category could 
+                        contain/summarize multiple expenses/incomes, or just one expense/income. For example, in the Monthly Expenses table, you could have a “Restaurant” category, and the expense 
+                        under this category should be the sum of all expenses on restaurants within that month. You could also have a “Rent” category, which only contains one expense on rent per 
+                        month since we pay rent once a month. You could also come up with categories that may only have values on certain months and have no values on other months. For example, 
+                        if you have a “Clothing” category, and you spent a total of $500 on clothing on Jan. and $0 on Feb., then this category should have no value on Feb. How to name and use 
+                        the categories of expenses and incomes are your choice but should be logical. All the other columns are self-explanatory. Further details 
+                        of the instruction are also included in that document we sent you via email. If you did not received the document, please contact ninghan2@illinois.edu.
+                        <br/>
+                        </p>
+                        <hr className="my-2" />
 
                     </ModalBody>
                     <ModalFooter>

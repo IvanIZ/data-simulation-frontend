@@ -199,7 +199,9 @@ class Utils {
 
         } else if (simulation_type === "employee_schedule_v2") {
             ATT_NUM = 8;
-            this.add_empty_rows(25, ATT_NUM, buffer, buffer_copy);
+            this.load_employee_schedule_v2(buffer);
+            this.load_employee_schedule_v2(buffer_copy);
+            this.add_empty_rows(5, ATT_NUM, buffer, buffer_copy);
 
         } else if (simulation_type === "progress_log") {
             ATT_NUM = 7;
@@ -313,6 +315,22 @@ class Utils {
         buffer.push(["00029", "Tanaka", "", "", "", ""]);
         buffer.push(["00030", "Jake", "", "", "", ""]);
         buffer.push(["00031", "Isla", "", "", "", ""]);
+    }
+
+    load_employee_schedule_v2 = (buffer) => {
+        buffer.push(["8AM-9AM", "", "", "", "", "", "", ""]);
+        buffer.push(["9AM-10AM", "", "", "", "", "", "", ""]);
+        buffer.push(["10AM-11AM", "", "", "", "", "", "", ""]);
+        buffer.push(["11AM-12PM", "", "", "", "", "", "", ""]);
+        buffer.push(["12PM-1PM", "", "", "", "", "", "", ""]);
+        buffer.push(["1PM-2PM", "", "", "", "", "", "", ""]);
+        buffer.push(["2PM-3PM", "", "", "", "", "", "", ""]);
+        buffer.push(["3PM-4PM", "", "", "", "", "", "", ""]);
+        buffer.push(["4PM-5PM", "", "", "", "", "", "", ""]);
+        buffer.push(["5PM-6PM", "", "", "", "", "", "", ""]);
+        buffer.push(["6PM-7PM", "", "", "", "", "", "", ""]);
+        buffer.push(["7PM-8PM", "", "", "", "", "", "", ""]);
+        buffer.push(["8PM-9AP", "", "", "", "", "", "", ""]);
     }
 
     fill_col_headers = (col_head, simulation_type) => {
