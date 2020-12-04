@@ -27,6 +27,7 @@ import {
 } from "react-router-dom";
 import { CSVLink } from "react-csv";
 import classnames from 'classnames';
+import io from "socket.io-client";
 
 const Utils = require('../utils');
 let utils = new Utils();
@@ -77,6 +78,8 @@ let pending_changes = {
   try_message: "SENT MESSAGE! SUCCESS!", 
   user: ""
 }
+
+let socket_id = "";
 
 class Academic extends Component {
 
@@ -133,6 +136,49 @@ class Academic extends Component {
 
       isCompleteConfirmationModalOpen: false
     }
+
+    // Socket io stuff =========================================================================================
+
+    this.socket = io('https://spreadsheetactions.herokuapp.com/');
+
+    this.socket.on('RECEIVE_ID', function(id){
+      change_id(id);
+    });
+
+    this.socket.on('ADD_NEW_USER', function(data) {
+      console.log("adding new user");
+      addNewUser(data);
+    });
+
+    const change_id = id => {
+      socket_id = id;
+    }
+
+    const addNewUser = data => {
+      this.setState({
+        history: data.history
+      })
+      change_current_user(data.current_users);
+    }
+
+    const change_current_user = data => {
+      this.setState({
+        users: data
+      });
+      let new_user_text = "Currently Online: ";
+      for (var i = 0; i < this.state.users.length; i++) {
+        if (i == this.state.users.length - 1) {
+          new_user_text += this.state.users[i]
+        } else {
+          new_user_text += this.state.users[i] + ", "
+        }
+      }
+      this.setState({
+        user_text_block: new_user_text
+      });
+    }
+
+    // Socket io stuff =========================================================================================
 
     this.toggleSelectionPrompt = this.toggleSelectionPrompt.bind()
     this.toggleNavbar = this.toggleNavbar.bind()
@@ -775,6 +821,12 @@ class Academic extends Component {
   submitName = (e) => {
     e.preventDefault();
     console.log("state name is: ", this.state.name);
+
+    let name_package = {
+      user_name: this.state.name
+    }
+    this.socket.emit('SEND_USERNAME', name_package);
+    console.log("sending user name");
     this.toggleNameModal();
   }
 
@@ -843,13 +895,12 @@ class Academic extends Component {
                   <h1 className="display-3">Hi {this.state.user_name}, welcome to Academic Simulation!</h1>
                   <p className="lead">This is a simple web interface that allows you to upload spreadsheets and retrieve data.</p>
                   <hr className="my-2" />
+                  {this.state.user_text_block}
                   <p className="lead">
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     {transaction_button}
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     <Button size='lg' className='display-button' color="info" onClick={this.store_training_data} >Complete Simulation</Button>
-                    {/* <CSVLink className='display-button' color="info" data={user_actions}>Download me</CSVLink>; */}
-                    {/* <CSVLink data={user_actions}>Download me</CSVLink>; */}
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     <Button size='lg' className='display-button' color="info" onClick={this.restart} >Restart Simulation</Button>
                     &nbsp;&nbsp;&nbsp;&nbsp;
@@ -927,7 +978,7 @@ class Academic extends Component {
                   </Modal>
 
                   <Modal size='lg' isOpen={this.state.isRestartModalOpen} toggle={this.toggleRestartModal}>
-                    <ModalHeader toggle={this.toggleRestartModal}>Please Enter Your Full Name</ModalHeader>
+                    <ModalHeader toggle={this.toggleRestartModal}>Restart Confirmation</ModalHeader>
                     <ModalBody>
                       Your simulation has been restarted. All the changes that haven't been committed yet are clearned. 
                     </ModalBody>
