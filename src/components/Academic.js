@@ -397,6 +397,10 @@ class Academic extends Component {
     });
   }
 
+  componentWillUnmount() {
+    this.socket.disconnect();
+  }
+
   toggleCompleteConfirmModal = () => {
     this.setState({
       isCompleteConfirmationModalOpen: !this.state.isCompleteConfirmationModalOpen
