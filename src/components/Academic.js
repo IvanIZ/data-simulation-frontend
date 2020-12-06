@@ -134,21 +134,41 @@ class Academic extends Component {
       isRestartModalOpen: false, 
       user_actions: [], 
 
-      isCompleteConfirmationModalOpen: false
+      isCompleteConfirmationModalOpen: false, 
+
+      attendance_table: [[]]
     }
 
     // Socket io stuff =========================================================================================
 
     this.socket = io('https://spreadsheetactions.herokuapp.com/');
+    // this.socket = io('localhost:3001');
 
     this.socket.on('RECEIVE_ID', function(id){
       change_id(id);
     });
 
+    // update current list of online users when a new user joins
     this.socket.on('ADD_NEW_USER', function(data) {
       console.log("adding new user");
       addNewUser(data);
     });
+
+    // update current list of online users when one user is disconnected
+    this.socket.on('CHANGE_CURRENT_USER', function(data) {
+      change_current_user(data);
+    });
+
+    // receive updates on spreadsheet from other users
+    this.socket.on('RECEIVE_MESSAGE', function(data){
+      addMessage(data);
+    });
+
+    // update the last edit message, as well as the entire edit history
+    this.socket.on('UPDATE_EDIT_MESSAGE', function(message_package) {
+      update_edit_message(message_package);
+    });
+    
 
     const change_id = id => {
       socket_id = id;
@@ -178,6 +198,34 @@ class Academic extends Component {
       });
     }
 
+    const update_edit_message = message_package => {
+      this.setState({
+        edit_message: message_package.new_message, 
+        history: message_package.history
+      })
+    }
+
+    const addMessage = data => {
+      console.log("the data in addMessage is: ", data);
+      let change_table = data.data
+      for (var x = 0; x < change_table.length; x++) {
+        // Extract data
+        let j = change_table[x][0] - 1   // 0 --> y_coord
+        let value = change_table[x][1] // 1 --> actual value
+        let i = change_table[x][2] - 1 // 2 --> x_coord
+        let table = change_table[x][3]; // table corresponds to this change  
+
+        // reflect each update to its corresponding table
+        if (table === "attendance" && typeof attendance_display !== "undefined") {
+            attendance_display[i][j] = value;
+        } else if (table === "grade_book") {
+            greadebook_display[i][j] = value;
+        } else if (table === "student_status") {
+            student_status_display[i][j] = value;
+        }
+      }
+  };
+
     // Socket io stuff =========================================================================================
 
     this.toggleSelectionPrompt = this.toggleSelectionPrompt.bind()
@@ -187,6 +235,7 @@ class Academic extends Component {
     this.toggleNameModal = this.toggleNameModal.bind();
     this.toggleRestartModal = this.toggleRestartModal.bind();
     this.toggleCompleteConfirmModal = this.toggleCompleteConfirmModal.bind();
+    this.toggleShowHistory = this.toggleShowHistory.bind();
   }
 
   // fetch 50 rows of data into the buffer
@@ -401,6 +450,12 @@ class Academic extends Component {
     this.socket.disconnect();
   }
 
+  toggleShowHistory = () => {
+    this.setState({
+      isShowHistoryOpen: !this.state.isShowHistoryOpen
+    })
+  }
+
   toggleCompleteConfirmModal = () => {
     this.setState({
       isCompleteConfirmationModalOpen: !this.state.isCompleteConfirmationModalOpen
@@ -499,6 +554,7 @@ class Academic extends Component {
       temp[0] = x_coord;
       temp[1] = actual_value;
       temp[2] = y_coord;
+      temp[3] = this.state.curr_table;
       pending_changes.data.push(temp);
       change_detected = false;
     } else {
@@ -524,7 +580,12 @@ class Academic extends Component {
     transaction_button = <Button size='lg' className='display-button' color="primary" onClick={this.start_transaction} >Start Transaction</Button>
     setTimeout(() => {
       user_actions.push(["END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION"]);
-    }, 200);
+      this.commit_transaction();
+    }, 500);
+  }
+
+  commit_transaction = () => {
+    this.socket.emit('SEND_MESSAGE', pending_changes);
   }
 
   track_action = (e, action_type) => {
@@ -793,6 +854,9 @@ class Academic extends Component {
         attendance_display = [attendance_col_headers].concat(attendance_display);
         greadebook_display = [grade_book_col_headers].concat(greadebook_display);
         student_status_display = [student_status_col_headers].concat(student_status_display);
+        this.setState({
+          attendance_table: attendance_display
+        })
     }, 500);
     col_headers = attendance_col_headers;
   }
@@ -896,7 +960,7 @@ class Academic extends Component {
           </Jumbotron >
           <div>
             <Jumbotron >
-                  <h1 className="display-3">Hi {this.state.user_name}, welcome to Academic Simulation!</h1>
+                  <h1 className="display-3">Hi {this.state.name}, welcome to Academic Simulation!</h1>
                   <p className="lead">This is a simple web interface that allows you to upload spreadsheets and retrieve data.</p>
                   <hr className="my-2" />
                   {this.state.user_text_block}
@@ -909,7 +973,10 @@ class Academic extends Component {
                     <Button size='lg' className='display-button' color="info" onClick={this.restart} >Restart Simulation</Button>
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     <Button size='lg' className='display-button' color="info" onClick={this.toggleInstructionModal} >Instruction</Button>
+                    {/* &nbsp;&nbsp;&nbsp;&nbsp;
+                    <Button size='lg' className='display-button' color="info" onClick={this.toggleShowHistory} >Edit History</Button> */}
                   </p>
+                  {this.state.edit_message}
 
                   <Modal size='lg' isOpen={this.state.isInstructionOpen} >
                     {/* <ModalHeader ><header>Simulation Instruction</header>  </ModalHeader> */}
@@ -999,6 +1066,24 @@ class Academic extends Component {
                     </ModalBody>
                     <ModalFooter>
                       <Button size='lg' className='display-button' color="info" onClick={this.close_confirmation}>Got It</Button>
+                    </ModalFooter>
+                  </Modal>
+
+                  <Modal size='lg' isOpen={this.state.isShowHistoryOpen} toggle={this.toggleShowHistory}>
+                    <ModalHeader toggle={this.toggleShowHistory}>File Edit History</ModalHeader>
+                    <ModalBody>
+                      <Table striped className="history-table">
+                        <tbody>
+                            {this.state.history.map(line => 
+                              <tr key = {line}>
+                                <td>{line}</td>
+                              </tr>
+                            )}
+                        </tbody>
+                      </Table>
+                    </ModalBody>
+                    <ModalFooter>
+                      <Button size='lg' color="primary" className='single_search_submit' onClick={this.toggleShowHistory}>Close</Button> {' '}
                     </ModalFooter>
                   </Modal>
                   

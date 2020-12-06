@@ -26,6 +26,7 @@ import {
   useHistory,
   Redirect
 } from "react-router-dom";
+import io from "socket.io-client";
 
 let simulation_type = "";
 
@@ -131,6 +132,8 @@ class Simulation extends Component {
       // simulation_type: ""
     }
 
+    // this.socket = io('localhost:3001');
+
     this.toggleSelectionPrompt = this.toggleSelectionPrompt.bind()
     this.toggleShowHistory = this.toggleShowHistory.bind()
     this.toggleConflictModal = this.toggleConflictModal.bind()
@@ -218,6 +221,10 @@ class Simulation extends Component {
       // console.log("amount: ", amount);
       // console.log("source: ", source);
     });
+  }
+
+  componentWillUnmount() {
+    this.socket.disconnect();
   }
 
   toggleNavbar = () => {
