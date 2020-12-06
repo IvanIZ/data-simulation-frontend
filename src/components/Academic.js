@@ -218,7 +218,8 @@ class Academic extends Component {
         // reflect each update to its corresponding table
         if (table === "attendance" && typeof attendance_display !== "undefined") {
             attendance_display[i][j] = value;
-        } else if (table === "grade_book") {
+        } else if (table === "cs225_gradebook") {
+            console.log("in grade book");
             greadebook_display[i][j] = value;
         } else if (table === "student_status") {
             student_status_display[i][j] = value;

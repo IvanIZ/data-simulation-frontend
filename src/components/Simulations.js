@@ -133,6 +133,7 @@ class Simulation extends Component {
     }
 
     // this.socket = io('localhost:3001');
+    this.socket = io('https://spreadsheetactions.herokuapp.com/');
 
     this.toggleSelectionPrompt = this.toggleSelectionPrompt.bind()
     this.toggleShowHistory = this.toggleShowHistory.bind()

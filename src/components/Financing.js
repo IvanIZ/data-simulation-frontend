@@ -22,6 +22,7 @@ import {
   Redirect
 } from "react-router-dom";
 import classnames from 'classnames';
+import io from "socket.io-client";
 
 const Utils = require('../utils');
 let utils = new Utils();
@@ -76,6 +77,8 @@ let select_j = -1;
 let transaction_button = "";
 let apply_read_only_lock_button = "";
 let display_dataset_button = "";
+
+let socket_id = "";
 
 let pending_changes = {
   data:[], // 2d array to store difference: y, value, x, 
@@ -136,6 +139,95 @@ class Financing extends Component {
       name: "", 
       curr_table: "monthly_expenses"
     }
+
+    // Socket io stuff =========================================================================================
+
+    this.socket = io('https://spreadsheetactions.herokuapp.com/');
+    // this.socket = io('localhost:3001');
+
+    this.socket.on('RECEIVE_ID', function(id){
+      change_id(id);
+    });
+
+    // update current list of online users when a new user joins
+    this.socket.on('ADD_NEW_USER', function(data) {
+      console.log("adding new user");
+      addNewUser(data);
+    });
+
+    // update current list of online users when one user is disconnected
+    this.socket.on('CHANGE_CURRENT_USER', function(data) {
+      change_current_user(data);
+    });
+
+    // receive updates on spreadsheet from other users
+    this.socket.on('RECEIVE_MESSAGE', function(data){
+      addMessage(data);
+    });
+
+    // update the last edit message, as well as the entire edit history
+    this.socket.on('UPDATE_EDIT_MESSAGE', function(message_package) {
+      update_edit_message(message_package);
+    });
+    
+
+    const change_id = id => {
+      socket_id = id;
+    }
+
+    const addNewUser = data => {
+      this.setState({
+        history: data.history
+      })
+      change_current_user(data.current_users);
+    }
+
+    const change_current_user = data => {
+      this.setState({
+        users: data
+      });
+      let new_user_text = "Currently Online: ";
+      for (var i = 0; i < this.state.users.length; i++) {
+        if (i == this.state.users.length - 1) {
+          new_user_text += this.state.users[i]
+        } else {
+          new_user_text += this.state.users[i] + ", "
+        }
+      }
+      this.setState({
+        user_text_block: new_user_text
+      });
+    }
+
+    const update_edit_message = message_package => {
+      this.setState({
+        edit_message: message_package.new_message, 
+        history: message_package.history
+      })
+    }
+
+    const addMessage = data => {
+      console.log("the data in addMessage is: ", data);
+      let change_table = data.data
+      for (var x = 0; x < change_table.length; x++) {
+        // Extract data
+        let j = change_table[x][0] - 1   // 0 --> y_coord
+        let value = change_table[x][1] // 1 --> actual value
+        let i = change_table[x][2] - 1 // 2 --> x_coord
+        let table = change_table[x][3]; // table corresponds to this change  
+
+        // reflect each update to its corresponding table
+        if (table === "monthly_expenses") {
+            monthly_expense_display[i][j] = value;
+        } else if (table === "monthly_income") {
+            monthly_income_display[i][j] = value;
+        } else if (table === "check_book") {
+            check_book_display[i][j] = value;
+        }
+      }
+  };
+
+    // Socket io stuff =========================================================================================
 
     this.toggleSelectionPrompt = this.toggleSelectionPrompt.bind()
     this.toggleNavbar = this.toggleNavbar.bind()
@@ -351,6 +443,10 @@ class Financing extends Component {
     });
   }
 
+  componentWillUnmount() {
+    this.socket.disconnect();
+  }
+
   toggleCompleteConfirmModal = () => {
     this.setState({
       isCompleteConfirmationModalOpen: !this.state.isCompleteConfirmationModalOpen
@@ -423,6 +519,8 @@ class Financing extends Component {
   check_cell_change = () => {
     if (change_detected) {
 
+      console.log("change detected!!!");
+
       // find current state
       let state = "Y"; //  Y means in a transaction
       if (!this.state.transaction_mode) {
@@ -451,6 +549,7 @@ class Financing extends Component {
       temp[0] = x_coord;
       temp[1] = actual_value;
       temp[2] = y_coord;
+      temp[3] = this.state.curr_table;
       pending_changes.data.push(temp);
       change_detected = false;
     } else {
@@ -469,6 +568,10 @@ class Financing extends Component {
     }, 200);
   }
 
+  commit_transaction = () => {
+    this.socket.emit('SEND_MESSAGE', pending_changes);
+  }
+
   end_transaction = () => {
     this.setState({
       transaction_mode: false
@@ -476,7 +579,8 @@ class Financing extends Component {
     transaction_button = <Button size='lg' className='display-button' color="primary" onClick={this.start_transaction} >Start Transaction</Button>
     setTimeout(() => {
       user_actions.push(["END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION"]);
-    }, 200);
+      this.commit_transaction();
+    }, 500);
   }
 
   track_action = (e, action_type) => {
@@ -696,7 +800,7 @@ class Financing extends Component {
 
     } else if (tab === "2") {
       this.setState({
-        curr_table: "montly_income"
+        curr_table: "monthly_income"
       })
       col_headers = monthly_income_col_headers;
 
@@ -768,6 +872,12 @@ class Financing extends Component {
   submitName = (e) => {
     e.preventDefault();
     console.log("state name is: ", this.state.name);
+
+    let name_package = {
+      user_name: this.state.name
+    }
+    this.socket.emit('SEND_USERNAME', name_package);
+    console.log("sending user name");
     this.toggleNameModal();
   }
 
@@ -826,6 +936,7 @@ class Financing extends Component {
                   <h1 className="display-3">Hi {this.state.user_name}, welcome to Financing Simulation!</h1>
                   <p className="lead">This is a simple web interface that allows you to upload spreadsheets and retrieve data.</p>
                   <hr className="my-2" />
+                  {this.state.user_text_block}
                   <p className="lead">
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     {transaction_button}
@@ -836,6 +947,7 @@ class Financing extends Component {
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     <Button size='lg' className='display-button' color="info" onClick={this.toggleInstructionModal} >Instruction</Button>
                   </p>
+                  {this.state.edit_message}
 
                   <Modal size='lg' isOpen={this.state.isInstructionOpen} >
                     <ModalBody>
