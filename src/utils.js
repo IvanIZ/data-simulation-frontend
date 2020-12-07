@@ -3,7 +3,7 @@ class Utils {
         console.log("simulation type is: ", simulation_type);
         this.fill_col_headers(col_headers, simulation_type);
         let simulation = "";
-        if (simulation_type === "attendance" || simulation_type === "grade_book" || simulation_type === "student_status") {
+        if (simulation_type === "attendance" || simulation_type === "grade_book" || simulation_type === "student_status" || simulation_type === "students") {
             simulation = "academic";
         }
         else if (simulation_type === "employee_schedule_v1" || simulation_type === "employee_schedule_v2" || simulation_type === "progress_log") {
@@ -32,6 +32,8 @@ class Utils {
             ATT_NUM = 7;
         } else if (simulation_type === "student_status") {
             ATT_NUM = 6;
+        } else if (simulation_type === "students") {
+            ATT_NUM = 4;
         }
 
         let url = 'https://spreadsheetactions.herokuapp.com' +  '/' + simulation + '/' + simulation_type + '/fetch-fifty-rows/' + index
@@ -150,6 +152,11 @@ class Utils {
                             if (j === 3) {temp[j] = data[i]['num_abs']}
                             if (j === 4) {temp[j] = data[i]['dis_action']}
                             if (j === 5) {temp[j] = data[i]['status']}
+                        } else if (simulation_type === "students") { // students
+                            if (j === 0) {temp[j] = data[i]['ID']}
+                            if (j === 1) {temp[j] = data[i]['name']}
+                            if (j === 2) {temp[j] = data[i]['team']}
+                            if (j === 3) {temp[j] = data[i]['email']}
                         }
                     }
 
@@ -440,6 +447,13 @@ class Utils {
             col_head.push("Absent");
             col_head.push("Disciplinary Action");
             col_head.push("Status");
+        }
+
+        if (simulation_type === "students") {
+            col_head.push("ID");
+            col_head.push("Name");
+            col_head.push("Team");
+            col_head.push("Email");
         }
     }
 
