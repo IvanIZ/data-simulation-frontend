@@ -229,6 +229,10 @@ class Academic extends Component {
             greadebook_display[i][j] = value;
         } else if (table === "student_status") {
             student_status_display[i][j] = value;
+        } else if (table === "students") {
+          students_display[i][j] = value;
+        } else if (table === "team_grades") {
+          team_grades_display[i][j] = value;
         }
       }
   };
@@ -990,8 +994,6 @@ class Academic extends Component {
           student_status_display = [student_status_col_headers].concat(student_status_display);
           students_display = [student_col_headers].concat(students_display);
           team_grades_display = [team_grades_col_headers].concat(team_grades_display);
-          console.log(students_display);
-          // this.toggleInstructionModal();
           this.setState({
             isInstructionOpen: false
           })
@@ -1005,17 +1007,21 @@ class Academic extends Component {
 
   reload_tables = () => {
     table_loaded = true;
-    utils.load_simulation_v3(1, "attendance", attendance_display, buffer_copy, attendance_col_headers);
-    utils.load_simulation_v3(1, "grade_book", greadebook_display, buffer_copy, grade_book_col_headers);
-    utils.load_simulation_v3(1, "student_status", student_status_display, buffer_copy, student_status_col_headers);
+    utils.load_simulation_v2(1, "attendance", attendance_display, buffer_copy, attendance_col_headers);
+    utils.load_simulation_v2(1, "grade_book", greadebook_display, buffer_copy, grade_book_col_headers);
+    utils.load_simulation_v2(1, "student_status", student_status_display, buffer_copy, student_status_col_headers);
+    utils.load_simulation_v2(1, "students", students_display, buffer_copy, student_col_headers);
+      utils.load_simulation_v2(1, "team_grades", team_grades_display, buffer_copy, team_grades_col_headers);
     setTimeout(() => {
         attendance_display = [attendance_col_headers].concat(attendance_display);
         greadebook_display = [grade_book_col_headers].concat(greadebook_display);
         student_status_display = [student_status_col_headers].concat(student_status_display);
+        students_display = [student_col_headers].concat(students_display);
+        team_grades_display = [team_grades_col_headers].concat(team_grades_display);
         this.setState({
           attendance_table: attendance_display
         })
-    }, 500);
+    }, 2000);
     col_headers = attendance_col_headers;
   }
 

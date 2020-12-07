@@ -8,7 +8,7 @@ class Utils {
         }
         else if (simulation_type === "employee_schedule_v1" || simulation_type === "employee_schedule_v2" || simulation_type === "progress_log") {
             simulation = "management";
-        } else if (simulation_type === "check_book" || simulation_type === "monthly_expense" || simulation_type === "monthly_income") {
+        } else if (simulation_type === "check_book" || simulation_type === "monthly_expense" || simulation_type === "monthly_income" || simulation_type === "check_book2" || simulation_type === "check_book3") {
             simulation = "financing";
         }
 
@@ -18,10 +18,10 @@ class Utils {
         } else if (simulation_type === "grade_book") {
             ATT_NUM = 17;
         }
-        else if (simulation_type === "check_book") {
-            ATT_NUM = 7;
+        else if (simulation_type === "check_book" || simulation_type === "check_book2" || simulation_type === "check_book3") {
+            ATT_NUM = 6;
         } else if (simulation_type === "monthly_expense") {
-            ATT_NUM = 14;
+            ATT_NUM = 13;
         } else if (simulation_type === "monthly_income") {
             ATT_NUM = 14;
         } else if (simulation_type === "employee_schedule_v1") {
@@ -82,17 +82,15 @@ class Utils {
                             if (j === 14) {temp[j] = data[i]['Exam2']}
                             if (j === 15) {temp[j] = data[i]['Final']}
                             if (j === 16) {temp[j] = data[i]['Overall']}
-                        } else if (simulation_type === "check_book") {    // check book
+                        } else if (simulation_type === "check_book" || simulation_type === "check_book2" || simulation_type === "check_book3") {    // check book 1, 2, 3
                             if (j === 0) {temp[j] = data[i]['id']}
-                            if (j === 1) {temp[j] = data[i]['number']}
-                            if (j === 2) {temp[j] = data[i]['date']}
-                            if (j === 3) {temp[j] = data[i]['transaction']}
-                            if (j === 4) {temp[j] = data[i]['withdraw']}
-                            if (j === 5) {temp[j] = data[i]['deposit']}
-                            if (j === 6) {temp[j] = data[i]['balance']}
+                            if (j === 1) {temp[j] = data[i]['date']}
+                            if (j === 2) {temp[j] = data[i]['transaction']}
+                            if (j === 3) {temp[j] = data[i]['withdraw']}
+                            if (j === 4) {temp[j] = data[i]['deposit']}
+                            if (j === 5) {temp[j] = data[i]['balance']}
                         } else if (simulation_type === "monthly_expense") { // monthly expense
-                            if (j === 0) {temp[j] = data[i]['id']}
-                            if (j === 1) {temp[j] = data[i]['expenses']}
+                            if (j === 1) {temp[j] = data[i]['category']}
                             if (j === 2) {temp[j] = data[i]['Jan']}
                             if (j === 3) {temp[j] = data[i]['Feb']}
                             if (j === 4) {temp[j] = data[i]['Mar']}
@@ -381,7 +379,7 @@ class Utils {
             col_head.push("Final");
             col_head.push("Overall");
         }
-        if (simulation_type === "check_book") {  // check book
+        if (simulation_type === "check_book" || simulation_type === "check_book2" || simulation_type === "check_book3") {  // check book
             col_head.push("ID");
             col_head.push("Date");
             col_head.push("Transaction");
