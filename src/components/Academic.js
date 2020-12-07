@@ -184,24 +184,27 @@ class Academic extends Component {
       this.setState({
         history: data.history
       })
-      change_current_user(data.current_users);
+      change_current_user(data);
     }
 
     const change_current_user = data => {
-      this.setState({
-        users: data
-      });
-      let new_user_text = "Currently Online: ";
-      for (var i = 0; i < this.state.users.length; i++) {
-        if (i == this.state.users.length - 1) {
-          new_user_text += this.state.users[i]
-        } else {
-          new_user_text += this.state.users[i] + ", "
+      if (data.simulation === "academic") {
+      
+        this.setState({
+          users: data.current_users
+        });
+        let new_user_text = "Currently Online: ";
+        for (var i = 0; i < this.state.users.length; i++) {
+          if (i == this.state.users.length - 1) {
+            new_user_text += this.state.users[i]
+          } else {
+            new_user_text += this.state.users[i] + ", "
+          }
         }
+        this.setState({
+          user_text_block: new_user_text
+        });
       }
-      this.setState({
-        user_text_block: new_user_text
-      });
     }
 
     const update_edit_message = message_package => {
@@ -1055,7 +1058,8 @@ class Academic extends Component {
     console.log("state name is: ", this.state.name);
 
     let name_package = {
-      user_name: this.state.name
+      user_name: this.state.name,
+      simulation: "academic"
     }
     this.socket.emit('SEND_USERNAME', name_package);
     console.log("sending user name");

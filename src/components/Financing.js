@@ -184,24 +184,26 @@ class Financing extends Component {
       this.setState({
         history: data.history
       })
-      change_current_user(data.current_users);
+      change_current_user(data);
     }
 
     const change_current_user = data => {
-      this.setState({
-        users: data
-      });
-      let new_user_text = "Currently Online: ";
-      for (var i = 0; i < this.state.users.length; i++) {
-        if (i == this.state.users.length - 1) {
-          new_user_text += this.state.users[i]
-        } else {
-          new_user_text += this.state.users[i] + ", "
+      if (data.simulation === "financing") {
+        this.setState({
+          users: data.current_users
+        });
+        let new_user_text = "Currently Online: ";
+        for (var i = 0; i < this.state.users.length; i++) {
+          if (i == this.state.users.length - 1) {
+            new_user_text += this.state.users[i]
+          } else {
+            new_user_text += this.state.users[i] + ", "
+          }
         }
+        this.setState({
+          user_text_block: new_user_text
+        });
       }
-      this.setState({
-        user_text_block: new_user_text
-      });
     }
 
     const update_edit_message = message_package => {
@@ -956,7 +958,8 @@ class Financing extends Component {
     console.log("state name is: ", this.state.name);
 
     let name_package = {
-      user_name: this.state.name
+      user_name: this.state.name,
+      simulation: "financing"
     }
     this.socket.emit('SEND_USERNAME', name_package);
     console.log("sending user name");
@@ -1014,7 +1017,7 @@ class Financing extends Component {
           </Jumbotron >
           <div>
             <Jumbotron >
-                  <h1 className="display-3">Hi {this.state.user_name}, welcome to Financing Simulation!</h1>
+                  <h1 className="display-3">Hi {this.state.name}, welcome to Financing Simulation!</h1>
                   <p className="lead">This is a simple web interface that allows you to upload spreadsheets and retrieve data.</p>
                   <hr className="my-2" />
                   {this.state.user_text_block}
@@ -1098,7 +1101,7 @@ class Financing extends Component {
                   </Modal>
 
                   <Modal size='lg' isOpen={this.state.isRestartModalOpen} toggle={this.toggleRestartModal}>
-                    <ModalHeader toggle={this.toggleRestartModal}>Please Enter Your Full Name</ModalHeader>
+                    <ModalHeader toggle={this.toggleRestartModal}>Restart Confirmation</ModalHeader>
                     <ModalBody>
                       Your simulation has been restarted. All the changes that haven't been committed yet are clearned. 
                     </ModalBody>
