@@ -3,7 +3,7 @@ class Utils {
         console.log("simulation type is: ", simulation_type);
         this.fill_col_headers(col_headers, simulation_type);
         let simulation = "";
-        if (simulation_type === "attendance" || simulation_type === "grade_book" || simulation_type === "student_status" || simulation_type === "students") {
+        if (simulation_type === "attendance" || simulation_type === "grade_book" || simulation_type === "student_status" || simulation_type === "students" || simulation_type === "team_grades") {
             simulation = "academic";
         }
         else if (simulation_type === "employee_schedule_v1" || simulation_type === "employee_schedule_v2" || simulation_type === "progress_log") {
@@ -34,6 +34,8 @@ class Utils {
             ATT_NUM = 6;
         } else if (simulation_type === "students") {
             ATT_NUM = 4;
+        } else if (simulation_type === "team_grades") {
+            ATT_NUM = 7;
         }
 
         let url = 'https://spreadsheetactions.herokuapp.com' +  '/' + simulation + '/' + simulation_type + '/fetch-fifty-rows/' + index
@@ -157,6 +159,14 @@ class Utils {
                             if (j === 1) {temp[j] = data[i]['name']}
                             if (j === 2) {temp[j] = data[i]['team']}
                             if (j === 3) {temp[j] = data[i]['email']}
+                        } else if (simulation_type === "team_grades") { // team grades
+                            if (j === 0) {temp[j] = data[i]['team']}
+                            if (j === 1) {temp[j] = data[i]['proposal']}
+                            if (j === 2) {temp[j] = data[i]['progress']}
+                            if (j === 3) {temp[j] = data[i]['presentation']}
+                            if (j === 4) {temp[j] = data[i]['codes']}
+                            if (j === 5) {temp[j] = data[i]['report']}
+                            if (j === 6) {temp[j] = data[i]['overall']}
                         }
                     }
 
@@ -440,7 +450,7 @@ class Utils {
             col_head.push("Status");
         }
 
-        if (simulation_type === "student_status") {
+        if (simulation_type === "student_status") { // student status
             col_head.push("ID");
             col_head.push("Name");
             col_head.push("Tardy");
@@ -449,11 +459,21 @@ class Utils {
             col_head.push("Status");
         }
 
-        if (simulation_type === "students") {
+        if (simulation_type === "students") { // students
             col_head.push("ID");
             col_head.push("Name");
             col_head.push("Team");
             col_head.push("Email");
+        }
+
+        if (simulation_type === "team_grades") {
+            col_head.push("Team");
+            col_head.push("Proposal");
+            col_head.push("progress");
+            col_head.push("Presentation");
+            col_head.push("Codes");
+            col_head.push("Report");
+            col_head.push("Overall");
         }
     }
 
