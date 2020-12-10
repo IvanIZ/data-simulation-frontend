@@ -54,15 +54,15 @@ class Utils {
                     var temp = []
                     for (var j = 0; j < ATT_NUM; j++) {
                         if (simulation_type === "attendance") {  // attendance
-                            if (j === 0) {
-                                temp[j] = data[i]['ID'];
-                            }
-                            else if (j === 1) {
-                                temp[j] = data[i]['name'];
-                            }
-                            else {
-                                temp[j] = "";
-                            }
+                            if (j === 0) {temp[j] = data[i]['ID'];}
+                            if (j === 1) { temp[j] = data[i]['name'];}
+                            if (j === 2) {temp[j] = data[i]['Monday']}
+                            if (j === 3) {temp[j] = data[i]['Tuesday']}
+                            if (j === 4) {temp[j] = data[i]['Wednesday']}
+                            if (j === 5) {temp[j] = data[i]['Thursday']}
+                            if (j === 6) {temp[j] = data[i]['Friday']}
+                            if (j === 7) {temp[j] = data[i]['Saturday']}
+                            if (j === 8) {temp[j] = data[i]['Sunday']}
                         }
                         if (simulation_type === "grade_book") {      // grade book 
                             if (j === 0) {temp[j] = data[i]['ID']}
@@ -83,26 +83,26 @@ class Utils {
                             if (j === 15) {temp[j] = data[i]['Final']}
                             if (j === 16) {temp[j] = data[i]['Overall']}
                         } else if (simulation_type === "check_book" || simulation_type === "check_book2" || simulation_type === "check_book3") {    // check book 1, 2, 3
-                            if (j === 0) {temp[j] = data[i]['id']}
+                            if (j === 0) {temp[j] = data[i]['number']}
                             if (j === 1) {temp[j] = data[i]['date']}
                             if (j === 2) {temp[j] = data[i]['transaction']}
                             if (j === 3) {temp[j] = data[i]['withdraw']}
                             if (j === 4) {temp[j] = data[i]['deposit']}
                             if (j === 5) {temp[j] = data[i]['balance']}
                         } else if (simulation_type === "monthly_expense") { // monthly expense
-                            if (j === 1) {temp[j] = data[i]['category']}
-                            if (j === 2) {temp[j] = data[i]['Jan']}
-                            if (j === 3) {temp[j] = data[i]['Feb']}
-                            if (j === 4) {temp[j] = data[i]['Mar']}
-                            if (j === 5) {temp[j] = data[i]['Apr']}
-                            if (j === 6) {temp[j] = data[i]['May']}
-                            if (j === 7) {temp[j] = data[i]['Jun']}
-                            if (j === 8) {temp[j] = data[i]['Jul']}
-                            if (j === 9) {temp[j] = data[i]['Aug']}
-                            if (j === 10) {temp[j] = data[i]['Sep']}
-                            if (j === 11) {temp[j] = data[i]['Oct']}
-                            if (j === 12) {temp[j] = data[i]['Nov']}
-                            if (j === 13) {temp[j] = data[i]['Dec']}
+                            if (j === 0) {temp[j] = data[i]['category']}
+                            if (j === 1) {temp[j] = data[i]['Jan']}
+                            if (j === 2) {temp[j] = data[i]['Feb']}
+                            if (j === 3) {temp[j] = data[i]['Mar']}
+                            if (j === 4) {temp[j] = data[i]['Apr']}
+                            if (j === 5) {temp[j] = data[i]['May']}
+                            if (j === 6) {temp[j] = data[i]['Jun']}
+                            if (j === 7) {temp[j] = data[i]['Jul']}
+                            if (j === 8) {temp[j] = data[i]['Aug']}
+                            if (j === 9) {temp[j] = data[i]['Sep']}
+                            if (j === 10) {temp[j] = data[i]['Oct']}
+                            if (j === 11) {temp[j] = data[i]['Nov']}
+                            if (j === 12) {temp[j] = data[i]['Dec']}
                         } else if (simulation_type === "monthly_income") { // monthly income
                             if (j === 0) {temp[j] = data[i]['id']}
                             if (j === 1) {temp[j] = data[i]['income_type']}
@@ -148,9 +148,9 @@ class Utils {
                         } else if (simulation_type === "student_status") {  // student status
                             if (j === 0) {temp[j] = data[i]['ID']}
                             if (j === 1) {temp[j] = data[i]['name']}
-                            if (j === 2) {temp[j] = data[i]['num_tardy']}
-                            if (j === 3) {temp[j] = data[i]['num_abs']}
-                            if (j === 4) {temp[j] = data[i]['dis_action']}
+                            if (j === 2) {temp[j] = data[i]['tardy']}
+                            if (j === 3) {temp[j] = data[i]['absent']}
+                            if (j === 4) {temp[j] = data[i]['disciplinary action']}
                             if (j === 5) {temp[j] = data[i]['status']}
                         } else if (simulation_type === "students") { // students
                             if (j === 0) {temp[j] = data[i]['ID']}
@@ -380,7 +380,7 @@ class Utils {
             col_head.push("Overall");
         }
         if (simulation_type === "check_book" || simulation_type === "check_book2" || simulation_type === "check_book3") {  // check book
-            col_head.push("ID");
+            col_head.push("Number");
             col_head.push("Date");
             col_head.push("Transaction");
             col_head.push("Withdraw");

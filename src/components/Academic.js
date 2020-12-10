@@ -219,10 +219,10 @@ class Academic extends Component {
       let change_table = data.data
       for (var x = 0; x < change_table.length; x++) {
         // Extract data
-        let j = change_table[x][0] - 1   // 0 --> y_coord
-        let value = change_table[x][1] // 1 --> actual value
-        let i = change_table[x][2] - 1 // 2 --> x_coord
-        let table = change_table[x][3]; // table corresponds to this change  
+        let table = change_table[x][0]; // table corresponds to this change  
+        let j = change_table[x][1] - 1   // 0 --> y_coord
+        let value = change_table[x][2] // 1 --> actual value
+        let i = change_table[x][3] - 1 // 2 --> x_coord
 
         // reflect each update to its corresponding table
         if (table === "attendance" && typeof attendance_display !== "undefined") {
@@ -699,10 +699,24 @@ class Academic extends Component {
       let y_coord = parseInt(chn_copy[0][0]) + 1;
       let x_coord = parseInt(chn_copy[0][1]) + 1;
       let actual_value = chn_copy[0][3];
-      temp[0] = x_coord;
-      temp[1] = actual_value;
-      temp[2] = y_coord;
-      temp[3] = this.state.curr_table;
+      temp[0] = this.state.curr_table;
+      temp[1] = x_coord;
+      temp[2] = actual_value;
+      temp[3] = y_coord;
+      
+      // find the correct attribute
+      if (this.state.curr_table === "attendance") {
+        temp[4] = attendance_col_headers[x_coord - 1];
+      } else if (this.state.curr_table === "cs225_gradebook") {
+        temp[4] = grade_book_col_headers[x_coord - 1];
+      } else if (this.state.curr_table === "student_status") {
+        temp[4] = student_status_col_headers[x_coord - 1];
+      } else if (this.state.curr_table === "students") {
+        temp[4] = student_col_headers[x_coord - 1];
+      } else if (this.state.curr_table === "team_grades") {
+        temp[4] = team_grades_col_headers[x_coord - 1];
+      }
+
       pending_changes.data.push(temp);
       change_detected = false;
     } else {
@@ -726,9 +740,19 @@ class Academic extends Component {
       transaction_mode: false
     });
     transaction_button = <Button size='lg' className='display-button' color="primary" onClick={this.start_transaction} >Start Transaction</Button>
+
+    // send updates to socket
     setTimeout(() => {
       user_actions.push(["END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION"]);
       this.commit_transaction();
+
+      // send updates to the database
+      const requestOptions = {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({pending_changes})
+      };
+      fetch('https://spreadsheetactions.herokuapp.com/academic/update', requestOptions,  {mode: 'no-cors'})
     }, 500);
   }
 
@@ -1116,7 +1140,7 @@ class Academic extends Component {
         <script src="node_modules/handsontable/dist/handsontable.full.min.js"></script>
         <link href="node_modules/handsontable/dist/handsontable.full.min.css" rel="stylesheet" media="screen"></link>
          <Jumbotron className='logo-jumbo'>
-          <ButtonDropdown isOpen={this.state.collapsed} toggle={this.toggleNavbar} style={{float: 'left'}} className="up-margin-one">
+          {/* <ButtonDropdown isOpen={this.state.collapsed} toggle={this.toggleNavbar} style={{float: 'left'}} className="up-margin-one">
                 <DropdownToggle color="#61dafb"  caret style={{float: 'right'}}>
                   Change Simulation
                 </DropdownToggle>
@@ -1125,7 +1149,7 @@ class Academic extends Component {
                   <DropdownItem divider />
                   <DropdownItem name="management" id="management" onClick={e => this.select_simulation(e)}>Management Simulation</DropdownItem>
                 </DropdownMenu>
-            </ButtonDropdown>
+            </ButtonDropdown> */}
           </Jumbotron >
           <div>
             <Jumbotron >
