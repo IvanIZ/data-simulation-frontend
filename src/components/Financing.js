@@ -32,6 +32,7 @@ let monthly_income_display = [];
 let check_book_display = [];
 let check_book2_display = [];
 let check_book3_display = [];
+let allowance_display = [];
 let table_loaded = false;
 
 let simulation_type = "";
@@ -48,6 +49,7 @@ let monthly_income_col_headers = [];
 let check_book_col_headers = [];
 let check_book2_col_headers = [];
 let check_book3_col_headers = [];
+let allowance_col_headers = [];
 
 let user_actions = []
 let recorded_time = 0;
@@ -99,6 +101,7 @@ class Financing extends Component {
     this.hotTableComponent1 = React.createRef();
     this.hotTableComponent2 = React.createRef();
     this.hotTableComponent3 = React.createRef();
+    this.hotTableComponent4 = React.createRef();
     this.state = {
       collapsed: false,
       items: Array.from({ length: 0 }),
@@ -234,6 +237,8 @@ class Financing extends Component {
             check_book2_display[i][j] = value;
         } else if (table === "check_book3") {
             check_book3_display[i][j] = value;
+        } else if (table === "allowance") {
+            allowance_display[i][j] = value;
         }
       }
   };
@@ -518,6 +523,72 @@ class Financing extends Component {
       layout_changes.layout_changed = true;
       layout_changes.changes.push(["remove_c", null, index]);
     });
+
+    // FIFTH REF ====================================================================================================
+    this.hotTableComponent4.current.hotInstance.addHook('afterChange', function(chn, src) {
+      if (src === 'edit') {
+        console.log(chn);
+        
+        // call check_cell_change if original and new data differ
+        if (chn[0][2] !== chn[0][3] && chn[0][3].charAt(0) !== "*" && chn[0][3] !== "-----") {
+          console.log("differ!");
+          chn_copy = chn;
+          change_detected = true;
+
+          // remove currently editing state
+          current_i = -1;
+          current_j = -1;
+          currently_editing = false;
+        }
+      }
+    });
+
+    this.hotTableComponent4.current.hotInstance.addHook('afterBeginEditing', function(row, col) {
+
+      // record the currently editing location and state. 
+      current_i = row;
+      current_j = col;
+    });
+
+    this.hotTableComponent4.current.hotInstance.addHook('afterSelection', function(row, column, row2, column2, preventScrolling, selectionLayerLevel) {
+
+      // record the currently editing location and state. 
+      select_i = row;
+      select_j = column;
+      currently_editing = true;
+    });
+
+    this.hotTableComponent4.current.hotInstance.addHook('afterCreateRow', function(index, amount, source) {
+      console.log("insert index is: ", index);
+      if (source === "ContextMenu.rowBelow") {
+        layout_changes.layout_changed = true;
+        layout_changes.changes.push(["insert_r", "below", index]);
+      } else {
+        layout_changes.layout_changed = true;
+        layout_changes.changes.push(["insert_r", "above", index]);
+      }
+    });
+
+    this.hotTableComponent4.current.hotInstance.addHook('afterCreateCol', function(index, amount, source) {
+      console.log("insert index is: ", index);
+      if (source === "ContextMenu.columnRight") {
+        layout_changes.layout_changed = true;
+        layout_changes.changes.push(["insert_c", "right", index]);
+      } else {
+        layout_changes.layout_changed = true;
+        layout_changes.changes.push(["insert_c", "left", index]);
+      }
+    });
+
+    this.hotTableComponent4.current.hotInstance.addHook('afterRemoveRow', function(index, amount, physicalRows, source) {
+      layout_changes.layout_changed = true;
+      layout_changes.changes.push(["remove_r", null, index]);
+    });
+
+    this.hotTableComponent4.current.hotInstance.addHook('afterRemoveCol', function(index, amount, physicalRows, source) {
+      layout_changes.layout_changed = true;
+      layout_changes.changes.push(["remove_c", null, index]);
+    });
   }
 
   componentWillUnmount() {
@@ -637,6 +708,8 @@ class Financing extends Component {
         temp[4] = check_book2_col_headers[x_coord - 1];
       } else if (this.state.curr_table === "check_book3") {
         temp[4] = check_book3_col_headers[x_coord - 1];
+      } else if (this.state.curr_table === "allowance") {
+        temp[4] = allowance_col_headers[x_coord - 1];
       }
 
       pending_changes.data.push(temp);
@@ -912,7 +985,12 @@ class Financing extends Component {
         curr_table: "check_book3"
       })
       col_headers = check_book3_col_headers;
-    }
+    } else if (tab === "5") {
+      this.setState({
+        curr_table: "allowance"
+      })
+      col_headers = allowance_col_headers;
+    } 
   }
 
   load_tables = (e) => {
@@ -925,11 +1003,13 @@ class Financing extends Component {
       utils.load_simulation_v2(1, "check_book", check_book_display, buffer_copy, check_book_col_headers);
       utils.load_simulation_v2(1, "check_book2", check_book2_display, buffer_copy, check_book2_col_headers);
       utils.load_simulation_v2(1, "check_book3", check_book3_display, buffer_copy, check_book3_col_headers);
+      utils.load_simulation_v2(1, "allowance", allowance_display, buffer_copy, allowance_col_headers);
       setTimeout(() => {
           monthly_expense_display = [monthly_expense_col_headers].concat(monthly_expense_display);
           check_book_display = [check_book_col_headers].concat(check_book_display);
           check_book2_display = [check_book2_col_headers].concat(check_book2_display);
           check_book3_display = [check_book3_col_headers].concat(check_book3_display);
+          allowance_display = [allowance_col_headers].concat(allowance_display);
           this.toggleInstructionModal();
       }, 2000);
       col_headers = monthly_expense_col_headers;
@@ -942,11 +1022,13 @@ class Financing extends Component {
     utils.load_simulation_v2(1, "check_book", check_book_display, buffer_copy, check_book_col_headers);
     utils.load_simulation_v2(1, "check_book2", check_book_display, buffer_copy, check_book_col_headers);
     utils.load_simulation_v2(1, "check_book3", check_book_display, buffer_copy, check_book_col_headers);
+    utils.load_simulation_v2(1, "allowance", allowance_display, buffer_copy, allowance_col_headers);
     setTimeout(() => {
         monthly_expense_display = [monthly_expense_col_headers].concat(monthly_expense_display);
         check_book_display = [check_book_col_headers].concat(check_book_display);
         check_book2_display = [check_book2_col_headers].concat(check_book2_display);
         check_book3_display = [check_book3_col_headers].concat(check_book3_display);
+        allowance_display = [allowance_col_headers].concat(allowance_display);
     }, 500);
     col_headers = monthly_expense_col_headers;
   }
@@ -1160,21 +1242,28 @@ class Financing extends Component {
                 <NavLink
                     className={classnames({ active: this.state.activeTab === '2' })}
                     onClick={() => { this.toggle('2'); }}>
-                    Transaction Log 1
+                    Parent Check Book
                 </NavLink>
             </NavItem>
             <NavItem>
                 <NavLink
                     className={classnames({ active: this.state.activeTab === '3' })}
                     onClick={() => { this.toggle('3'); }}>
-                    Transaction Log 2
+                    Child 1 Check Book
                 </NavLink>
             </NavItem>
             <NavItem>
                 <NavLink
                     className={classnames({ active: this.state.activeTab === '4' })}
                     onClick={() => { this.toggle('4'); }}>
-                    Transaction Log 3
+                    Child 2 Check Book
+                </NavLink>
+            </NavItem>
+            <NavItem>
+                <NavLink
+                    className={classnames({ active: this.state.activeTab === '5' })}
+                    onClick={() => { this.toggle('5'); }}>
+                    Allowance
                 </NavLink>
             </NavItem>
         </Nav>
@@ -1200,7 +1289,7 @@ class Financing extends Component {
             </TabPane>
             <TabPane tabId="2">
                 <h4>
-                    Transaction Log 1
+                    Parent Check Book
                 </h4> 
                 <div id = "display_portion" onScrollCapture={e => this.track_action(e, "scroll")}  tabIndex="2">
                     <HotTable className="handsontable" id ="display_table" data={check_book_display} ref={this.hotTableComponent1} id={this.id}
@@ -1219,7 +1308,7 @@ class Financing extends Component {
             </TabPane>
             <TabPane tabId="3">
                 <h4>
-                    Transaction Log 2
+                    Child 1 Check Book
                 </h4> 
                 <div id = "display_portion" onScrollCapture={e => this.track_action(e, "scroll")}  tabIndex="3">
                     <HotTable className="handsontable" id ="display_table" data={check_book2_display} ref={this.hotTableComponent2} id={this.id}
@@ -1238,10 +1327,29 @@ class Financing extends Component {
             </TabPane>
             <TabPane tabId="4">
                 <h4>
-                    Transaction Log 3
+                    Child 2 Check Book
                 </h4> 
                 <div id = "display_portion" onScrollCapture={e => this.track_action(e, "scroll")}  tabIndex="4">
                     <HotTable className="handsontable" id ="display_table" data={check_book3_display} ref={this.hotTableComponent3} id={this.id}
+                        colHeaders={true} 
+                        rowHeaders={true} 
+                        width="100%" 
+                        height="300"
+                        colWidths="100%"
+                        rowHeights="25"
+                        contextMenu={true}
+                        formulas={true}
+                        readOnly={!this.state.transaction_mode}
+                    />
+                </div>
+                    
+            </TabPane>
+            <TabPane tabId="5">
+                <h4>
+                    Allowance
+                </h4> 
+                <div id = "display_portion" onScrollCapture={e => this.track_action(e, "scroll")}  tabIndex="5">
+                    <HotTable className="handsontable" id ="display_table" data={allowance_display} ref={this.hotTableComponent4} id={this.id}
                         colHeaders={true} 
                         rowHeaders={true} 
                         width="100%" 

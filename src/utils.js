@@ -3,12 +3,12 @@ class Utils {
         console.log("simulation type is: ", simulation_type);
         this.fill_col_headers(col_headers, simulation_type);
         let simulation = "";
-        if (simulation_type === "attendance" || simulation_type === "grade_book" || simulation_type === "student_status" || simulation_type === "students" || simulation_type === "team_grades") {
+        if (simulation_type === "attendance" || simulation_type === "grade_book" || simulation_type === "student_status" || simulation_type === "students" || simulation_type === "team_grades" || simulation_type === "team_comments") {
             simulation = "academic";
         }
         else if (simulation_type === "employee_schedule_v1" || simulation_type === "employee_schedule_v2" || simulation_type === "progress_log") {
             simulation = "management";
-        } else if (simulation_type === "check_book" || simulation_type === "monthly_expense" || simulation_type === "monthly_income" || simulation_type === "check_book2" || simulation_type === "check_book3") {
+        } else if (simulation_type === "check_book" || simulation_type === "monthly_expense" || simulation_type === "monthly_income" || simulation_type === "check_book2" || simulation_type === "check_book3" || simulation_type === "allowance") {
             simulation = "financing";
         }
 
@@ -36,6 +36,10 @@ class Utils {
             ATT_NUM = 4;
         } else if (simulation_type === "team_grades") {
             ATT_NUM = 7;
+        } else if (simulation_type === "team_comments") {
+            ATT_NUM = 6;
+        } else if (simulation_type === "allowance") {
+            ATT_NUM = 2;
         }
 
         let url = 'https://spreadsheetactions.herokuapp.com' +  '/' + simulation + '/' + simulation_type + '/fetch-fifty-rows/' + index
@@ -165,6 +169,16 @@ class Utils {
                             if (j === 4) {temp[j] = data[i]['codes']}
                             if (j === 5) {temp[j] = data[i]['report']}
                             if (j === 6) {temp[j] = data[i]['overall']}
+                        } else if (simulation_type === "team_comments") { //team comments
+                            if (j === 0) {temp[j] = data[i]['id']}
+                            if (j === 1) {temp[j] = data[i]['name']}
+                            if (j === 2) {temp[j] = data[i]['Participation']}
+                            if (j === 3) {temp[j] = data[i]['Contribution']}
+                            if (j === 4) {temp[j] = data[i]['Communication']}
+                            if (j === 5) {temp[j] = data[i]['comments']}
+                        } else if (simulation_type === "allowance") {
+                            if (j === 0) {temp[j] = data[i]['child']}
+                            if (j === 1) {temp[j] = data[i]['allowance']}
                         }
                     }
 
@@ -464,7 +478,7 @@ class Utils {
             col_head.push("Email");
         }
 
-        if (simulation_type === "team_grades") {
+        if (simulation_type === "team_grades") { // team grades
             col_head.push("Team");
             col_head.push("Proposal");
             col_head.push("progress");
@@ -472,6 +486,20 @@ class Utils {
             col_head.push("Codes");
             col_head.push("Report");
             col_head.push("Overall");
+        }
+
+        if (simulation_type === "team_comments") {  // team comments
+            col_head.push("ID");
+            col_head.push("Name");
+            col_head.push("Participation");
+            col_head.push("Contribution");
+            col_head.push("Communication");
+            col_head.push("Comments");
+        }   
+
+        if (simulation_type === "allowance") {  // allowance
+            col_head.push("Child");
+            col_head.push("Allowance");
         }
     }
 

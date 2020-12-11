@@ -16,7 +16,7 @@ import {
   NavItem,
   NavLink,
   Button,
-  Table, Modal, ModalHeader, ModalFooter, ModalBody, Form, FormGroup, Label, Input, ListGroup, Card, CardTitle, CardText, TabContent, TabPane, ButtonDropdown, Dropdown, DropdownToggle, DropdownMenu, DropdownItem
+  Table, Modal, ModalHeader, ModalFooter, ModalBody, Form, FormGroup, Label, Input, ListGroup, Card, CardTitle, CardText, TabContent, TabPane, ButtonDropdown, Dropdown, DropdownToggle, DropdownMenu, DropdownItem, UncontrolledTooltip
 } from 'reactstrap';
 import {
   BrowserRouter as Router,
@@ -37,6 +37,7 @@ let greadebook_display = [];
 let student_status_display = [];
 let students_display = [];
 let team_grades_display = [];
+let team_comments_display = [];
 
 // A JSON object that keeps track of previous layout changes
 let layout_changes = {
@@ -50,6 +51,7 @@ let grade_book_col_headers = [];
 let student_status_col_headers = [];
 let student_col_headers = [];
 let team_grades_col_headers = [];
+let team_comments_col_headers = [];
 let table_loaded = false;
 
 let user_actions = []
@@ -95,6 +97,7 @@ class Academic extends Component {
     this.hotTableComponent2 = React.createRef();
     this.hotTableComponent3 = React.createRef();
     this.hotTableComponent4 = React.createRef();
+    this.hotTableComponent5 = React.createRef();
     this.state = {
       collapsed: false,
       items: Array.from({ length: 0 }),
@@ -236,6 +239,8 @@ class Academic extends Component {
           students_display[i][j] = value;
         } else if (table === "team_grades") {
           team_grades_display[i][j] = value;
+        } else if (table === "team_comments") {
+          team_comments_display[i][j] = value;
         }
       }
   };
@@ -254,6 +259,210 @@ class Academic extends Component {
 
   // fetch 50 rows of data into the buffer
   async componentDidMount() {
+
+    this.socket.on('RECEIVE_FREED_CELLS', function(free_cells_package) {
+      update_freed_cells(free_cells_package);
+    });
+
+    // function that updates all the cells that do not have any lock anymore. 
+    const update_freed_cells = free_cells_package => {
+      console.log("received freecell called with: ", free_cells_package);
+
+      let free_cells = free_cells_package.free_cells;
+      let disconnect = free_cells_package.disconnect;
+
+      console.log("the free cells are ", free_cells);
+
+      for (var i = 0; i < free_cells.length; i++) {
+        let location = free_cells[i];
+        if (location[0] === "attendance") {
+          console.log("enter here with location: ", location);
+          let cell_data = this.hotTableComponent.current.hotInstance.getDataAtCell(location[1], location[2]);
+
+          // update read-only cells
+          if (cell_data[0] == "*") {
+            let new_data = cell_data.substring(1);
+            this.hotTableComponent.current.hotInstance.setDataAtCell(location[1], location[2], new_data);
+
+          } else if (cell_data == "-----" && disconnect == true) {
+            data_display[location[0], location[1]] = this.state.data_original[location[1], location[2]];
+          }
+
+        } else if (location[0] === "cs225_gradebook") {
+          let cell_data = this.hotTableComponent1.current.hotInstance.getDataAtCell(location[1], location[2]);
+
+          // update read-only cells
+          if (cell_data[0] == "*") {
+            let new_data = cell_data.substring(1);
+            this.hotTableComponent1.current.hotInstance.setDataAtCell(location[1], location[2], new_data);
+
+          } else if (cell_data == "-----" && disconnect == true) {
+            data_display[location[0], location[1]] = this.state.data_original[location[1], location[2]];
+          }
+
+        } else if (location[0] === "student_status") {
+          let cell_data = this.hotTableComponent2.current.hotInstance.getDataAtCell(location[1], location[2]);
+
+          // update read-only cells
+          if (cell_data[0] == "*") {
+            let new_data = cell_data.substring(1);
+            this.hotTableComponent2.current.hotInstance.setDataAtCell(location[1], location[2], new_data);
+
+          } else if (cell_data == "-----" && disconnect == true) {
+            data_display[location[0], location[1]] = this.state.data_original[location[1], location[2]];
+          }
+
+        } else if (location[0] === "students") {
+          let cell_data = this.hotTableComponent3.current.hotInstance.getDataAtCell(location[1], location[2]);
+
+          // update read-only cells
+          if (cell_data[0] == "*") {
+            let new_data = cell_data.substring(1);
+            this.hotTableComponent3.current.hotInstance.setDataAtCell(location[1], location[2], new_data);
+
+          } else if (cell_data == "-----" && disconnect == true) {
+            data_display[location[0], location[1]] = this.state.data_original[location[1], location[2]];
+          }
+
+        } else if (location[0] === "team_grades") {
+          let cell_data = this.hotTableComponent4.current.hotInstance.getDataAtCell(location[1], location[2]);
+
+          // update read-only cells
+          if (cell_data[0] == "*") {
+            let new_data = cell_data.substring(1);
+            this.hotTableComponent4.current.hotInstance.setDataAtCell(location[1], location[2], new_data);
+
+          } else if (cell_data == "-----" && disconnect == true) {
+            data_display[location[0], location[1]] = this.state.data_original[location[1], location[2]];
+          }
+
+        }
+      }
+      cell_read_only();
+    }
+
+    this.socket.on('REQUEST_SHARED_ACCEPT', function(shared_lock_accept) {
+      let table = shared_lock_accept.table;
+      let row = shared_lock_accept.row;
+      let col = shared_lock_accept.col;
+
+      display_shared_lock(table, row, col);
+
+    });
+
+    // the function that turns a cell into read-only due to a read lock
+    const cell_read_only = () => {
+      
+        this.hotTableComponent.current.hotInstance.updateSettings({
+            cells: function(row, col, prop){
+            var cellProperties = {};
+              if(attendance_display[row][col] !== null && attendance_display[row][col].length !== 0 &&  (attendance_display[row][col] == "-----" || attendance_display[row][col].charAt(0) === "*")){
+                cellProperties.readOnly = 'true'
+              }
+            return cellProperties
+          }
+        });
+
+      
+        this.hotTableComponent1.current.hotInstance.updateSettings({
+            cells: function(row, col, prop){
+            var cellProperties = {};
+              if(greadebook_display[row][col] !== null && greadebook_display[row][col].length !== 0 &&  (greadebook_display[row][col] == "-----" || greadebook_display[row][col].charAt(0) === "*")){
+                cellProperties.readOnly = 'true'
+              }
+            return cellProperties
+          }
+        });
+
+      
+        this.hotTableComponent2.current.hotInstance.updateSettings({
+            cells: function(row, col, prop){
+            var cellProperties = {};
+              if(student_status_display[row][col] !== null && student_status_display[row][col].length !== 0 &&  (student_status_display[row][col] == "-----" || student_status_display[row][col].charAt(0) === "*")){
+                cellProperties.readOnly = 'true'
+              }
+            return cellProperties
+          }
+        });
+
+      
+        this.hotTableComponent3.current.hotInstance.updateSettings({
+            cells: function(row, col, prop){
+            var cellProperties = {};
+              if(students_display[row][col] !== null && students_display[row][col].length !== 0 &&  (students_display[row][col] == "-----" || students_display[row][col].charAt(0) === "*")){
+                cellProperties.readOnly = 'true'
+              }
+            return cellProperties
+          }
+        });
+
+      
+        this.hotTableComponent4.current.hotInstance.updateSettings({
+            cells: function(row, col, prop){
+            var cellProperties = {};
+              if(team_grades_display[row][col] !== null && team_grades_display[row][col].length !== 0 &&  (team_grades_display[row][col] == "-----" || team_grades_display[row][col].charAt(0) === "*")){
+                cellProperties.readOnly = 'true'
+              }
+            return cellProperties
+          }
+        }); 
+    }
+
+    // Function that accept the position of a new shared lock and display it
+    const display_shared_lock = (table, row, col) => {
+
+      if (table === "attendance") {
+        let cell_data = this.hotTableComponent.current.hotInstance.getDataAtCell(row, col);
+        // if there is a shared lock displaying already, do nothing
+        if (cell_data.charAt(0) === "*") {
+          return;
+        } else {
+          let new_data = "*" + cell_data
+          this.hotTableComponent.current.hotInstance.setDataAtCell(row, col, new_data);
+        }
+
+      } else if (table === "cs225_gradebook") {
+        let cell_data = this.hotTableComponent1.current.hotInstance.getDataAtCell(row, col);
+        // if there is a shared lock displaying already, do nothing
+        if (cell_data.charAt(0) === "*") {
+          return;
+        } else {
+          let new_data = "*" + cell_data
+          this.hotTableComponent1.current.hotInstance.setDataAtCell(row, col, new_data);
+        }
+
+      } else if (table === "student_status") {
+        let cell_data = this.hotTableComponent2.current.hotInstance.getDataAtCell(row, col);
+        // if there is a shared lock displaying already, do nothing
+        if (cell_data.charAt(0) === "*") {
+          return;
+        } else {
+          let new_data = "*" + cell_data
+          this.hotTableComponent2.current.hotInstance.setDataAtCell(row, col, new_data);
+        }
+
+      } else if (table === "students") {
+        let cell_data = this.hotTableComponent3.current.hotInstance.getDataAtCell(row, col);
+        // if there is a shared lock displaying already, do nothing
+        if (cell_data.charAt(0) === "*") {
+          return;
+        } else {
+          let new_data = "*" + cell_data
+          this.hotTableComponent3.current.hotInstance.setDataAtCell(row, col, new_data);
+        }
+
+      } else if (table === "team_grades") {
+        let cell_data = this.hotTableComponent4.current.hotInstance.getDataAtCell(row, col);
+        // if there is a shared lock displaying already, do nothing
+        if (cell_data.charAt(0) === "*") {
+          return;
+        } else {
+          let new_data = "*" + cell_data
+          this.hotTableComponent4.current.hotInstance.setDataAtCell(row, col, new_data);
+        }
+      }
+      cell_read_only();
+    }
 
     recorded_time = Date.now() / 1000;
 
@@ -590,6 +799,72 @@ class Academic extends Component {
       layout_changes.layout_changed = true;
       layout_changes.changes.push(["remove_c", null, index]);
     });
+
+    // SIXTH COMPONENT REF ========================================================================================
+    this.hotTableComponent5.current.hotInstance.addHook('afterChange', function(chn, src) {
+      if (src === 'edit') {
+        console.log(chn);
+        
+        // call check_cell_change if original and new data differ
+        if (chn[0][2] !== chn[0][3] && chn[0][3].charAt(0) !== "*" && chn[0][3] !== "-----") {
+          console.log("differ!");
+          chn_copy = chn;
+          change_detected = true;
+
+          // remove currently editing state
+          current_i = -1;
+          current_j = -1;
+          currently_editing = false;
+        }
+      }
+    });
+
+    this.hotTableComponent5.current.hotInstance.addHook('afterBeginEditing', function(row, col) {
+
+      // record the currently editing location and state. 
+      current_i = row;
+      current_j = col;
+    });
+
+    this.hotTableComponent5.current.hotInstance.addHook('afterSelection', function(row, column, row2, column2, preventScrolling, selectionLayerLevel) {
+
+      // record the currently editing location and state. 
+      select_i = row;
+      select_j = column;
+      currently_editing = true;
+    });
+
+    this.hotTableComponent5.current.hotInstance.addHook('afterCreateRow', function(index, amount, source) {
+      console.log("insert index is: ", index);
+      if (source === "ContextMenu.rowBelow") {
+        layout_changes.layout_changed = true;
+        layout_changes.changes.push(["insert_r", "below", index]);
+      } else {
+        layout_changes.layout_changed = true;
+        layout_changes.changes.push(["insert_r", "above", index]);
+      }
+    });
+
+    this.hotTableComponent5.current.hotInstance.addHook('afterCreateCol', function(index, amount, source) {
+      console.log("insert index is: ", index);
+      if (source === "ContextMenu.columnRight") {
+        layout_changes.layout_changed = true;
+        layout_changes.changes.push(["insert_c", "right", index]);
+      } else {
+        layout_changes.layout_changed = true;
+        layout_changes.changes.push(["insert_c", "left", index]);
+      }
+    });
+
+    this.hotTableComponent5.current.hotInstance.addHook('afterRemoveRow', function(index, amount, physicalRows, source) {
+      layout_changes.layout_changed = true;
+      layout_changes.changes.push(["remove_r", null, index]);
+    });
+
+    this.hotTableComponent5.current.hotInstance.addHook('afterRemoveCol', function(index, amount, physicalRows, source) {
+      layout_changes.layout_changed = true;
+      layout_changes.changes.push(["remove_c", null, index]);
+    });
   }
 
   
@@ -715,6 +990,8 @@ class Academic extends Component {
         temp[4] = student_col_headers[x_coord - 1];
       } else if (this.state.curr_table === "team_grades") {
         temp[4] = team_grades_col_headers[x_coord - 1];
+      } else if (this.state.curr_table === "team_comments") {
+        temp[4] = team_comments_col_headers[x_coord - 1];
       }
 
       pending_changes.data.push(temp);
@@ -740,6 +1017,9 @@ class Academic extends Component {
       transaction_mode: false
     });
     transaction_button = <Button size='lg' className='display-button' color="primary" onClick={this.start_transaction} >Start Transaction</Button>
+
+    // signal backend to release locks
+    this.socket.emit('FINISH_TRANSACTION');
 
     // send updates to socket
     setTimeout(() => {
@@ -1001,6 +1281,12 @@ class Academic extends Component {
         curr_table: "team_grades"
       });
       col_headers = team_grades_col_headers;
+
+    } else if (tab === '6') {
+      this.setState({
+        curr_table: "team_comments"
+      });
+      col_headers = team_comments_col_headers;
     }
   }
 
@@ -1015,12 +1301,14 @@ class Academic extends Component {
       utils.load_simulation_v2(1, "student_status", student_status_display, buffer_copy, student_status_col_headers);
       utils.load_simulation_v2(1, "students", students_display, buffer_copy, student_col_headers);
       utils.load_simulation_v2(1, "team_grades", team_grades_display, buffer_copy, team_grades_col_headers);
+      utils.load_simulation_v2(1, "team_comments", team_comments_display, buffer_copy, team_comments_col_headers);
       setTimeout(() => {
           attendance_display = [attendance_col_headers].concat(attendance_display);
           greadebook_display = [grade_book_col_headers].concat(greadebook_display);
           student_status_display = [student_status_col_headers].concat(student_status_display);
           students_display = [student_col_headers].concat(students_display);
           team_grades_display = [team_grades_col_headers].concat(team_grades_display);
+          team_comments_display = [team_comments_col_headers].concat(team_comments_display);
           this.setState({
             isInstructionOpen: false
           })
@@ -1038,13 +1326,15 @@ class Academic extends Component {
     utils.load_simulation_v2(1, "grade_book", greadebook_display, buffer_copy, grade_book_col_headers);
     utils.load_simulation_v2(1, "student_status", student_status_display, buffer_copy, student_status_col_headers);
     utils.load_simulation_v2(1, "students", students_display, buffer_copy, student_col_headers);
-      utils.load_simulation_v2(1, "team_grades", team_grades_display, buffer_copy, team_grades_col_headers);
+    utils.load_simulation_v2(1, "team_grades", team_grades_display, buffer_copy, team_grades_col_headers);
+    utils.load_simulation_v2(1, "team_comments", team_comments_display, buffer_copy, team_comments_col_headers);
     setTimeout(() => {
         attendance_display = [attendance_col_headers].concat(attendance_display);
         greadebook_display = [grade_book_col_headers].concat(greadebook_display);
         student_status_display = [student_status_col_headers].concat(student_status_display);
         students_display = [student_col_headers].concat(students_display);
         team_grades_display = [team_grades_col_headers].concat(team_grades_display);
+        team_comments_display = [team_comments_col_headers].concat(team_comments_display);
         this.setState({
           attendance_table: attendance_display
         })
@@ -1130,6 +1420,15 @@ class Academic extends Component {
     this.toggleCompleteConfirmModal();
   }
 
+  request_read_lock = () => {
+    let shared_lock_request = {
+      row: select_i,
+      col: select_j, 
+      table: this.state.curr_table
+    }
+    this.socket.emit('REQUEST_SHARED_LOCK', shared_lock_request);
+  }
+
   render() {
     if (this.state.redirect) {
       return <Redirect to={this.state.redirect_link} />
@@ -1167,7 +1466,7 @@ class Academic extends Component {
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     <Button size='lg' className='display-button' color="info" onClick={this.toggleInstructionModal} >Instruction</Button>
                     {/* &nbsp;&nbsp;&nbsp;&nbsp;
-                    <Button size='lg' className='display-button' color="info" onClick={this.toggleShowHistory} >Edit History</Button> */}
+                    <Button size='lg' className='display-button' color="info" onClick={this.request_read_lock} >Read Lock</Button> */}
                   </p>
                   {this.state.edit_message}
 
@@ -1321,6 +1620,13 @@ class Academic extends Component {
                     Team Grades
                 </NavLink>
             </NavItem>
+            <NavItem>
+                <NavLink
+                    className={classnames({ active: this.state.activeTab === '6' })}
+                    onClick={() => { this.toggle('6'); }}>
+                    Team Comments
+                </NavLink>
+            </NavItem>
         </Nav>
         <TabContent activeTab={this.state.activeTab}>
             <TabPane tabId="1">
@@ -1405,6 +1711,25 @@ class Academic extends Component {
                 </h4> 
                 <div id = "display_portion" onScrollCapture={e => this.track_action(e, "scroll")}  tabIndex="5">
                     <HotTable className="handsontable" id ="display_table" data={team_grades_display} ref={this.hotTableComponent4} id={this.id}
+                        colHeaders={true} 
+                        rowHeaders={true} 
+                        width="100%" 
+                        height="300"
+                        colWidths="100%"
+                        rowHeights="25"
+                        contextMenu={true}
+                        formulas={true}
+                        readOnly={!this.state.transaction_mode}
+                    />
+                </div>
+                    
+            </TabPane>
+            <TabPane tabId="6">
+                <h4>
+                    Team Comments
+                </h4> 
+                <div id = "display_portion" onScrollCapture={e => this.track_action(e, "scroll")}  tabIndex="6">
+                    <HotTable className="handsontable" id ="display_table" data={team_comments_display} ref={this.hotTableComponent5} id={this.id}
                         colHeaders={true} 
                         rowHeaders={true} 
                         width="100%" 
