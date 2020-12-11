@@ -145,7 +145,8 @@ class Academic extends Component {
 
       isCompleteConfirmationModalOpen: false, 
 
-      attendance_table: [[]]
+      attendance_table: [[]], 
+      refresh: false
     }
 
     // Socket io stuff =========================================================================================
@@ -1429,6 +1430,16 @@ class Academic extends Component {
     this.socket.emit('REQUEST_SHARED_LOCK', shared_lock_request);
   }
 
+  refresh = () => {
+    this.setState({
+      refresh: !this.state.refresh
+    });
+  }
+
+  test = () => {
+    attendance_display[0][0] = "Haha"
+  }
+
   render() {
     if (this.state.redirect) {
       return <Redirect to={this.state.redirect_link} />
@@ -1467,6 +1478,10 @@ class Academic extends Component {
                     <Button size='lg' className='display-button' color="info" onClick={this.toggleInstructionModal} >Instruction</Button>
                     {/* &nbsp;&nbsp;&nbsp;&nbsp;
                     <Button size='lg' className='display-button' color="info" onClick={this.request_read_lock} >Read Lock</Button> */}
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <Button size='lg' className='display-button' color="info" onClick={this.refresh} >Refresh</Button>
+                    {/* &nbsp;&nbsp;&nbsp;&nbsp;
+                    <Button size='lg' className='display-button' color="info" onClick={this.test} >TEST</Button> */}
                   </p>
                   {this.state.edit_message}
 
@@ -1476,6 +1491,9 @@ class Academic extends Component {
                         <h2>Welcome</h2>
                         Welcome to Academic Simulation! This instruction can be accessed at any time by clicking the "Instruction" button on this webpage. 
                         Under this simulation, there are three tables: "Attendance" table, "Gradebook" table, and a "Student Status" table. This simulation has two parts.  
+                        <br/>
+                        <h5>Note: </h5>
+                        When you first enter this simulation, please check if all tables are loaded. If some tables only have headers loaded but no content, press the refresh button.   
                         <hr className="my-2" />
                         
 

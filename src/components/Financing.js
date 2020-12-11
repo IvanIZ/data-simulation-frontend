@@ -1099,6 +1099,12 @@ class Financing extends Component {
     this.toggleCompleteConfirmModal();
   }
 
+  refresh = () => {
+    this.setState({
+      refresh: !this.state.refresh
+    });
+  }
+
   render() {
     if (this.state.redirect) {
       return <Redirect to={this.state.redirect_link} />
@@ -1134,6 +1140,8 @@ class Financing extends Component {
                     <Button size='lg' className='display-button' color="info" onClick={this.restart} >Restart Simulation</Button>
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     <Button size='lg' className='display-button' color="info" onClick={this.toggleInstructionModal} >Instruction</Button>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <Button size='lg' className='display-button' color="info" onClick={this.refresh} >Refresh</Button>
                   </p>
                   {this.state.edit_message}
 
@@ -1143,6 +1151,9 @@ class Financing extends Component {
                         Welcome to Academic Simulation! This instruction can be accessed at any time by clicking the "Instruction" button on this webpage. 
                         Under this simulation, there are three tables: a "Monthly Expenses" table, a "Monthly Income" table, and a "Transaction Log" table. This simulation has only one part 
                         but there are two tasks to complete within this part. 
+                        <br/>
+                        <h5>Note: </h5>
+                        When you first enter this simulation, please check if all tables are loaded. If some tables only have headers loaded but no content, press the refresh button.   
                         <hr className="my-2" />
                         
                         <p className="margin-one">

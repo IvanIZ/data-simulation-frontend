@@ -183,7 +183,8 @@ class Utils {
                     }
 
                     buffer[i] = temp;
-                    buffer_copy[i] = temp.slice()
+                    // buffer_copy[i] = temp.slice()
+                    buffer.push(temp.slice());
                     // return buffer;
                 }
 
