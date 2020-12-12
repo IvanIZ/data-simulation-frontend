@@ -264,16 +264,24 @@ class Financing extends Component {
       if (src === 'edit') {
         console.log(chn);
         
-        // call check_cell_change if original and new data differ
-        if (chn[0][2] !== chn[0][3] && chn[0][3].charAt(0) !== "*" && chn[0][3] !== "-----") {
-          console.log("differ!");
-          chn_copy = chn;
-          change_detected = true;
+        try {
+          // call check_cell_change if original and new data differ
+          if (chn[0][2] !== chn[0][3] && (chn[0][3] === null || (chn[0][3].charAt(0) !== "*" && chn[0][3] !== "-----") )) {
+            console.log("differ!");
+            chn_copy = chn;
+            if (chn_copy[0][3] === null) {
+              chn_copy[0][3] = "";
+            }
+            change_detected = true;
 
-          // remove currently editing state
-          current_i = -1;
-          current_j = -1;
-          currently_editing = false;
+            // remove currently editing state
+            current_i = -1;
+            current_j = -1;
+            currently_editing = false;
+          }
+        }
+        catch (err) {
+          console.log(err);
         }
       }
     });
@@ -330,16 +338,24 @@ class Financing extends Component {
       if (src === 'edit') {
         console.log(chn);
         
-        // call check_cell_change if original and new data differ
-        if (chn[0][2] !== chn[0][3] && chn[0][3].charAt(0) !== "*" && chn[0][3] !== "-----") {
-          console.log("differ!");
-          chn_copy = chn;
-          change_detected = true;
+        try {
+          // call check_cell_change if original and new data differ
+          if (chn[0][2] !== chn[0][3] && (chn[0][3] === null || (chn[0][3].charAt(0) !== "*" && chn[0][3] !== "-----") )) {
+            console.log("differ!");
+            chn_copy = chn;
+            if (chn_copy[0][3] === null) {
+              chn_copy[0][3] = "";
+            }
+            change_detected = true;
 
-          // remove currently editing state
-          current_i = -1;
-          current_j = -1;
-          currently_editing = false;
+            // remove currently editing state
+            current_i = -1;
+            current_j = -1;
+            currently_editing = false;
+          }
+        }
+        catch (err) {
+          console.log(err);
         }
       }
     });
@@ -396,16 +412,24 @@ class Financing extends Component {
       if (src === 'edit') {
         console.log(chn);
         
-        // call check_cell_change if original and new data differ
-        if (chn[0][2] !== chn[0][3] && chn[0][3].charAt(0) !== "*" && chn[0][3] !== "-----") {
-          console.log("differ!");
-          chn_copy = chn;
-          change_detected = true;
+        try {
+          // call check_cell_change if original and new data differ
+          if (chn[0][2] !== chn[0][3] && (chn[0][3] === null || (chn[0][3].charAt(0) !== "*" && chn[0][3] !== "-----") )) {
+            console.log("differ!");
+            chn_copy = chn;
+            if (chn_copy[0][3] === null) {
+              chn_copy[0][3] = "";
+            }
+            change_detected = true;
 
-          // remove currently editing state
-          current_i = -1;
-          current_j = -1;
-          currently_editing = false;
+            // remove currently editing state
+            current_i = -1;
+            current_j = -1;
+            currently_editing = false;
+          }
+        }
+        catch (err) {
+          console.log(err);
         }
       }
     });
@@ -462,16 +486,24 @@ class Financing extends Component {
       if (src === 'edit') {
         console.log(chn);
         
-        // call check_cell_change if original and new data differ
-        if (chn[0][2] !== chn[0][3] && chn[0][3].charAt(0) !== "*" && chn[0][3] !== "-----") {
-          console.log("differ!");
-          chn_copy = chn;
-          change_detected = true;
+        try {
+          // call check_cell_change if original and new data differ
+          if (chn[0][2] !== chn[0][3] && (chn[0][3] === null || (chn[0][3].charAt(0) !== "*" && chn[0][3] !== "-----") )) {
+            console.log("differ!");
+            chn_copy = chn;
+            if (chn_copy[0][3] === null) {
+              chn_copy[0][3] = "";
+            }
+            change_detected = true;
 
-          // remove currently editing state
-          current_i = -1;
-          current_j = -1;
-          currently_editing = false;
+            // remove currently editing state
+            current_i = -1;
+            current_j = -1;
+            currently_editing = false;
+          }
+        }
+        catch (err) {
+          console.log(err);
         }
       }
     });
@@ -528,16 +560,24 @@ class Financing extends Component {
       if (src === 'edit') {
         console.log(chn);
         
-        // call check_cell_change if original and new data differ
-        if (chn[0][2] !== chn[0][3] && chn[0][3].charAt(0) !== "*" && chn[0][3] !== "-----") {
-          console.log("differ!");
-          chn_copy = chn;
-          change_detected = true;
+        try {
+          // call check_cell_change if original and new data differ
+          if (chn[0][2] !== chn[0][3] && (chn[0][3] === null || (chn[0][3].charAt(0) !== "*" && chn[0][3] !== "-----") )) {
+            console.log("differ!");
+            chn_copy = chn;
+            if (chn_copy[0][3] === null) {
+              chn_copy[0][3] = "";
+            }
+            change_detected = true;
 
-          // remove currently editing state
-          current_i = -1;
-          current_j = -1;
-          currently_editing = false;
+            // remove currently editing state
+            current_i = -1;
+            current_j = -1;
+            currently_editing = false;
+          }
+        }
+        catch (err) {
+          console.log(err);
         }
       }
     });
@@ -1057,6 +1097,11 @@ class Financing extends Component {
   }
 
   refresh = () => {
+    console.log(monthly_expense_display);
+    console.log(check_book_display);
+    console.log(check_book2_display);
+    console.log(check_book3_display);
+    console.log(allowance_display);
     this.setState({
       refresh: !this.state.refresh
     });

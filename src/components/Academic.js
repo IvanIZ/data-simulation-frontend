@@ -29,6 +29,7 @@ import { CSVLink } from "react-csv";
 import classnames from 'classnames';
 import io from "socket.io-client";
 
+
 const Utils = require('../utils');
 let utils = new Utils();
 
@@ -475,17 +476,25 @@ class Academic extends Component {
     this.hotTableComponent.current.hotInstance.addHook('afterChange', function(chn, src) {
       if (src === 'edit') {
         console.log(chn);
-        
-        // call check_cell_change if original and new data differ
-        if (chn[0][2] !== chn[0][3] && chn[0][3].charAt(0) !== "*" && chn[0][3] !== "-----") {
-          console.log("differ!");
-          chn_copy = chn;
-          change_detected = true;
 
-          // remove currently editing state
-          current_i = -1;
-          current_j = -1;
-          currently_editing = false;
+        try {
+          // call check_cell_change if original and new data differ
+          if (chn[0][2] !== chn[0][3] && (chn[0][3] === null || (chn[0][3].charAt(0) !== "*" && chn[0][3] !== "-----") )) {
+            console.log("differ!");
+            chn_copy = chn;
+            if (chn_copy[0][3] === null) {
+              chn_copy[0][3] = "";
+            }
+            change_detected = true;
+
+            // remove currently editing state
+            current_i = -1;
+            current_j = -1;
+            currently_editing = false;
+          }
+        }
+        catch (err) {
+          console.log(err);
         }
       }
     });
@@ -542,16 +551,24 @@ class Academic extends Component {
       if (src === 'edit') {
         console.log(chn);
         
-        // call check_cell_change if original and new data differ
-        if (chn[0][2] !== chn[0][3] && chn[0][3].charAt(0) !== "*" && chn[0][3] !== "-----") {
-          console.log("differ!");
-          chn_copy = chn;
-          change_detected = true;
+        try {
+          // call check_cell_change if original and new data differ
+          if (chn[0][2] !== chn[0][3] && (chn[0][3] === null || (chn[0][3].charAt(0) !== "*" && chn[0][3] !== "-----") )) {
+            console.log("differ!");
+            chn_copy = chn;
+            if (chn_copy[0][3] === null) {
+              chn_copy[0][3] = "";
+            }
+            change_detected = true;
 
-          // remove currently editing state
-          current_i = -1;
-          current_j = -1;
-          currently_editing = false;
+            // remove currently editing state
+            current_i = -1;
+            current_j = -1;
+            currently_editing = false;
+          }
+        }
+        catch (err) {
+          console.log(err)
         }
       }
     });
@@ -607,17 +624,25 @@ class Academic extends Component {
     this.hotTableComponent2.current.hotInstance.addHook('afterChange', function(chn, src) {
       if (src === 'edit') {
         console.log(chn);
-        
-        // call check_cell_change if original and new data differ
-        if (chn[0][2] !== chn[0][3] && chn[0][3].charAt(0) !== "*" && chn[0][3] !== "-----") {
-          console.log("differ!");
-          chn_copy = chn;
-          change_detected = true;
 
-          // remove currently editing state
-          current_i = -1;
-          current_j = -1;
-          currently_editing = false;
+        try {
+          // call check_cell_change if original and new data differ
+          if (chn[0][2] !== chn[0][3] && (chn[0][3] === null || (chn[0][3].charAt(0) !== "*" && chn[0][3] !== "-----") )) {
+            console.log("differ!");
+            chn_copy = chn;
+            if (chn_copy[0][3] === null) {
+              chn_copy[0][3] = "";
+            }
+            change_detected = true;
+
+            // remove currently editing state
+            current_i = -1;
+            current_j = -1;
+            currently_editing = false;
+          }
+        }
+        catch (err) {
+          console.log(err);
         }
       }
     });
@@ -674,16 +699,24 @@ class Academic extends Component {
       if (src === 'edit') {
         console.log(chn);
         
-        // call check_cell_change if original and new data differ
-        if (chn[0][2] !== chn[0][3] && chn[0][3].charAt(0) !== "*" && chn[0][3] !== "-----") {
-          console.log("differ!");
-          chn_copy = chn;
-          change_detected = true;
+        try {
+          // call check_cell_change if original and new data differ
+          if (chn[0][2] !== chn[0][3] && (chn[0][3] === null || (chn[0][3].charAt(0) !== "*" && chn[0][3] !== "-----") )) {
+            console.log("differ!");
+            chn_copy = chn;
+            if (chn_copy[0][3] === null) {
+              chn_copy[0][3] = "";
+            }
+            change_detected = true;
 
-          // remove currently editing state
-          current_i = -1;
-          current_j = -1;
-          currently_editing = false;
+            // remove currently editing state
+            current_i = -1;
+            current_j = -1;
+            currently_editing = false;
+          }
+        }
+        catch (err) {
+          console.log(err);
         }
       }
     });
@@ -740,16 +773,24 @@ class Academic extends Component {
       if (src === 'edit') {
         console.log(chn);
         
-        // call check_cell_change if original and new data differ
-        if (chn[0][2] !== chn[0][3] && chn[0][3].charAt(0) !== "*" && chn[0][3] !== "-----") {
-          console.log("differ!");
-          chn_copy = chn;
-          change_detected = true;
+        try {
+          // call check_cell_change if original and new data differ
+          if (chn[0][2] !== chn[0][3] && (chn[0][3] === null || (chn[0][3].charAt(0) !== "*" && chn[0][3] !== "-----") )) {
+            console.log("differ!");
+            chn_copy = chn;
+            if (chn_copy[0][3] === null) {
+              chn_copy[0][3] = "";
+            }
+            change_detected = true;
 
-          // remove currently editing state
-          current_i = -1;
-          current_j = -1;
-          currently_editing = false;
+            // remove currently editing state
+            current_i = -1;
+            current_j = -1;
+            currently_editing = false;
+          }
+        }
+        catch (err) {
+          console.log(err);
         }
       }
     });
@@ -806,17 +847,26 @@ class Academic extends Component {
       if (src === 'edit') {
         console.log(chn);
         
-        // call check_cell_change if original and new data differ
-        if (chn[0][2] !== chn[0][3] && chn[0][3].charAt(0) !== "*" && chn[0][3] !== "-----") {
-          console.log("differ!");
-          chn_copy = chn;
-          change_detected = true;
+        try {
+          // call check_cell_change if original and new data differ
+          if (chn[0][2] !== chn[0][3] && (chn[0][3] === null || (chn[0][3].charAt(0) !== "*" && chn[0][3] !== "-----") )) {
+            console.log("differ!");
+            chn_copy = chn;
+            if (chn_copy[0][3] === null) {
+              chn_copy[0][3] = "";
+            }
+            change_detected = true;
 
-          // remove currently editing state
-          current_i = -1;
-          current_j = -1;
-          currently_editing = false;
+            // remove currently editing state
+            current_i = -1;
+            current_j = -1;
+            currently_editing = false;
+          }
         }
+        catch (err) {
+          console.log(err);
+        }
+        
       }
     });
 
@@ -867,8 +917,6 @@ class Academic extends Component {
       layout_changes.changes.push(["remove_c", null, index]);
     });
   }
-
-  
 
   componentWillUnmount() {
     this.socket.disconnect();
@@ -1433,6 +1481,12 @@ class Academic extends Component {
   }
 
   refresh = () => {
+    console.log(attendance_display);
+    console.log(greadebook_display);
+    console.log(student_status_display);
+    console.log(students_display);
+    console.log(team_grades_display);
+    console.log(team_comments_display);
     this.setState({
       refresh: !this.state.refresh
     });
@@ -1447,7 +1501,6 @@ class Academic extends Component {
       return <Redirect to={this.state.redirect_link} />
     }
     return (
-
       <div onClick={e => this.track_action(e, "click")} onKeyUp={e => this.track_action(e, "key_press")} className="App">
         <script src="node_modules/handsontable/dist/handsontable.full.min.js"></script>
         <link href="node_modules/handsontable/dist/handsontable.full.min.css" rel="stylesheet" media="screen"></link>
