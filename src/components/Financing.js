@@ -248,7 +248,6 @@ class Financing extends Component {
     this.toggleSelectionPrompt = this.toggleSelectionPrompt.bind()
     this.toggleNavbar = this.toggleNavbar.bind()
     this.toggleInstructionModal = this.toggleInstructionModal.bind();
-    this.toggleRedirectConfirmModal = this.toggleRedirectConfirmModal.bind();
     this.toggleNameModal = this.toggleNameModal.bind();
     this.toggleRestartModal = this.toggleRestartModal.bind();
     this.toggleCompleteConfirmModal = this.toggleCompleteConfirmModal.bind();
@@ -613,12 +612,6 @@ class Financing extends Component {
     })
   }
 
-  toggleRedirectConfirmModal = () => {
-    this.setState({
-      isRedirectConfirmOpen: !this.state.isRedirectConfirmOpen
-    })
-  }
-
   toggleNavbar = () => {
     this.setState({
       collapsed: !this.state.collapsed
@@ -731,7 +724,9 @@ class Financing extends Component {
   }
 
   commit_transaction = () => {
-    this.socket.emit('SEND_MESSAGE', pending_changes);
+    if (pending_changes.data.length !== 0) {
+      this.socket.emit('SEND_MESSAGE', pending_changes);
+    }
   }
 
   end_transaction = () => {
@@ -940,26 +935,6 @@ class Financing extends Component {
     this.toggleCompleteConfirmModal();
   }
 
-  select_simulation = (e) => {
-    // e.preventDefault();
-    if (e.target.name === "academic") {
-      this.setState({
-        redirect_link: '/academic'
-      })
-    }
-    if (e.target.name === "financing") {
-      this.setState({
-        redirect_link: '/financing'
-      })
-    }
-    if (e.target.name === "management") {
-      this.setState({
-        redirect_link: '/management'
-      })
-    }
-    this.toggleRedirectConfirmModal();
-  }
-
   toggle = (tab) => {
     if (this.state.activeTab !== tab) {
         this.setState({ activeTab: tab });
@@ -1033,24 +1008,6 @@ class Financing extends Component {
     col_headers = monthly_expense_col_headers;
   }
 
-  redirect = (e) => {
-    e.preventDefault();
-    this.setState({
-      redirect: true
-    });
-
-    // reset all display
-    monthly_expense_display = [];
-    check_book_display = [];
-    monthly_expense_col_headers = [];
-    monthly_income_col_headers = [];
-    check_book_col_headers = [];
-
-    // clear recorded actions
-    user_actions = [];
-    table_loaded = false;
-  }
-
   onNameSubmit = (e) => {
     this.setState({
         [e.target.name]: e.target.value
@@ -1106,24 +1063,11 @@ class Financing extends Component {
   }
 
   render() {
-    if (this.state.redirect) {
-      return <Redirect to={this.state.redirect_link} />
-    }
     return (
       <div onClick={e => this.track_action(e, "click")} onKeyUp={e => this.track_action(e, "key_press")} className="App">
         <script src="node_modules/handsontable/dist/handsontable.full.min.js"></script>
         <link href="node_modules/handsontable/dist/handsontable.full.min.css" rel="stylesheet" media="screen"></link>
          <Jumbotron className='logo-jumbo'>
-          {/* <ButtonDropdown isOpen={this.state.collapsed} toggle={this.toggleNavbar} style={{float: 'left'}} className="up-margin-one">
-                <DropdownToggle color="#61dafb"  caret style={{float: 'right'}}>
-                  Change Simulation
-                </DropdownToggle>
-                <DropdownMenu>
-                  <DropdownItem name="academic" id="academic" onClick={e => this.select_simulation(e)}>Academic Simulation</DropdownItem>
-                  <DropdownItem divider />
-                  <DropdownItem name="management" id="management" onClick={e => this.select_simulation(e)}>Management Simulation</DropdownItem>
-                </DropdownMenu>
-          </ButtonDropdown> */}
           </Jumbotron >
           <div>
             <Jumbotron >
@@ -1188,17 +1132,6 @@ class Financing extends Component {
                     </ModalBody>
                     <ModalFooter>
                         <Button size='lg' className='display-button' color="info" onClick={this.load_tables}>Got it!</Button>
-                    </ModalFooter>
-                  </Modal>
-
-                  <Modal size='lg' isOpen={this.state.isRedirectConfirmOpen} toggle={this.toggleRedirectConfirmModal}>
-                    <ModalHeader toggle={this.toggleRedirectConfirmModal}>Are you sure you want to leave this page?</ModalHeader>
-                    <ModalBody>
-                      Note that once you leave this simulation page, you will lose all the records and progress on this simulation. 
-                    </ModalBody>
-                    <ModalFooter>
-                    <Button size='lg' className='display-button' color="info" onClick={this.redirect}>Confirm</Button> {' '}
-                    <Button size='lg' className='display-button' color="info" onClick={this.toggleRedirectConfirmModal}>Cancel</Button>
                     </ModalFooter>
                   </Modal>
 

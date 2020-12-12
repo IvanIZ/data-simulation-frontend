@@ -1038,7 +1038,9 @@ class Academic extends Component {
   }
 
   commit_transaction = () => {
-    this.socket.emit('SEND_MESSAGE', pending_changes);
+    if (pending_changes.data.length !== 0) {
+      this.socket.emit('SEND_MESSAGE', pending_changes);
+    }
   }
 
   track_action = (e, action_type) => {
