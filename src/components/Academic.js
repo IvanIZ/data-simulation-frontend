@@ -25,7 +25,6 @@ import {
   useHistory,
   Redirect
 } from "react-router-dom";
-import { CSVLink } from "react-csv";
 import classnames from 'classnames';
 import io from "socket.io-client";
 
@@ -98,7 +97,6 @@ class Academic extends Component {
     this.hotTableComponent2 = React.createRef();
     this.hotTableComponent3 = React.createRef();
     this.hotTableComponent4 = React.createRef();
-    this.hotTableComponent5 = React.createRef();
     this.state = {
       collapsed: false,
       items: Array.from({ length: 0 }),
@@ -152,8 +150,8 @@ class Academic extends Component {
 
     // Socket io stuff =========================================================================================
 
-    this.socket = io('https://spreadsheetactions.herokuapp.com/');
-    // this.socket = io('localhost:3001');
+    // this.socket = io('https://spreadsheetactions.herokuapp.com/');
+    this.socket = io('localhost:3001');
 
     this.socket.on('RECEIVE_ID', function(id){
       change_id(id);
@@ -302,7 +300,7 @@ class Academic extends Component {
             data_display[location[0], location[1]] = this.state.data_original[location[1], location[2]];
           }
 
-        } else if (location[0] === "student_status") {
+        } else if (location[0] === "students") {
           let cell_data = this.hotTableComponent2.current.hotInstance.getDataAtCell(location[1], location[2]);
 
           // update read-only cells
@@ -314,7 +312,7 @@ class Academic extends Component {
             data_display[location[0], location[1]] = this.state.data_original[location[1], location[2]];
           }
 
-        } else if (location[0] === "students") {
+        } else if (location[0] === "team_grades") {
           let cell_data = this.hotTableComponent3.current.hotInstance.getDataAtCell(location[1], location[2]);
 
           // update read-only cells
@@ -326,7 +324,7 @@ class Academic extends Component {
             data_display[location[0], location[1]] = this.state.data_original[location[1], location[2]];
           }
 
-        } else if (location[0] === "team_grades") {
+        } else if (location[0] === "team_comments") {
           let cell_data = this.hotTableComponent4.current.hotInstance.getDataAtCell(location[1], location[2]);
 
           // update read-only cells
@@ -376,19 +374,7 @@ class Academic extends Component {
           }
         });
 
-      
         this.hotTableComponent2.current.hotInstance.updateSettings({
-            cells: function(row, col, prop){
-            var cellProperties = {};
-              if(student_status_display[row][col] !== null && student_status_display[row][col].length !== 0 &&  (student_status_display[row][col] == "-----" || student_status_display[row][col].charAt(0) === "*")){
-                cellProperties.readOnly = 'true'
-              }
-            return cellProperties
-          }
-        });
-
-      
-        this.hotTableComponent3.current.hotInstance.updateSettings({
             cells: function(row, col, prop){
             var cellProperties = {};
               if(students_display[row][col] !== null && students_display[row][col].length !== 0 &&  (students_display[row][col] == "-----" || students_display[row][col].charAt(0) === "*")){
@@ -399,7 +385,7 @@ class Academic extends Component {
         });
 
       
-        this.hotTableComponent4.current.hotInstance.updateSettings({
+        this.hotTableComponent3.current.hotInstance.updateSettings({
             cells: function(row, col, prop){
             var cellProperties = {};
               if(team_grades_display[row][col] !== null && team_grades_display[row][col].length !== 0 &&  (team_grades_display[row][col] == "-----" || team_grades_display[row][col].charAt(0) === "*")){
@@ -408,6 +394,16 @@ class Academic extends Component {
             return cellProperties
           }
         }); 
+
+        this.hotTableComponent4.current.hotInstance.updateSettings({
+          cells: function(row, col, prop){
+          var cellProperties = {};
+            if(team_comments_display[row][col] !== null && team_comments_display[row][col].length !== 0 &&  (team_comments_display[row][col] == "-----" || team_comments_display[row][col].charAt(0) === "*")){
+              cellProperties.readOnly = 'true'
+            }
+          return cellProperties
+        }
+      }); 
     }
 
     // Function that accept the position of a new shared lock and display it
@@ -433,7 +429,7 @@ class Academic extends Component {
           this.hotTableComponent1.current.hotInstance.setDataAtCell(row, col, new_data);
         }
 
-      } else if (table === "student_status") {
+      } else if (table === "students") {
         let cell_data = this.hotTableComponent2.current.hotInstance.getDataAtCell(row, col);
         // if there is a shared lock displaying already, do nothing
         if (cell_data.charAt(0) === "*") {
@@ -443,7 +439,7 @@ class Academic extends Component {
           this.hotTableComponent2.current.hotInstance.setDataAtCell(row, col, new_data);
         }
 
-      } else if (table === "students") {
+      } else if (table === "team_grades") {
         let cell_data = this.hotTableComponent3.current.hotInstance.getDataAtCell(row, col);
         // if there is a shared lock displaying already, do nothing
         if (cell_data.charAt(0) === "*") {
@@ -452,8 +448,7 @@ class Academic extends Component {
           let new_data = "*" + cell_data
           this.hotTableComponent3.current.hotInstance.setDataAtCell(row, col, new_data);
         }
-
-      } else if (table === "team_grades") {
+      } else if (table === "team_comments") {
         let cell_data = this.hotTableComponent4.current.hotInstance.getDataAtCell(row, col);
         // if there is a shared lock displaying already, do nothing
         if (cell_data.charAt(0) === "*") {
@@ -838,81 +833,6 @@ class Academic extends Component {
     });
 
     this.hotTableComponent4.current.hotInstance.addHook('afterRemoveCol', function(index, amount, physicalRows, source) {
-      layout_changes.layout_changed = true;
-      layout_changes.changes.push(["remove_c", null, index]);
-    });
-
-    // SIXTH COMPONENT REF ========================================================================================
-    this.hotTableComponent5.current.hotInstance.addHook('afterChange', function(chn, src) {
-      if (src === 'edit') {
-        console.log(chn);
-        
-        try {
-          // call check_cell_change if original and new data differ
-          if (chn[0][2] !== chn[0][3] && (chn[0][3] === null || (chn[0][3].charAt(0) !== "*" && chn[0][3] !== "-----") )) {
-            console.log("differ!");
-            chn_copy = chn;
-            if (chn_copy[0][3] === null) {
-              chn_copy[0][3] = "";
-            }
-            change_detected = true;
-
-            // remove currently editing state
-            current_i = -1;
-            current_j = -1;
-            currently_editing = false;
-          }
-        }
-        catch (err) {
-          console.log(err);
-        }
-        
-      }
-    });
-
-    this.hotTableComponent5.current.hotInstance.addHook('afterBeginEditing', function(row, col) {
-
-      // record the currently editing location and state. 
-      current_i = row;
-      current_j = col;
-    });
-
-    this.hotTableComponent5.current.hotInstance.addHook('afterSelection', function(row, column, row2, column2, preventScrolling, selectionLayerLevel) {
-
-      // record the currently editing location and state. 
-      select_i = row;
-      select_j = column;
-      currently_editing = true;
-    });
-
-    this.hotTableComponent5.current.hotInstance.addHook('afterCreateRow', function(index, amount, source) {
-      console.log("insert index is: ", index);
-      if (source === "ContextMenu.rowBelow") {
-        layout_changes.layout_changed = true;
-        layout_changes.changes.push(["insert_r", "below", index]);
-      } else {
-        layout_changes.layout_changed = true;
-        layout_changes.changes.push(["insert_r", "above", index]);
-      }
-    });
-
-    this.hotTableComponent5.current.hotInstance.addHook('afterCreateCol', function(index, amount, source) {
-      console.log("insert index is: ", index);
-      if (source === "ContextMenu.columnRight") {
-        layout_changes.layout_changed = true;
-        layout_changes.changes.push(["insert_c", "right", index]);
-      } else {
-        layout_changes.layout_changed = true;
-        layout_changes.changes.push(["insert_c", "left", index]);
-      }
-    });
-
-    this.hotTableComponent5.current.hotInstance.addHook('afterRemoveRow', function(index, amount, physicalRows, source) {
-      layout_changes.layout_changed = true;
-      layout_changes.changes.push(["remove_r", null, index]);
-    });
-
-    this.hotTableComponent5.current.hotInstance.addHook('afterRemoveCol', function(index, amount, physicalRows, source) {
       layout_changes.layout_changed = true;
       layout_changes.changes.push(["remove_c", null, index]);
     });
@@ -1317,23 +1237,17 @@ class Academic extends Component {
 
     } else if (tab === '3') {
       this.setState({
-        curr_table: "student_status"
-      })
-      col_headers = student_status_col_headers;
-
-    } else if (tab === '4') {
-      this.setState({
         curr_table: "students"
       });
       col_headers = student_col_headers;
 
-    } else if (tab === '5') {
+    } else if (tab === '4') {
       this.setState({
         curr_table: "team_grades"
       });
       col_headers = team_grades_col_headers;
 
-    } else if (tab === '6') {
+    } else if (tab === '5') {
       this.setState({
         curr_table: "team_comments"
       });
@@ -1349,14 +1263,12 @@ class Academic extends Component {
       table_loaded = true;
       utils.load_simulation_v2(1, "attendance", attendance_display, buffer_copy, attendance_col_headers);
       utils.load_simulation_v2(1, "grade_book", greadebook_display, buffer_copy, grade_book_col_headers);
-      utils.load_simulation_v2(1, "student_status", student_status_display, buffer_copy, student_status_col_headers);
       utils.load_simulation_v2(1, "students", students_display, buffer_copy, student_col_headers);
       utils.load_simulation_v2(1, "team_grades", team_grades_display, buffer_copy, team_grades_col_headers);
       utils.load_simulation_v2(1, "team_comments", team_comments_display, buffer_copy, team_comments_col_headers);
       setTimeout(() => {
           attendance_display = [attendance_col_headers].concat(attendance_display);
           greadebook_display = [grade_book_col_headers].concat(greadebook_display);
-          student_status_display = [student_status_col_headers].concat(student_status_display);
           students_display = [student_col_headers].concat(students_display);
           team_grades_display = [team_grades_col_headers].concat(team_grades_display);
           team_comments_display = [team_comments_col_headers].concat(team_comments_display);
@@ -1375,14 +1287,12 @@ class Academic extends Component {
     table_loaded = true;
     utils.load_simulation_v2(1, "attendance", attendance_display, buffer_copy, attendance_col_headers);
     utils.load_simulation_v2(1, "grade_book", greadebook_display, buffer_copy, grade_book_col_headers);
-    utils.load_simulation_v2(1, "student_status", student_status_display, buffer_copy, student_status_col_headers);
     utils.load_simulation_v2(1, "students", students_display, buffer_copy, student_col_headers);
     utils.load_simulation_v2(1, "team_grades", team_grades_display, buffer_copy, team_grades_col_headers);
     utils.load_simulation_v2(1, "team_comments", team_comments_display, buffer_copy, team_comments_col_headers);
     setTimeout(() => {
         attendance_display = [attendance_col_headers].concat(attendance_display);
         greadebook_display = [grade_book_col_headers].concat(greadebook_display);
-        student_status_display = [student_status_col_headers].concat(student_status_display);
         students_display = [student_col_headers].concat(students_display);
         team_grades_display = [team_grades_col_headers].concat(team_grades_display);
         team_comments_display = [team_comments_col_headers].concat(team_comments_display);
@@ -1457,15 +1367,6 @@ class Academic extends Component {
     this.toggleRestartModal();
   }
 
-  download = () => {
-    console.log("downloading!!!!");
-    user_actions.push([this.state.name, "END_TRAINING_DATA", null, null, null, this.state.curr_table, null, null, "END"]);
-    this.setState({
-      user_actions: user_actions
-    })
-    this.csvLink.link.click()
-  }
-
   close_confirmation = () => {
     user_actions = []
     this.toggleCompleteConfirmModal();
@@ -1483,7 +1384,6 @@ class Academic extends Component {
   refresh = () => {
     console.log(attendance_display);
     console.log(greadebook_display);
-    console.log(student_status_display);
     console.log(students_display);
     console.log(team_grades_display);
     console.log(team_comments_display);
@@ -1505,16 +1405,6 @@ class Academic extends Component {
         <script src="node_modules/handsontable/dist/handsontable.full.min.js"></script>
         <link href="node_modules/handsontable/dist/handsontable.full.min.css" rel="stylesheet" media="screen"></link>
          <Jumbotron className='logo-jumbo'>
-          {/* <ButtonDropdown isOpen={this.state.collapsed} toggle={this.toggleNavbar} style={{float: 'left'}} className="up-margin-one">
-                <DropdownToggle color="#61dafb"  caret style={{float: 'right'}}>
-                  Change Simulation
-                </DropdownToggle>
-                <DropdownMenu>
-                  <DropdownItem name="financing" id="financing" onClick={e => this.select_simulation(e)}>Financing Simulation</DropdownItem>
-                  <DropdownItem divider />
-                  <DropdownItem name="management" id="management" onClick={e => this.select_simulation(e)}>Management Simulation</DropdownItem>
-                </DropdownMenu>
-            </ButtonDropdown> */}
           </Jumbotron >
           <div>
             <Jumbotron >
@@ -1531,8 +1421,8 @@ class Academic extends Component {
                     <Button size='lg' className='display-button' color="info" onClick={this.restart} >Restart Simulation</Button>
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     <Button size='lg' className='display-button' color="info" onClick={this.toggleInstructionModal} >Instruction</Button>
-                    {/* &nbsp;&nbsp;&nbsp;&nbsp;
-                    <Button size='lg' className='display-button' color="info" onClick={this.request_read_lock} >Read Lock</Button> */}
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <Button size='lg' className='display-button' color="info" onClick={this.request_read_lock} >Read Lock</Button>
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     <Button size='lg' className='display-button' color="info" onClick={this.refresh} >Refresh</Button>
                     {/* &nbsp;&nbsp;&nbsp;&nbsp;
@@ -1589,17 +1479,7 @@ class Academic extends Component {
                     </ModalFooter>
                   </Modal>
 
-                  <Modal size='lg' isOpen={this.state.isRedirectConfirmOpen} toggle={this.toggleRedirectConfirmModal}>
-                    <ModalHeader toggle={this.toggleRedirectConfirmModal}>Are you sure you want to leave this page?</ModalHeader>
-                    <ModalBody>
-                      Note that once you leave this simulation page, you will lose all the records and progress on this simulation. 
-                    </ModalBody>
-                    <ModalFooter>
-                    <Button size='lg' className='display-button' color="info" onClick={this.redirect}>Confirm</Button> {' '}
-                    <Button size='lg' className='display-button' color="info" onClick={this.toggleRedirectConfirmModal}>Cancel</Button>
-                    </ModalFooter>
-                  </Modal>
-
+                  
                   <Modal size='lg' isOpen={this.state.isNameModalOpen} toggle={this.toggleNameModal}>
                     <ModalHeader toggle={this.toggleNameModal}>Please Enter Your Full Name</ModalHeader>
                     <ModalBody>
@@ -1676,27 +1556,20 @@ class Academic extends Component {
                 <NavLink
                     className={classnames({ active: this.state.activeTab === '3' })}
                     onClick={() => { this.toggle('3'); }}>
-                    Student Status
+                    Students
                 </NavLink>
             </NavItem>
             <NavItem>
                 <NavLink
                     className={classnames({ active: this.state.activeTab === '4' })}
                     onClick={() => { this.toggle('4'); }}>
-                    Students
+                    Team Grades
                 </NavLink>
             </NavItem>
             <NavItem>
                 <NavLink
                     className={classnames({ active: this.state.activeTab === '5' })}
                     onClick={() => { this.toggle('5'); }}>
-                    Team Grades
-                </NavLink>
-            </NavItem>
-            <NavItem>
-                <NavLink
-                    className={classnames({ active: this.state.activeTab === '6' })}
-                    onClick={() => { this.toggle('6'); }}>
                     Team Comments
                 </NavLink>
             </NavItem>
@@ -1742,10 +1615,10 @@ class Academic extends Component {
             </TabPane>
             <TabPane tabId="3">
                 <h4>
-                    Student Status Table
+                    Students Table
                 </h4> 
                 <div id = "display_portion" onScrollCapture={e => this.track_action(e, "scroll")}  tabIndex="3">
-                    <HotTable className="handsontable" id ="display_table" data={student_status_display} ref={this.hotTableComponent2} id={this.id}
+                    <HotTable className="handsontable" id ="display_table" data={students_display} ref={this.hotTableComponent2} id={this.id}
                         colHeaders={true} 
                         rowHeaders={true} 
                         width="100%" 
@@ -1761,10 +1634,10 @@ class Academic extends Component {
             </TabPane>
             <TabPane tabId="4">
                 <h4>
-                    Students Table
+                    Team Grades
                 </h4> 
                 <div id = "display_portion" onScrollCapture={e => this.track_action(e, "scroll")}  tabIndex="4">
-                    <HotTable className="handsontable" id ="display_table" data={students_display} ref={this.hotTableComponent3} id={this.id}
+                    <HotTable className="handsontable" id ="display_table" data={team_grades_display} ref={this.hotTableComponent3} id={this.id}
                         colHeaders={true} 
                         rowHeaders={true} 
                         width="100%" 
@@ -1780,29 +1653,10 @@ class Academic extends Component {
             </TabPane>
             <TabPane tabId="5">
                 <h4>
-                    Team Grades
-                </h4> 
-                <div id = "display_portion" onScrollCapture={e => this.track_action(e, "scroll")}  tabIndex="5">
-                    <HotTable className="handsontable" id ="display_table" data={team_grades_display} ref={this.hotTableComponent4} id={this.id}
-                        colHeaders={true} 
-                        rowHeaders={true} 
-                        width="100%" 
-                        height="300"
-                        colWidths="100%"
-                        rowHeights="25"
-                        contextMenu={true}
-                        formulas={true}
-                        readOnly={!this.state.transaction_mode}
-                    />
-                </div>
-                    
-            </TabPane>
-            <TabPane tabId="6">
-                <h4>
                     Team Comments
                 </h4> 
-                <div id = "display_portion" onScrollCapture={e => this.track_action(e, "scroll")}  tabIndex="6">
-                    <HotTable className="handsontable" id ="display_table" data={team_comments_display} ref={this.hotTableComponent5} id={this.id}
+                <div id = "display_portion" onScrollCapture={e => this.track_action(e, "scroll")}  tabIndex="5">
+                    <HotTable className="handsontable" id ="display_table" data={team_comments_display} ref={this.hotTableComponent4} id={this.id}
                         colHeaders={true} 
                         rowHeaders={true} 
                         width="100%" 

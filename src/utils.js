@@ -14,9 +14,9 @@ class Utils {
 
         let ATT_NUM = 0;
         if (simulation_type === "attendance") {
-            ATT_NUM = 9;
+            ATT_NUM = 12;
         } else if (simulation_type === "grade_book") {
-            ATT_NUM = 17;
+            ATT_NUM = 11;
         }
         else if (simulation_type === "check_book" || simulation_type === "check_book2" || simulation_type === "check_book3") {
             ATT_NUM = 6;
@@ -37,7 +37,7 @@ class Utils {
         } else if (simulation_type === "team_grades") {
             ATT_NUM = 7;
         } else if (simulation_type === "team_comments") {
-            ATT_NUM = 6;
+            ATT_NUM = 3;
         } else if (simulation_type === "allowance") {
             ATT_NUM = 2;
         }
@@ -60,32 +60,29 @@ class Utils {
                         if (simulation_type === "attendance") {  // attendance
                             if (j === 0) {temp[j] = data[i]['ID'];}
                             if (j === 1) { temp[j] = data[i]['name'];}
-                            if (j === 2) {temp[j] = data[i]['Monday']}
-                            if (j === 3) {temp[j] = data[i]['Tuesday']}
-                            if (j === 4) {temp[j] = data[i]['Wednesday']}
-                            if (j === 5) {temp[j] = data[i]['Thursday']}
-                            if (j === 6) {temp[j] = data[i]['Friday']}
-                            if (j === 7) {temp[j] = data[i]['Saturday']}
-                            if (j === 8) {temp[j] = data[i]['Sunday']}
+                            if (j === 2) {temp[j] = data[i]['Week1']}
+                            if (j === 3) {temp[j] = data[i]['Week2']}
+                            if (j === 4) {temp[j] = data[i]['Week3']}
+                            if (j === 5) {temp[j] = data[i]['Week4']}
+                            if (j === 6) {temp[j] = data[i]['Week5']}
+                            if (j === 7) {temp[j] = data[i]['Week6']}
+                            if (j === 8) {temp[j] = data[i]['Week7']}
+                            if (j === 9) {temp[j] = data[i]['Week8']}
+                            if (j === 10) {temp[j] = data[i]['Week9']}
+                            if (j === 11) {temp[j] = data[i]['Week10']}
                         }
                         if (simulation_type === "grade_book") {      // grade book 
                             if (j === 0) {temp[j] = data[i]['ID']}
                             if (j === 1) {temp[j] = data[i]['name']}
                             if (j === 2) {temp[j] = data[i]['MP1']}
                             if (j === 3) {temp[j] = data[i]['MP2']}
-                            if (j === 4) {temp[j] = data[i]['MP3']}
-                            if (j === 5) {temp[j] = data[i]['MP4']}
-                            if (j === 6) {temp[j] = data[i]['Lab1']}
-                            if (j === 7) {temp[j] = data[i]['Lab2']}
-                            if (j === 8) {temp[j] = data[i]['Lab3']}
-                            if (j === 9) {temp[j] = data[i]['Lab4']}
-                            if (j === 10) {temp[j] = data[i]['Lab5']}
-                            if (j === 11) {temp[j] = data[i]['Lab6']}
-                            if (j === 12) {temp[j] = data[i]['Lab7']}
-                            if (j === 13) {temp[j] = data[i]['Exam1']}
-                            if (j === 14) {temp[j] = data[i]['Exam2']}
-                            if (j === 15) {temp[j] = data[i]['Final']}
-                            if (j === 16) {temp[j] = data[i]['Overall']}
+                            if (j === 4) {temp[j] = data[i]['Lab1']}
+                            if (j === 5) {temp[j] = data[i]['Lab2']}
+                            if (j === 6) {temp[j] = data[i]['Exam1']}
+                            if (j === 7) {temp[j] = data[i]['Exam2']}
+                            if (j === 8) {temp[j] = data[i]['Final']}
+                            if (j === 9) {temp[j] = data[i]['Project']}
+                            if (j === 10) {temp[j] = data[i]['Overall']}
                         } else if (simulation_type === "check_book" || simulation_type === "check_book2" || simulation_type === "check_book3") {    // check book 1, 2, 3
                             if (j === 0) {temp[j] = data[i]['number']}
                             if (j === 1) {temp[j] = data[i]['date']}
@@ -164,18 +161,15 @@ class Utils {
                         } else if (simulation_type === "team_grades") { // team grades
                             if (j === 0) {temp[j] = data[i]['team']}
                             if (j === 1) {temp[j] = data[i]['proposal']}
-                            if (j === 2) {temp[j] = data[i]['progress']}
-                            if (j === 3) {temp[j] = data[i]['presentation']}
-                            if (j === 4) {temp[j] = data[i]['codes']}
-                            if (j === 5) {temp[j] = data[i]['report']}
+                            if (j === 2) {temp[j] = data[i]['presentation']}
+                            if (j === 3) {temp[j] = data[i]['codes']}
+                            if (j === 4) {temp[j] = data[i]['report']}
+                            if (j === 5) {temp[j] = data[i]['Peer Reviews']}
                             if (j === 6) {temp[j] = data[i]['overall']}
                         } else if (simulation_type === "team_comments") { //team comments
-                            if (j === 0) {temp[j] = data[i]['id']}
-                            if (j === 1) {temp[j] = data[i]['name']}
-                            if (j === 2) {temp[j] = data[i]['Participation']}
-                            if (j === 3) {temp[j] = data[i]['Contribution']}
-                            if (j === 4) {temp[j] = data[i]['Communication']}
-                            if (j === 5) {temp[j] = data[i]['comments']}
+                            if (j === 0) {temp[j] = data[i]['Team']}
+                            if (j === 1) {temp[j] = data[i]['comments1']}
+                            if (j === 2) {temp[j] = data[i]['comments2']}
                         } else if (simulation_type === "allowance") {
                             if (j === 0) {temp[j] = data[i]['child']}
                             if (j === 1) {temp[j] = data[i]['allowance']}
@@ -367,31 +361,28 @@ class Utils {
         if (simulation_type === "attendance") {  // attendance
             col_head.push("ID");
             col_head.push("Name");
-            col_head.push("Monday");
-            col_head.push("Tuesday");
-            col_head.push("Wednesday");
-            col_head.push("Thursday");
-            col_head.push("Friday");
-            col_head.push("Saturday");
-            col_head.push("Sunday");
+            col_head.push("Week1");
+            col_head.push("Week2");
+            col_head.push("Week3");
+            col_head.push("Week4");
+            col_head.push("Week5");
+            col_head.push("Week6");
+            col_head.push("Week7");
+            col_head.push("Week8");
+            col_head.push("Week9");
+            col_head.push("Week10");
         }
         if (simulation_type === "grade_book") {  // grade book
             col_head.push("ID");
             col_head.push("Name");
             col_head.push("MP1");
             col_head.push("MP2");
-            col_head.push("MP3");
-            col_head.push("MP4");
             col_head.push("Lab1");
             col_head.push("Lab2");
-            col_head.push("Lab3");
-            col_head.push("Lab4");
-            col_head.push("Lab5");
-            col_head.push("Lab6");
-            col_head.push("Lab7");
             col_head.push("Exam1");
             col_head.push("Exam2");
             col_head.push("Final");
+            col_head.push("Project");
             col_head.push("Overall");
         }
         if (simulation_type === "check_book" || simulation_type === "check_book2" || simulation_type === "check_book3") {  // check book
@@ -482,20 +473,17 @@ class Utils {
         if (simulation_type === "team_grades") { // team grades
             col_head.push("Team");
             col_head.push("Proposal");
-            col_head.push("progress");
             col_head.push("Presentation");
             col_head.push("Codes");
             col_head.push("Report");
+            col_head.push("Peer Reviews");
             col_head.push("Overall");
         }
 
         if (simulation_type === "team_comments") {  // team comments
-            col_head.push("ID");
-            col_head.push("Name");
-            col_head.push("Participation");
-            col_head.push("Contribution");
-            col_head.push("Communication");
-            col_head.push("Comments");
+            col_head.push("Team");
+            col_head.push("Comments1");
+            col_head.push("Comments2");
         }   
 
         if (simulation_type === "allowance") {  // allowance
