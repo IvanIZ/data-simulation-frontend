@@ -150,8 +150,8 @@ class Academic extends Component {
 
     // Socket io stuff =========================================================================================
 
-    // this.socket = io('https://spreadsheetactions.herokuapp.com/');
-    this.socket = io('localhost:3001');
+    this.socket = io('https://spreadsheetactions.herokuapp.com/');
+    // this.socket = io('localhost:3001');
 
     this.socket.on('RECEIVE_ID', function(id){
       change_id(id);
@@ -926,7 +926,7 @@ class Academic extends Component {
         state = "N";
       }
 
-      // extract features of the new value
+      // extract features of the new value  [row, col, prev, new]
       let feature = "";
       if (isNaN(chn_copy[0][3])) {
         feature = "STR";
@@ -1396,6 +1396,51 @@ class Academic extends Component {
     attendance_display[0][0] = "Haha"
   }
 
+  record_read_cell = () => {
+
+    // find current state
+    let state = "Y"; //  Y means in a transaction
+    if (!this.state.transaction_mode) {
+      state = "N";
+    }
+
+    // find the correct table
+    let table = "";
+    if (this.state.curr_table === "attendance") {
+      table = attendance_display;
+    } else if (this.state.curr_table === "cs225_gradebook") {
+      table = greadebook_display;
+    } else if (this.state.curr_table === "student_status") {
+      table = students_display;
+    } else if (this.state.curr_table === "students") {
+      table = students_display;
+    } else if (this.state.curr_table === "team_grades") {
+      table = team_grades_display;
+    } else if (this.state.curr_table === "team_comments") {
+      table = team_comments_display;
+    }
+
+    // extract features of the new value  [row, col, prev, new]
+    let feature = "EMPTY";
+    if (table[select_i][select_j] !== null && table[select_i][select_j].length !== 0 && isNaN(table[select_i][select_j])) {
+      feature = "STR";
+    } else if (table[select_i][select_j] !== null && table[select_i][select_j].length !== 0 && !isNaN(table[select_i][select_j])) {
+      feature = "DIGIT";
+    }
+
+    if (user_actions.length !== 0) {
+      let prev_action = user_actions[user_actions.length - 1];
+      if (prev_action[1] == "READ" && prev_action[2] == select_i && prev_action[3] == select_j) {
+        // do nothing
+      } else {
+        user_actions.push([this.state.name, "READ", select_i, select_j, feature, this.state.curr_table, select_i + 1, col_headers[select_j], state]);
+      }
+
+    } else {
+      user_actions.push([this.state.name, "READ", select_i, select_j, feature, this.state.curr_table, select_i + 1, col_headers[select_j], state]);
+    }
+  }
+
   render() {
     if (this.state.redirect) {
       return <Redirect to={this.state.redirect_link} />
@@ -1421,8 +1466,10 @@ class Academic extends Component {
                     <Button size='lg' className='display-button' color="info" onClick={this.restart} >Restart Simulation</Button>
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     <Button size='lg' className='display-button' color="info" onClick={this.toggleInstructionModal} >Instruction</Button>
+                    {/* &nbsp;&nbsp;&nbsp;&nbsp;
+                    <Button size='lg' className='display-button' color="info" onClick={this.request_read_lock} >Read Lock</Button> */}
                     &nbsp;&nbsp;&nbsp;&nbsp;
-                    <Button size='lg' className='display-button' color="info" onClick={this.request_read_lock} >Read Lock</Button>
+                    <Button size='lg' className='display-button' color="info" onClick={this.record_read_cell} >Read Cell</Button>
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     <Button size='lg' className='display-button' color="info" onClick={this.refresh} >Refresh</Button>
                     {/* &nbsp;&nbsp;&nbsp;&nbsp;
