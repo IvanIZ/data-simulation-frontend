@@ -1,5 +1,5 @@
 class Utils {
-    load_simulation_v2 = (index, simulation_type, buffer, buffer_copy, col_headers) => {
+    load_simulation_v2 = (index, simulation_type, buffer, error_indicater, col_headers) => {
         console.log("simulation type is: ", simulation_type);
         this.fill_col_headers(col_headers, simulation_type);
         let simulation = "";
@@ -49,7 +49,7 @@ class Utils {
         .then(data => {
             if (data.length === 0) {
                 console.log("No data is fetched by fetchMoreRows function");
-                this.add_empty_rows(50, ATT_NUM, buffer, buffer_copy);
+                this.add_empty_rows(50, ATT_NUM, buffer);
             } else {
                 console.log(data)
                 //load returned data into the buffer
@@ -182,7 +182,11 @@ class Utils {
                     // return buffer;
                 }
 
-                this.add_empty_rows(10, ATT_NUM, buffer, buffer_copy);
+                this.add_empty_rows(10, ATT_NUM, buffer);
+            }
+        }, (error) => {
+            if (error) {
+                error_indicater[0][0] = 1;
             }
         });
     }
@@ -194,48 +198,44 @@ class Utils {
         let ATT_NUM = 0;
         if (simulation_type === "attendance") {
             this.load_attendance(buffer);
-            this.load_attendance(buffer_copy);
             ATT_NUM = 9;
-            this.add_empty_rows(10, ATT_NUM, buffer, buffer_copy);
+            this.add_empty_rows(10, ATT_NUM, buffer);
 
         } else if (simulation_type === "grade_book") {
             this.load_gradebook(buffer);
-            this.load_gradebook(buffer_copy);
             ATT_NUM = 17;
-            this.add_empty_rows(10, ATT_NUM, buffer, buffer_copy);
+            this.add_empty_rows(10, ATT_NUM, buffer);
 
         }
         else if (simulation_type === "check_book") {
             ATT_NUM = 6;
-            this.add_empty_rows(25, ATT_NUM, buffer, buffer_copy);
+            this.add_empty_rows(25, ATT_NUM, buffer);
 
         } else if (simulation_type === "monthly_expense") {
             ATT_NUM = 13;
-            this.add_empty_rows(25, ATT_NUM, buffer, buffer_copy);
+            this.add_empty_rows(25, ATT_NUM, buffer);
 
         } else if (simulation_type === "monthly_income") {
             ATT_NUM = 13;
-            this.add_empty_rows(25, ATT_NUM, buffer, buffer_copy);
+            this.add_empty_rows(25, ATT_NUM, buffer);
 
         } else if (simulation_type === "employee_schedule_v1") {
             ATT_NUM = 9;
-            this.add_empty_rows(25, ATT_NUM, buffer, buffer_copy);
+            this.add_empty_rows(25, ATT_NUM, buffer);
 
         } else if (simulation_type === "employee_schedule_v2") {
             ATT_NUM = 8;
             this.load_employee_schedule_v2(buffer);
-            this.load_employee_schedule_v2(buffer_copy);
-            this.add_empty_rows(5, ATT_NUM, buffer, buffer_copy);
+            this.add_empty_rows(5, ATT_NUM, buffer);
 
         } else if (simulation_type === "progress_log") {
             ATT_NUM = 7;
-            this.add_empty_rows(25, ATT_NUM, buffer, buffer_copy);
+            this.add_empty_rows(25, ATT_NUM, buffer);
 
         } else if (simulation_type === "student_status") {
             this.load_student_status(buffer);
-            this.load_student_status(buffer_copy);
             ATT_NUM = 6;
-            this.add_empty_rows(10, ATT_NUM, buffer, buffer_copy);
+            this.add_empty_rows(10, ATT_NUM, buffer);
         }         
     }
 
@@ -492,7 +492,7 @@ class Utils {
         }
     }
 
-    add_empty_rows = (num_row, num_att, buffer, buffer_copy) => {
+    add_empty_rows = (num_row, num_att, buffer) => {
         console.log("adding more rows!");
         for (var i = 0; i < num_row; i++) {
             let temp = []
@@ -500,7 +500,6 @@ class Utils {
                 temp.push("");
             }
             buffer[buffer.length] = temp;
-            buffer_copy[buffer_copy.length] = temp.slice();
         }
     }
 }

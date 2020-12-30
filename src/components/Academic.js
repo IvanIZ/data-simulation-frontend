@@ -62,6 +62,8 @@ let SCROLL_SIZE = 5;
 let display_dataset_button = ""
 
 let data = [],  buffer = [], buffer_copy = []
+let load_error = [[0]];
+let name_entered = false;
 let ATT_NUM = 7
 let prev_scrolltop = 0
 let data_display = []
@@ -144,11 +146,9 @@ class Academic extends Component {
 
       isCompleteConfirmationModalOpen: false, 
 
-      attendance_table: [[]], 
-      refresh: false
+      refresh: false, 
+      isLoadErrorModelOpen: false
     }
-
-    // Socket io stuff =========================================================================================
 
     this.socket = io('https://spreadsheetactions.herokuapp.com/');
     // this.socket = io('localhost:3001');
@@ -218,7 +218,6 @@ class Academic extends Component {
     }
 
     const addMessage = data => {
-      console.log("the data in addMessage is: ", data);
       let change_table = data.data
       for (var x = 0; x < change_table.length; x++) {
         // Extract data
@@ -228,24 +227,24 @@ class Academic extends Component {
         let i = change_table[x][3] - 1 // 2 --> x_coord
 
         // reflect each update to its corresponding table
-        if (table === "attendance" && typeof attendance_display !== "undefined") {
+        try {
+          if (table === "attendance" && typeof attendance_display !== "undefined") {
             attendance_display[i][j] = value;
-        } else if (table === "cs225_gradebook") {
-            console.log("in grade book");
-            greadebook_display[i][j] = value;
-        } else if (table === "student_status") {
-            student_status_display[i][j] = value;
-        } else if (table === "students") {
-          students_display[i][j] = value;
-        } else if (table === "team_grades") {
-          team_grades_display[i][j] = value;
-        } else if (table === "team_comments") {
-          team_comments_display[i][j] = value;
+          } else if (table === "cs225_gradebook") {
+              greadebook_display[i][j] = value;
+          } else if (table === "students") {
+            students_display[i][j] = value;
+          } else if (table === "team_grades") {
+            team_grades_display[i][j] = value;
+          } else if (table === "team_comments") {
+            team_comments_display[i][j] = value;
+          }
+        } catch (error) {
+          console.log(error);
         }
       }
   };
 
-    // Socket io stuff =========================================================================================
 
     this.toggleSelectionPrompt = this.toggleSelectionPrompt.bind()
     this.toggleNavbar = this.toggleNavbar.bind()
@@ -255,211 +254,217 @@ class Academic extends Component {
     this.toggleRestartModal = this.toggleRestartModal.bind();
     this.toggleCompleteConfirmModal = this.toggleCompleteConfirmModal.bind();
     this.toggleShowHistory = this.toggleShowHistory.bind();
+    this.toggleLoadErrorModal = this.toggleLoadErrorModal.bind();
   }
 
   // fetch 50 rows of data into the buffer
   async componentDidMount() {
 
-    this.socket.on('RECEIVE_FREED_CELLS', function(free_cells_package) {
-      update_freed_cells(free_cells_package);
-    });
+    // REMOVED FOR THE FIRST USER STUDY -------------------------------------------------------------------------------------------
+
+    // Removed for the first user study
+    // this.socket.on('RECEIVE_FREED_CELLS', function(free_cells_package) {
+    //   update_freed_cells(free_cells_package);
+    // });
 
     // function that updates all the cells that do not have any lock anymore. 
-    const update_freed_cells = free_cells_package => {
-      console.log("received freecell called with: ", free_cells_package);
+    // const update_freed_cells = free_cells_package => {
+    //   console.log("received freecell called with: ", free_cells_package);
 
-      let free_cells = free_cells_package.free_cells;
-      let disconnect = free_cells_package.disconnect;
+    //   let free_cells = free_cells_package.free_cells;
+    //   let disconnect = free_cells_package.disconnect;
 
-      console.log("the free cells are ", free_cells);
+    //   for (var i = 0; i < free_cells.length; i++) {
+    //     let location = free_cells[i];
+    //     if (location[0] === "attendance") {
+    //       console.log("enter here with location: ", location);
+    //       let cell_data = this.hotTableComponent.current.hotInstance.getDataAtCell(location[1], location[2]);
 
-      for (var i = 0; i < free_cells.length; i++) {
-        let location = free_cells[i];
-        if (location[0] === "attendance") {
-          console.log("enter here with location: ", location);
-          let cell_data = this.hotTableComponent.current.hotInstance.getDataAtCell(location[1], location[2]);
+    //       // update read-only cells
+    //       if (cell_data[0] == "*") {
+    //         let new_data = cell_data.substring(1);
+    //         this.hotTableComponent.current.hotInstance.setDataAtCell(location[1], location[2], new_data);
 
-          // update read-only cells
-          if (cell_data[0] == "*") {
-            let new_data = cell_data.substring(1);
-            this.hotTableComponent.current.hotInstance.setDataAtCell(location[1], location[2], new_data);
+    //       } else if (cell_data == "-----" && disconnect == true) {
+    //         data_display[location[0], location[1]] = this.state.data_original[location[1], location[2]];
+    //       }
 
-          } else if (cell_data == "-----" && disconnect == true) {
-            data_display[location[0], location[1]] = this.state.data_original[location[1], location[2]];
-          }
+    //     } else if (location[0] === "cs225_gradebook") {
+    //       let cell_data = this.hotTableComponent1.current.hotInstance.getDataAtCell(location[1], location[2]);
 
-        } else if (location[0] === "cs225_gradebook") {
-          let cell_data = this.hotTableComponent1.current.hotInstance.getDataAtCell(location[1], location[2]);
+    //       // update read-only cells
+    //       if (cell_data[0] == "*") {
+    //         let new_data = cell_data.substring(1);
+    //         this.hotTableComponent1.current.hotInstance.setDataAtCell(location[1], location[2], new_data);
 
-          // update read-only cells
-          if (cell_data[0] == "*") {
-            let new_data = cell_data.substring(1);
-            this.hotTableComponent1.current.hotInstance.setDataAtCell(location[1], location[2], new_data);
+    //       } else if (cell_data == "-----" && disconnect == true) {
+    //         data_display[location[0], location[1]] = this.state.data_original[location[1], location[2]];
+    //       }
 
-          } else if (cell_data == "-----" && disconnect == true) {
-            data_display[location[0], location[1]] = this.state.data_original[location[1], location[2]];
-          }
+    //     } else if (location[0] === "students") {
+    //       let cell_data = this.hotTableComponent2.current.hotInstance.getDataAtCell(location[1], location[2]);
 
-        } else if (location[0] === "students") {
-          let cell_data = this.hotTableComponent2.current.hotInstance.getDataAtCell(location[1], location[2]);
+    //       // update read-only cells
+    //       if (cell_data[0] == "*") {
+    //         let new_data = cell_data.substring(1);
+    //         this.hotTableComponent2.current.hotInstance.setDataAtCell(location[1], location[2], new_data);
 
-          // update read-only cells
-          if (cell_data[0] == "*") {
-            let new_data = cell_data.substring(1);
-            this.hotTableComponent2.current.hotInstance.setDataAtCell(location[1], location[2], new_data);
+    //       } else if (cell_data == "-----" && disconnect == true) {
+    //         data_display[location[0], location[1]] = this.state.data_original[location[1], location[2]];
+    //       }
 
-          } else if (cell_data == "-----" && disconnect == true) {
-            data_display[location[0], location[1]] = this.state.data_original[location[1], location[2]];
-          }
+    //     } else if (location[0] === "team_grades") {
+    //       let cell_data = this.hotTableComponent3.current.hotInstance.getDataAtCell(location[1], location[2]);
 
-        } else if (location[0] === "team_grades") {
-          let cell_data = this.hotTableComponent3.current.hotInstance.getDataAtCell(location[1], location[2]);
+    //       // update read-only cells
+    //       if (cell_data[0] == "*") {
+    //         let new_data = cell_data.substring(1);
+    //         this.hotTableComponent3.current.hotInstance.setDataAtCell(location[1], location[2], new_data);
 
-          // update read-only cells
-          if (cell_data[0] == "*") {
-            let new_data = cell_data.substring(1);
-            this.hotTableComponent3.current.hotInstance.setDataAtCell(location[1], location[2], new_data);
+    //       } else if (cell_data == "-----" && disconnect == true) {
+    //         data_display[location[0], location[1]] = this.state.data_original[location[1], location[2]];
+    //       }
 
-          } else if (cell_data == "-----" && disconnect == true) {
-            data_display[location[0], location[1]] = this.state.data_original[location[1], location[2]];
-          }
+    //     } else if (location[0] === "team_comments") {
+    //       let cell_data = this.hotTableComponent4.current.hotInstance.getDataAtCell(location[1], location[2]);
 
-        } else if (location[0] === "team_comments") {
-          let cell_data = this.hotTableComponent4.current.hotInstance.getDataAtCell(location[1], location[2]);
+    //       // update read-only cells
+    //       if (cell_data[0] == "*") {
+    //         let new_data = cell_data.substring(1);
+    //         this.hotTableComponent4.current.hotInstance.setDataAtCell(location[1], location[2], new_data);
 
-          // update read-only cells
-          if (cell_data[0] == "*") {
-            let new_data = cell_data.substring(1);
-            this.hotTableComponent4.current.hotInstance.setDataAtCell(location[1], location[2], new_data);
+    //       } else if (cell_data == "-----" && disconnect == true) {
+    //         data_display[location[0], location[1]] = this.state.data_original[location[1], location[2]];
+    //       }
 
-          } else if (cell_data == "-----" && disconnect == true) {
-            data_display[location[0], location[1]] = this.state.data_original[location[1], location[2]];
-          }
+    //     }
+    //   }
+    //   cell_read_only();
+    // }
 
-        }
-      }
-      cell_read_only();
-    }
+    // Removed for the first user study
+    // this.socket.on('REQUEST_SHARED_ACCEPT', function(shared_lock_accept) {
+    //   let table = shared_lock_accept.table;
+    //   let row = shared_lock_accept.row;
+    //   let col = shared_lock_accept.col;
 
-    this.socket.on('REQUEST_SHARED_ACCEPT', function(shared_lock_accept) {
-      let table = shared_lock_accept.table;
-      let row = shared_lock_accept.row;
-      let col = shared_lock_accept.col;
+    //   display_shared_lock(table, row, col);
 
-      display_shared_lock(table, row, col);
-
-    });
+    // });
 
     // the function that turns a cell into read-only due to a read lock
-    const cell_read_only = () => {
+    // const cell_read_only = () => {
       
-        this.hotTableComponent.current.hotInstance.updateSettings({
-            cells: function(row, col, prop){
-            var cellProperties = {};
-              if(attendance_display[row][col] !== null && attendance_display[row][col].length !== 0 &&  (attendance_display[row][col] == "-----" || attendance_display[row][col].charAt(0) === "*")){
-                cellProperties.readOnly = 'true'
-              }
-            return cellProperties
-          }
-        });
-
-      
-        this.hotTableComponent1.current.hotInstance.updateSettings({
-            cells: function(row, col, prop){
-            var cellProperties = {};
-              if(greadebook_display[row][col] !== null && greadebook_display[row][col].length !== 0 &&  (greadebook_display[row][col] == "-----" || greadebook_display[row][col].charAt(0) === "*")){
-                cellProperties.readOnly = 'true'
-              }
-            return cellProperties
-          }
-        });
-
-        this.hotTableComponent2.current.hotInstance.updateSettings({
-            cells: function(row, col, prop){
-            var cellProperties = {};
-              if(students_display[row][col] !== null && students_display[row][col].length !== 0 &&  (students_display[row][col] == "-----" || students_display[row][col].charAt(0) === "*")){
-                cellProperties.readOnly = 'true'
-              }
-            return cellProperties
-          }
-        });
+    //     this.hotTableComponent.current.hotInstance.updateSettings({
+    //         cells: function(row, col, prop){
+    //         var cellProperties = {};
+    //           if(attendance_display[row][col] !== null && attendance_display[row][col].length !== 0 &&  (attendance_display[row][col] == "-----" || attendance_display[row][col].charAt(0) === "*")){
+    //             cellProperties.readOnly = 'true'
+    //           }
+    //         return cellProperties
+    //       }
+    //     });
 
       
-        this.hotTableComponent3.current.hotInstance.updateSettings({
-            cells: function(row, col, prop){
-            var cellProperties = {};
-              if(team_grades_display[row][col] !== null && team_grades_display[row][col].length !== 0 &&  (team_grades_display[row][col] == "-----" || team_grades_display[row][col].charAt(0) === "*")){
-                cellProperties.readOnly = 'true'
-              }
-            return cellProperties
-          }
-        }); 
+    //     this.hotTableComponent1.current.hotInstance.updateSettings({
+    //         cells: function(row, col, prop){
+    //         var cellProperties = {};
+    //           if(greadebook_display[row][col] !== null && greadebook_display[row][col].length !== 0 &&  (greadebook_display[row][col] == "-----" || greadebook_display[row][col].charAt(0) === "*")){
+    //             cellProperties.readOnly = 'true'
+    //           }
+    //         return cellProperties
+    //       }
+    //     });
 
-        this.hotTableComponent4.current.hotInstance.updateSettings({
-          cells: function(row, col, prop){
-          var cellProperties = {};
-            if(team_comments_display[row][col] !== null && team_comments_display[row][col].length !== 0 &&  (team_comments_display[row][col] == "-----" || team_comments_display[row][col].charAt(0) === "*")){
-              cellProperties.readOnly = 'true'
-            }
-          return cellProperties
-        }
-      }); 
-    }
+    //     this.hotTableComponent2.current.hotInstance.updateSettings({
+    //         cells: function(row, col, prop){
+    //         var cellProperties = {};
+    //           if(students_display[row][col] !== null && students_display[row][col].length !== 0 &&  (students_display[row][col] == "-----" || students_display[row][col].charAt(0) === "*")){
+    //             cellProperties.readOnly = 'true'
+    //           }
+    //         return cellProperties
+    //       }
+    //     });
 
+      
+    //     this.hotTableComponent3.current.hotInstance.updateSettings({
+    //         cells: function(row, col, prop){
+    //         var cellProperties = {};
+    //           if(team_grades_display[row][col] !== null && team_grades_display[row][col].length !== 0 &&  (team_grades_display[row][col] == "-----" || team_grades_display[row][col].charAt(0) === "*")){
+    //             cellProperties.readOnly = 'true'
+    //           }
+    //         return cellProperties
+    //       }
+    //     }); 
+
+    //     this.hotTableComponent4.current.hotInstance.updateSettings({
+    //       cells: function(row, col, prop){
+    //       var cellProperties = {};
+    //         if(team_comments_display[row][col] !== null && team_comments_display[row][col].length !== 0 &&  (team_comments_display[row][col] == "-----" || team_comments_display[row][col].charAt(0) === "*")){
+    //           cellProperties.readOnly = 'true'
+    //         }
+    //       return cellProperties
+    //     }
+    //   }); 
+    // }
+
+    // Removed for the first user study
     // Function that accept the position of a new shared lock and display it
-    const display_shared_lock = (table, row, col) => {
+    // const display_shared_lock = (table, row, col) => {
 
-      if (table === "attendance") {
-        let cell_data = this.hotTableComponent.current.hotInstance.getDataAtCell(row, col);
-        // if there is a shared lock displaying already, do nothing
-        if (cell_data.charAt(0) === "*") {
-          return;
-        } else {
-          let new_data = "*" + cell_data
-          this.hotTableComponent.current.hotInstance.setDataAtCell(row, col, new_data);
-        }
+    //   if (table === "attendance") {
+    //     let cell_data = this.hotTableComponent.current.hotInstance.getDataAtCell(row, col);
+    //     // if there is a shared lock displaying already, do nothing
+    //     if (cell_data.charAt(0) === "*") {
+    //       return;
+    //     } else {
+    //       let new_data = "*" + cell_data
+    //       this.hotTableComponent.current.hotInstance.setDataAtCell(row, col, new_data);
+    //     }
 
-      } else if (table === "cs225_gradebook") {
-        let cell_data = this.hotTableComponent1.current.hotInstance.getDataAtCell(row, col);
-        // if there is a shared lock displaying already, do nothing
-        if (cell_data.charAt(0) === "*") {
-          return;
-        } else {
-          let new_data = "*" + cell_data
-          this.hotTableComponent1.current.hotInstance.setDataAtCell(row, col, new_data);
-        }
+    //   } else if (table === "cs225_gradebook") {
+    //     let cell_data = this.hotTableComponent1.current.hotInstance.getDataAtCell(row, col);
+    //     // if there is a shared lock displaying already, do nothing
+    //     if (cell_data.charAt(0) === "*") {
+    //       return;
+    //     } else {
+    //       let new_data = "*" + cell_data
+    //       this.hotTableComponent1.current.hotInstance.setDataAtCell(row, col, new_data);
+    //     }
 
-      } else if (table === "students") {
-        let cell_data = this.hotTableComponent2.current.hotInstance.getDataAtCell(row, col);
-        // if there is a shared lock displaying already, do nothing
-        if (cell_data.charAt(0) === "*") {
-          return;
-        } else {
-          let new_data = "*" + cell_data
-          this.hotTableComponent2.current.hotInstance.setDataAtCell(row, col, new_data);
-        }
+    //   } else if (table === "students") {
+    //     let cell_data = this.hotTableComponent2.current.hotInstance.getDataAtCell(row, col);
+    //     // if there is a shared lock displaying already, do nothing
+    //     if (cell_data.charAt(0) === "*") {
+    //       return;
+    //     } else {
+    //       let new_data = "*" + cell_data
+    //       this.hotTableComponent2.current.hotInstance.setDataAtCell(row, col, new_data);
+    //     }
 
-      } else if (table === "team_grades") {
-        let cell_data = this.hotTableComponent3.current.hotInstance.getDataAtCell(row, col);
-        // if there is a shared lock displaying already, do nothing
-        if (cell_data.charAt(0) === "*") {
-          return;
-        } else {
-          let new_data = "*" + cell_data
-          this.hotTableComponent3.current.hotInstance.setDataAtCell(row, col, new_data);
-        }
-      } else if (table === "team_comments") {
-        let cell_data = this.hotTableComponent4.current.hotInstance.getDataAtCell(row, col);
-        // if there is a shared lock displaying already, do nothing
-        if (cell_data.charAt(0) === "*") {
-          return;
-        } else {
-          let new_data = "*" + cell_data
-          this.hotTableComponent4.current.hotInstance.setDataAtCell(row, col, new_data);
-        }
-      }
-      cell_read_only();
-    }
+    //   } else if (table === "team_grades") {
+    //     let cell_data = this.hotTableComponent3.current.hotInstance.getDataAtCell(row, col);
+    //     // if there is a shared lock displaying already, do nothing
+    //     if (cell_data.charAt(0) === "*") {
+    //       return;
+    //     } else {
+    //       let new_data = "*" + cell_data
+    //       this.hotTableComponent3.current.hotInstance.setDataAtCell(row, col, new_data);
+    //     }
+    //   } else if (table === "team_comments") {
+    //     let cell_data = this.hotTableComponent4.current.hotInstance.getDataAtCell(row, col);
+    //     // if there is a shared lock displaying already, do nothing
+    //     if (cell_data.charAt(0) === "*") {
+    //       return;
+    //     } else {
+    //       let new_data = "*" + cell_data
+    //       this.hotTableComponent4.current.hotInstance.setDataAtCell(row, col, new_data);
+    //     }
+    //   }
+    //   cell_read_only();
+    // }
+
+    // REMOVED FOR THE FIRST USER STUDY -------------------------------------------------------------------------------------------
 
     recorded_time = Date.now() / 1000;
 
@@ -842,6 +847,12 @@ class Academic extends Component {
     this.socket.disconnect();
   }
 
+  toggleLoadErrorModal = () => {
+    this.setState({
+      isLoadErrorModelOpen: !this.state.isLoadErrorModelOpen
+    })
+  }
+
   toggleShowHistory = () => {
     this.setState({
       isShowHistoryOpen: !this.state.isShowHistoryOpen
@@ -890,25 +901,6 @@ class Academic extends Component {
       })
   }
 
-  display = () => {
-    display_dataset_button = "";
-    if (this.state.transaction_mode) {
-      transaction_button = <Button size='lg' className='display-button' color="primary" onClick={this.end_transaction} >End Transaction</Button> 
-    } else {
-      transaction_button = <Button size='lg' className='display-button' color="primary" onClick={this.start_transaction} >Start Transaction</Button>
-    }
-    this.setState({
-      data_original: this.state.data_original.concat(buffer)
-    })
-
-    // fill in column headers and row headers
-    if (data_display.length === 0) {
-      data_display.push(col_headers);
-    }
-    data_display = data_display.concat(buffer_copy) 
-    console.log("data display is: ", data_display);
-  }
-
   handleScroll = (e) => {
     const bottom = e.target.scrollHeight - e.target.scrollTop === e.target.clientHeight;
     if (bottom) {
@@ -930,6 +922,8 @@ class Academic extends Component {
       let feature = "";
       if (isNaN(chn_copy[0][3])) {
         feature = "STR";
+      } else if (chn_copy[0][3].length === 0) {
+        feature = "EMPTY";
       } else {
         feature = "DIGIT";
       }
@@ -987,11 +981,17 @@ class Academic extends Component {
     });
     transaction_button = <Button size='lg' className='display-button' color="primary" onClick={this.start_transaction} >Start Transaction</Button>
 
-    // signal backend to release locks
-    this.socket.emit('FINISH_TRANSACTION');
+    // signal backend to release locks | Removed for the first user study
+    // this.socket.emit('FINISH_TRANSACTION');
 
     // send updates to socket
     setTimeout(() => {
+      // remove data noise by removing the invisible click before end transaction
+      if (user_actions.length >= 3) {
+        if (user_actions[user_actions.length - 1][1] === "click" && user_actions[user_actions.length - 2][1] === "edit_cell" && user_actions[user_actions.length - 3][1] === "keyPress_enter") {
+          user_actions.pop();
+        }
+      }
       user_actions.push(["END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION"]);
       this.commit_transaction();
 
@@ -1261,11 +1261,11 @@ class Academic extends Component {
       this.toggleInstructionModal();
     } else {
       table_loaded = true;
-      utils.load_simulation_v2(1, "attendance", attendance_display, buffer_copy, attendance_col_headers);
-      utils.load_simulation_v2(1, "grade_book", greadebook_display, buffer_copy, grade_book_col_headers);
-      utils.load_simulation_v2(1, "students", students_display, buffer_copy, student_col_headers);
-      utils.load_simulation_v2(1, "team_grades", team_grades_display, buffer_copy, team_grades_col_headers);
-      utils.load_simulation_v2(1, "team_comments", team_comments_display, buffer_copy, team_comments_col_headers);
+      utils.load_simulation_v2(1, "attendance", attendance_display, load_error, attendance_col_headers);
+      utils.load_simulation_v2(1, "grade_book", greadebook_display, load_error, grade_book_col_headers);
+      utils.load_simulation_v2(1, "students", students_display, load_error, student_col_headers);
+      utils.load_simulation_v2(1, "team_grades", team_grades_display, load_error, team_grades_col_headers);
+      utils.load_simulation_v2(1, "team_comments", team_comments_display, load_error, team_comments_col_headers);
       setTimeout(() => {
           attendance_display = [attendance_col_headers].concat(attendance_display);
           greadebook_display = [grade_book_col_headers].concat(greadebook_display);
@@ -1275,7 +1275,7 @@ class Academic extends Component {
           this.setState({
             isInstructionOpen: false
           })
-      }, 2000);
+      }, 3000);
       col_headers = attendance_col_headers;
       this.setState({
         isNameModalOpen: true
@@ -1285,41 +1285,19 @@ class Academic extends Component {
 
   reload_tables = () => {
     table_loaded = true;
-    utils.load_simulation_v2(1, "attendance", attendance_display, buffer_copy, attendance_col_headers);
-    utils.load_simulation_v2(1, "grade_book", greadebook_display, buffer_copy, grade_book_col_headers);
-    utils.load_simulation_v2(1, "students", students_display, buffer_copy, student_col_headers);
-    utils.load_simulation_v2(1, "team_grades", team_grades_display, buffer_copy, team_grades_col_headers);
-    utils.load_simulation_v2(1, "team_comments", team_comments_display, buffer_copy, team_comments_col_headers);
+    utils.load_simulation_v2(1, "attendance", attendance_display, load_error, attendance_col_headers);
+    utils.load_simulation_v2(1, "grade_book", greadebook_display, load_error, grade_book_col_headers);
+    utils.load_simulation_v2(1, "students", students_display, load_error, student_col_headers);
+    utils.load_simulation_v2(1, "team_grades", team_grades_display, load_error, team_grades_col_headers);
+    utils.load_simulation_v2(1, "team_comments", team_comments_display, load_error, team_comments_col_headers);
     setTimeout(() => {
         attendance_display = [attendance_col_headers].concat(attendance_display);
         greadebook_display = [grade_book_col_headers].concat(greadebook_display);
         students_display = [student_col_headers].concat(students_display);
         team_grades_display = [team_grades_col_headers].concat(team_grades_display);
         team_comments_display = [team_comments_col_headers].concat(team_comments_display);
-        this.setState({
-          attendance_table: attendance_display
-        })
-    }, 2000);
+    }, 3000);
     col_headers = attendance_col_headers;
-  }
-
-  redirect = (e) => {
-    e.preventDefault();
-    this.setState({
-      redirect: true
-    })
-
-    // reset all display
-    attendance_display = [];
-    greadebook_display = [];
-    student_status_display = [];
-    attendance_col_headers = [];
-    grade_book_col_headers = [];
-    student_status_col_headers = [];
-
-    // clear recorded actions
-    user_actions = [];
-    table_loaded = false;
   }
 
   onNameSubmit = (e) => {
@@ -1337,19 +1315,33 @@ class Academic extends Component {
       simulation: "academic"
     }
     this.socket.emit('SEND_USERNAME', name_package);
-    console.log("sending user name");
     this.toggleNameModal();
+
+    // handle load error that happens the FIRST time loading the table
+    if (load_error[0][0] === 1) {
+      this.setState({
+        isLoadErrorModelOpen: true
+      });
+    }
   }
 
   restart = () => {
     // reset all display
     attendance_display = [];
     greadebook_display = [];
-    student_status_display = [];
+    students_display = [];
+    team_grades_display = [];
+    team_comments_display = [];
+
+    // reset all col headers
     attendance_col_headers = [];
     grade_book_col_headers = [];
-    student_status_col_headers = [];
     student_col_headers = [];
+    team_grades_col_headers = [];
+    team_comments_col_headers = [];
+
+    // reset load error
+    load_error[0][0] = 0;
 
     // reload all tables
     this.reload_tables();
@@ -1363,8 +1355,25 @@ class Academic extends Component {
     })
     this.toggle('1');
 
-    // toggle restart confirmation
-    this.toggleRestartModal();
+    // open restart confirmation
+    this.setState({
+      isRestartModalOpen: true
+    })
+  }
+
+  close_restart_comfirmation = () => {
+    setTimeout(() => {
+      this.setState({
+        isRestartModalOpen: false
+      });
+
+      // handle load error that happens during restart
+      if (load_error[0][0] === 1) {
+        this.setState({
+          isLoadErrorModelOpen: true
+        });
+      }
+    }, 2000);
   }
 
   close_confirmation = () => {
@@ -1379,21 +1388,6 @@ class Academic extends Component {
       table: this.state.curr_table
     }
     this.socket.emit('REQUEST_SHARED_LOCK', shared_lock_request);
-  }
-
-  refresh = () => {
-    console.log(attendance_display);
-    console.log(greadebook_display);
-    console.log(students_display);
-    console.log(team_grades_display);
-    console.log(team_comments_display);
-    this.setState({
-      refresh: !this.state.refresh
-    });
-  }
-
-  test = () => {
-    attendance_display[0][0] = "Haha"
   }
 
   record_read_cell = () => {
@@ -1470,10 +1464,6 @@ class Academic extends Component {
                     <Button size='lg' className='display-button' color="info" onClick={this.request_read_lock} >Read Lock</Button> */}
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     <Button size='lg' className='display-button' color="info" onClick={this.record_read_cell} >Read Cell</Button>
-                    &nbsp;&nbsp;&nbsp;&nbsp;
-                    <Button size='lg' className='display-button' color="info" onClick={this.refresh} >Refresh</Button>
-                    {/* &nbsp;&nbsp;&nbsp;&nbsp;
-                    <Button size='lg' className='display-button' color="info" onClick={this.test} >TEST</Button> */}
                   </p>
                   {this.state.edit_message}
 
@@ -1546,12 +1536,12 @@ class Academic extends Component {
                       Your simulation has been restarted. All the changes that haven't been committed yet are clearned. 
                     </ModalBody>
                     <ModalFooter>
-                      <Button size='lg' className='display-button' color="info" onClick={this.toggleRestartModal}>Got It</Button>
+                      <Button size='lg' className='display-button' color="info" onClick={this.close_restart_comfirmation}>Got It</Button>
                     </ModalFooter>
                   </Modal>
 
                   <Modal size='lg' isOpen={this.state.isCompleteConfirmationModalOpen} toggle={this.toggleCompleteConfirmModal}>
-                    <ModalHeader toggle={this.toggleRestartModal}>Complete Confirmation</ModalHeader>
+                    <ModalHeader toggle={this.toggleCompleteConfirmModal}>Complete Confirmation</ModalHeader>
                     <ModalBody>
                       The current part of the simulation has been completed and submitted. If you have completed Part 1, you can work on Part 2 now. 
                       If you have completed Part 2, you can simply close this webpage. If you submitted by mistake or you need to report an error, please contact ninghan2@illinois.edu 
@@ -1576,6 +1566,17 @@ class Academic extends Component {
                     </ModalBody>
                     <ModalFooter>
                       <Button size='lg' color="primary" className='single_search_submit' onClick={this.toggleShowHistory}>Close</Button> {' '}
+                    </ModalFooter>
+                  </Modal>
+
+                  <Modal size='lg' isOpen={this.state.isLoadErrorModelOpen} toggle={this.toggleLoadErrorModal}>
+                    <ModalHeader toggle={this.toggleLoadErrorModal}>Load Error!</ModalHeader>
+                    <ModalBody>
+                      Something went wrong while loading your tables. Please press the "Restart" button on your screen to reload the tables after you close this message. If the error keeps coming up, 
+                      contact ninghan2@illinois.edu 
+                    </ModalBody>
+                    <ModalFooter>
+                      <Button size='lg' className='display-button' color="info" onClick={this.toggleLoadErrorModal}>Close Message</Button>
                     </ModalFooter>
                   </Modal>
                   
