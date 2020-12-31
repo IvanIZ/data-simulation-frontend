@@ -14,7 +14,7 @@ class Utils {
 
         let ATT_NUM = 0;
         if (simulation_type === "attendance") {
-            ATT_NUM = 12;
+            ATT_NUM = 18;
         } else if (simulation_type === "grade_book") {
             ATT_NUM = 11;
         }
@@ -58,7 +58,7 @@ class Utils {
                     var temp = []
                     for (var j = 0; j < ATT_NUM; j++) {
                         if (simulation_type === "attendance") {  // attendance
-                            if (j === 0) {temp[j] = data[i]['ID'];}
+                            if (j === 0) {temp[j] = data[i]['NetID'];}
                             if (j === 1) { temp[j] = data[i]['name'];}
                             if (j === 2) {temp[j] = data[i]['Week1']}
                             if (j === 3) {temp[j] = data[i]['Week2']}
@@ -70,9 +70,15 @@ class Utils {
                             if (j === 9) {temp[j] = data[i]['Week8']}
                             if (j === 10) {temp[j] = data[i]['Week9']}
                             if (j === 11) {temp[j] = data[i]['Week10']}
+                            if (j === 12) {temp[j] = data[i]['Week11']}
+                            if (j === 13) {temp[j] = data[i]['Week12']}
+                            if (j === 14) {temp[j] = data[i]['Week13']}
+                            if (j === 15) {temp[j] = data[i]['Week14']}
+                            if (j === 16) {temp[j] = data[i]['Week15']}
+                            if (j === 17) {temp[j] = data[i]['Week16']}
                         }
                         if (simulation_type === "grade_book") {      // grade book 
-                            if (j === 0) {temp[j] = data[i]['ID']}
+                            if (j === 0) {temp[j] = data[i]['NetID']}
                             if (j === 1) {temp[j] = data[i]['name']}
                             if (j === 2) {temp[j] = data[i]['MP1']}
                             if (j === 3) {temp[j] = data[i]['MP2']}
@@ -154,10 +160,10 @@ class Utils {
                             if (j === 4) {temp[j] = data[i]['disciplinary action']}
                             if (j === 5) {temp[j] = data[i]['status']}
                         } else if (simulation_type === "students") { // students
-                            if (j === 0) {temp[j] = data[i]['ID']}
+                            if (j === 0) {temp[j] = data[i]['NetID']}
                             if (j === 1) {temp[j] = data[i]['name']}
-                            if (j === 2) {temp[j] = data[i]['team']}
-                            if (j === 3) {temp[j] = data[i]['email']}
+                            if (j === 2) {temp[j] = data[i]['email']}
+                            if (j === 3) {temp[j] = data[i]['team']}
                         } else if (simulation_type === "team_grades") { // team grades
                             if (j === 0) {temp[j] = data[i]['team']}
                             if (j === 1) {temp[j] = data[i]['proposal']}
@@ -176,8 +182,7 @@ class Utils {
                         }
                     }
 
-                    buffer[i] = temp;
-                    // buffer_copy[i] = temp.slice()
+                    // buffer[i] = temp;
                     buffer.push(temp.slice());
                     // return buffer;
                 }
@@ -359,7 +364,7 @@ class Utils {
 
     fill_col_headers = (col_head, simulation_type) => {
         if (simulation_type === "attendance") {  // attendance
-            col_head.push("ID");
+            col_head.push("NetID");
             col_head.push("Name");
             col_head.push("Week1");
             col_head.push("Week2");
@@ -371,9 +376,15 @@ class Utils {
             col_head.push("Week8");
             col_head.push("Week9");
             col_head.push("Week10");
+            col_head.push("Week11");
+            col_head.push("Week12");
+            col_head.push("Week13");
+            col_head.push("Week14");
+            col_head.push("Week15");
+            col_head.push("Week16");
         }
         if (simulation_type === "grade_book") {  // grade book
-            col_head.push("ID");
+            col_head.push("NetID");
             col_head.push("Name");
             col_head.push("MP1");
             col_head.push("MP2");
@@ -464,10 +475,10 @@ class Utils {
         }
 
         if (simulation_type === "students") { // students
-            col_head.push("ID");
+            col_head.push("NetID");
             col_head.push("Name");
-            col_head.push("Team");
             col_head.push("Email");
+            col_head.push("Team");
         }
 
         if (simulation_type === "team_grades") { // team grades

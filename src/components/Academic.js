@@ -912,11 +912,9 @@ class Academic extends Component {
   check_cell_change = () => {
     if (change_detected) {
 
-      // find current state
-      let state = "Y"; //  Y means in a transaction 
-      if (!this.state.transaction_mode) {
-        state = "N";
-      }
+      // get current chicago time
+      const date = new Date();
+      let curr_time = date.toLocaleString('en-US', { timeZone: 'America/Chicago' });
 
       // extract features of the new value  [row, col, prev, new]
       let feature = "";
@@ -929,7 +927,7 @@ class Academic extends Component {
       }
 
       // record user action
-      user_actions.push([this.state.name, "edit_cell", chn_copy[0][0], chn_copy[0][1], feature, this.state.curr_table, chn_copy[0][0] + 1, col_headers[chn_copy[0][1]], state]);
+      user_actions.push([this.state.name, "edit_cell", chn_copy[0][0], chn_copy[0][1], feature, this.state.curr_table, chn_copy[0][0] + 1, col_headers[chn_copy[0][1]], curr_time]);
       
       pending_changes.user = this.state.user_name
   
@@ -971,7 +969,7 @@ class Academic extends Component {
     })
     transaction_button = <Button size='lg' className='display-button' color="primary" onClick={this.end_transaction} >End Transaction</Button> 
     setTimeout(() => {
-      user_actions.push(["START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", ]);
+      user_actions.push([this.state.name, "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", ]);
     }, 200);
   }
 
@@ -992,7 +990,7 @@ class Academic extends Component {
           user_actions.pop();
         }
       }
-      user_actions.push(["END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION"]);
+      user_actions.push([this.state.name, "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION"]);
       this.commit_transaction();
 
       // send updates to the database
@@ -1013,41 +1011,19 @@ class Academic extends Component {
 
   track_action = (e, action_type) => {
 
-    // find current state
-    let state = "Y"; //  Y means in a transaction
-    if (!this.state.transaction_mode) {
-      state = "N";
-    }
-
-    // calculate idle time and record idle action if necessary
-    let idle_duration = (Date.now() / 1000) - recorded_time;
-    recorded_time = (Date.now() / 1000);
-    if (idle_duration > 3) {
-
-      // check if we can merge two idle periods together
-      if (user_actions.length > 0 && user_actions[user_actions.length - 1][1] === "idle") {
-        let prev_idle_time = user_actions[user_actions.length - 1][2];
-        user_actions.pop();
-        user_actions.push([this.state.name, "idle", parseInt(idle_duration) + prev_idle_time, null, null, this.state.curr_table, null, null, state]);
-      } else {
-        user_actions.push([this.state.name, "idle", parseInt(idle_duration), null, null, this.state.curr_table, null, null, state]);
-      }
-    }
+    // get current chicago time
+    const date = new Date();
+    let curr_time = date.toLocaleString('en-US', { timeZone: 'America/Chicago' });
 
     // check and update possible spreadsheet layout change
     if (layout_changes.layout_changed) { 
-      
-      // remove prev idle action
-      if (user_actions.length > 0 && user_actions[user_actions.length - 1][1] === "idle") {
-        user_actions.pop();
-      }
 
       // add in all layout changes
       for (var i = 0; i < layout_changes.changes.length; i++) {
         let layout_change_type = layout_changes.changes[i][0];
         let layout_change_direction = layout_changes.changes[i][1];
         let change_index = layout_changes.changes[i][2];
-        user_actions.push([this.state.name, layout_change_type, change_index, layout_change_direction, null, this.state.curr_table, null, null, state]); 
+        user_actions.push([this.state.name, layout_change_type, change_index, layout_change_direction, null, this.state.curr_table, null, null, curr_time]); 
       }
 
       // clear up current layout_changes recorder
@@ -1055,83 +1031,81 @@ class Academic extends Component {
       layout_changes.layout_changed = false;
     }
 
-    // handle scroll actions
-    if (action_type === "scroll") {
+    // // handle scroll actions
+    // if (action_type === "scroll") {
 
-      console.log("i'm scorlling rn!!!");
+    //   let scroll_diff = prev_scrolltop - e.target.scrollTop;
+    //   let action_length = user_actions.length;
 
-      let scroll_diff = prev_scrolltop - e.target.scrollTop;
-      let action_length = user_actions.length;
-
-      // don't hace scroll_diff === 0 because each scroll on mouse will result in two identical function calls
-      if (scroll_diff > 0) {
+    //   // don't hace scroll_diff === 0 because each scroll on mouse will result in two identical function calls
+    //   if (scroll_diff > 0) {
         
-        // check if previous is a large up scroll. If so, do nothing
-        if (action_length >= 1 && user_actions[action_length - 1][1] === "up_scroll_l") {
-          // deliberately do nothing here
-        }
+    //     // check if previous is a large up scroll. If so, do nothing
+    //     if (action_length >= 1 && user_actions[action_length - 1][1] === "up_scroll_l") {
+    //       // deliberately do nothing here
+    //     }
 
-        // check for combining 6 small up scrolls
-        else if (action_length >= SCROLL_SIZE) {
-          let combine = true;
-          for (var i = 0; i < SCROLL_SIZE; i++) {
-              if (user_actions[action_length - 1 - i][1] !== "up_scroll_s") {
-                combine = false;
-                break;
-              }
-          }
+    //     // check for combining 6 small up scrolls
+    //     else if (action_length >= SCROLL_SIZE) {
+    //       let combine = true;
+    //       for (var i = 0; i < SCROLL_SIZE; i++) {
+    //           if (user_actions[action_length - 1 - i][1] !== "up_scroll_s") {
+    //             combine = false;
+    //             break;
+    //           }
+    //       }
 
-          if (combine) {
-            for (var i = 0; i < SCROLL_SIZE; i++) {
-                user_actions.pop();
-            }
-            user_actions.push([this.state.name, "up_scroll_l", null, null, null, this.state.curr_table, null, null, state]);
-          }
+    //       if (combine) {
+    //         for (var i = 0; i < SCROLL_SIZE; i++) {
+    //             user_actions.pop();
+    //         }
+    //         user_actions.push([this.state.name, "up_scroll_l", null, null, null, this.state.curr_table, null, null, curr_time]);
+    //       }
 
-          else {
-            user_actions.push([this.state.name, "up_scroll_s", null, null, null, this.state.curr_table, null, null, state]);
-          }
-        }
+    //       else {
+    //         user_actions.push([this.state.name, "up_scroll_s", null, null, null, this.state.curr_table, null, null, curr_time]);
+    //       }
+    //     }
 
-        else {
-          user_actions.push([this.state.name, "up_scroll_s", null, null, null, this.state.curr_table, null, null, state]);
-        }
+    //     else {
+    //       user_actions.push([this.state.name, "up_scroll_s", null, null, null, this.state.curr_table, null, null, curr_time]);
+    //     }
 
-      } else if (scroll_diff < 0) {
+    //   } else if (scroll_diff < 0) {
 
-        // check if previous is a large down scroll. If so, do nothing
-        if (action_length >= 1 && user_actions[action_length - 1][1] === "down_scroll_l") {
-            // deliberately do nothing here
-        }
+    //     // check if previous is a large down scroll. If so, do nothing
+    //     if (action_length >= 1 && user_actions[action_length - 1][1] === "down_scroll_l") {
+    //         // deliberately do nothing here
+    //     }
 
-        // check for combining 6 small scrolls
-        else if (action_length >= SCROLL_SIZE) {
-          let combine = true;
-          for (var i = 0; i < SCROLL_SIZE; i++) {
-              if (user_actions[action_length - 1 - i][1] !== "down_scroll_s") {
-                combine = false;
-                break;
-              }
-          }
+    //     // check for combining 6 small scrolls
+    //     else if (action_length >= SCROLL_SIZE) {
+    //       let combine = true;
+    //       for (var i = 0; i < SCROLL_SIZE; i++) {
+    //           if (user_actions[action_length - 1 - i][1] !== "down_scroll_s") {
+    //             combine = false;
+    //             break;
+    //           }
+    //       }
           
-          if (combine) {
-            for (var i = 0; i < SCROLL_SIZE; i++) {
-                user_actions.pop();
-            }
-            user_actions.push([this.state.name, "down_scroll_l", null, null, null, this.state.curr_table, null, null, state]);
-          }
+    //       if (combine) {
+    //         for (var i = 0; i < SCROLL_SIZE; i++) {
+    //             user_actions.pop();
+    //         }
+    //         user_actions.push([this.state.name, "down_scroll_l", null, null, null, this.state.curr_table, null, null, curr_time]);
+    //       }
 
-          else {
-            user_actions.push([this.state.name, "down_scroll_s", null, null, null, this.state.curr_table, null, null, state]);
-          }
-        } 
+    //       else {
+    //         user_actions.push([this.state.name, "down_scroll_s", null, null, null, this.state.curr_table, null, null, curr_time]);
+    //       }
+    //     } 
 
-        else {
-          user_actions.push([this.state.name, "down_scroll_s", null, null, null, this.state.curr_table, null, null, state]);
-        }
-      }
-      this.handleScroll(e);
-    }
+    //     else {
+    //       user_actions.push([this.state.name, "down_scroll_s", null, null, null, this.state.curr_table, null, null, curr_time]);
+    //     }
+    //   }
+    //   this.handleScroll(e);
+    // }
 
     // calculate click action
     else if (action_type === "click") {
@@ -1140,17 +1114,17 @@ class Academic extends Component {
         
         // select a row
         if (select_j < 0) {
-          user_actions.push([this.state.name, "select_r", select_i, null, null, this.state.curr_table, null, null, state]);
+          user_actions.push([this.state.name, "select_r", select_i, null, null, this.state.curr_table, null, null, curr_time]);
         }
 
         // select a column
         else if (select_i < 0) {
-          user_actions.push([this.state.name, "select_c", select_j, null, null, this.state.curr_table, null, null, state]);
+          user_actions.push([this.state.name, "select_c", select_j, null, null, this.state.curr_table, null, null, curr_time]);
         }
         
         // select a cell
         else {
-          user_actions.push([this.state.name, action_type, select_i, select_j, null, this.state.curr_table, select_i + 1, col_headers[select_j], state]);
+          user_actions.push([this.state.name, action_type, select_i, select_j, null, this.state.curr_table, select_i + 1, col_headers[select_j], curr_time]);
         }
         currently_editing = false;
       }
@@ -1163,17 +1137,17 @@ class Academic extends Component {
       if (change_detected) {
         // handle enter press
         if (e.key === "Enter") {
-          user_actions.push([this.state.name, "keyPress_enter", chn_copy[0][0], chn_copy[0][1], null, this.state.curr_table, chn_copy[0][0] + 1, col_headers[chn_copy[0][1]], state ]);
+          user_actions.push([this.state.name, "keyPress_enter", chn_copy[0][0], chn_copy[0][1], null, this.state.curr_table, chn_copy[0][0] + 1, col_headers[chn_copy[0][1]], curr_time]);
         }
 
         // handle tab press
         else if (e.key === "Tab") {
-          user_actions.push([this.state.name, "keyPress_tab", chn_copy[0][0], chn_copy[0][1], null, this.state.curr_table, chn_copy[0][0] + 1, col_headers[chn_copy[0][1]], state]);
+          user_actions.push([this.state.name, "keyPress_tab", chn_copy[0][0], chn_copy[0][1], null, this.state.curr_table, chn_copy[0][0] + 1, col_headers[chn_copy[0][1]], curr_time]);
         }
 
         // all other press 
         else {
-          user_actions.push([this.state.name, "keyPress", chn_copy[0][0], chn_copy[0][1], null, this.state.curr_table, chn_copy[0][0] + 1, col_headers[chn_copy[0][1]], state]);
+          user_actions.push([this.state.name, "keyPress", chn_copy[0][0], chn_copy[0][1], null, this.state.curr_table, chn_copy[0][0] + 1, col_headers[chn_copy[0][1]], curr_time]);
         }
       }
       this.check_cell_change();
@@ -1182,7 +1156,11 @@ class Academic extends Component {
   }
 
   store_training_data = () => {
-    user_actions.push([this.state.name, "END_TRAINING_DATA", null, null, null, this.state.curr_table, null, null, "END"]);
+    // get current chicago time
+    const date = new Date();
+    let curr_time = date.toLocaleString('en-US', { timeZone: 'America/Chicago' });
+    
+    user_actions.push([this.state.name, "END_TRAINING_DATA", null, null, null, this.state.curr_table, null, null, curr_time]);
     let action_package = {
       user_actions: user_actions
     }
@@ -1392,11 +1370,9 @@ class Academic extends Component {
 
   record_read_cell = () => {
 
-    // find current state
-    let state = "Y"; //  Y means in a transaction
-    if (!this.state.transaction_mode) {
-      state = "N";
-    }
+    // get current chicago time
+    const date = new Date();
+    let curr_time = date.toLocaleString('en-US', { timeZone: 'America/Chicago' });
 
     // find the correct table
     let table = "";
@@ -1427,11 +1403,11 @@ class Academic extends Component {
       if (prev_action[1] == "READ" && prev_action[2] == select_i && prev_action[3] == select_j) {
         // do nothing
       } else {
-        user_actions.push([this.state.name, "READ", select_i, select_j, feature, this.state.curr_table, select_i + 1, col_headers[select_j], state]);
+        user_actions.push([this.state.name, "READ", select_i, select_j, feature, this.state.curr_table, select_i + 1, col_headers[select_j], curr_time]);
       }
 
     } else {
-      user_actions.push([this.state.name, "READ", select_i, select_j, feature, this.state.curr_table, select_i + 1, col_headers[select_j], state]);
+      user_actions.push([this.state.name, "READ", select_i, select_j, feature, this.state.curr_table, select_i + 1, col_headers[select_j], curr_time]);
     }
   }
 
@@ -1627,7 +1603,8 @@ class Academic extends Component {
                 <h4>
                     Attendance
                 </h4> 
-                <div id = "display_portion" onScrollCapture={e => this.track_action(e, "scroll")}  tabIndex="1">
+                {/* onScrollCapture={e => this.track_action(e, "scroll")} */}
+                <div id = "display_portion"  tabIndex="1">
                     <HotTable className="handsontable" id ="display_table" data={attendance_display} ref={this.hotTableComponent} id={this.id}
                         colHeaders={true} 
                         rowHeaders={true} 
@@ -1646,7 +1623,7 @@ class Academic extends Component {
                 <h4>
                     Gradebook
                 </h4> 
-                <div id = "display_portion" onScrollCapture={e => this.track_action(e, "scroll")}  tabIndex="2">
+                <div id = "display_portion" tabIndex="2">
                     <HotTable className="handsontable" id ="display_table" data={greadebook_display} ref={this.hotTableComponent1} id={this.id}
                         colHeaders={true} 
                         rowHeaders={true} 
@@ -1665,7 +1642,7 @@ class Academic extends Component {
                 <h4>
                     Students Table
                 </h4> 
-                <div id = "display_portion" onScrollCapture={e => this.track_action(e, "scroll")}  tabIndex="3">
+                <div id = "display_portion" tabIndex="3">
                     <HotTable className="handsontable" id ="display_table" data={students_display} ref={this.hotTableComponent2} id={this.id}
                         colHeaders={true} 
                         rowHeaders={true} 
@@ -1684,7 +1661,7 @@ class Academic extends Component {
                 <h4>
                     Team Grades
                 </h4> 
-                <div id = "display_portion" onScrollCapture={e => this.track_action(e, "scroll")}  tabIndex="4">
+                <div id = "display_portion" tabIndex="4">
                     <HotTable className="handsontable" id ="display_table" data={team_grades_display} ref={this.hotTableComponent3} id={this.id}
                         colHeaders={true} 
                         rowHeaders={true} 
@@ -1703,7 +1680,7 @@ class Academic extends Component {
                 <h4>
                     Team Comments
                 </h4> 
-                <div id = "display_portion" onScrollCapture={e => this.track_action(e, "scroll")}  tabIndex="5">
+                <div id = "display_portion" tabIndex="5">
                     <HotTable className="handsontable" id ="display_table" data={team_comments_display} ref={this.hotTableComponent4} id={this.id}
                         colHeaders={true} 
                         rowHeaders={true} 
