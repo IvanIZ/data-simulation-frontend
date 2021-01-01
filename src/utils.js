@@ -16,7 +16,7 @@ class Utils {
         if (simulation_type === "attendance") {
             ATT_NUM = 18;
         } else if (simulation_type === "grade_book") {
-            ATT_NUM = 11;
+            ATT_NUM = 12;
         }
         else if (simulation_type === "check_book" || simulation_type === "check_book2" || simulation_type === "check_book3") {
             ATT_NUM = 6;
@@ -87,8 +87,9 @@ class Utils {
                             if (j === 6) {temp[j] = data[i]['Exam1']}
                             if (j === 7) {temp[j] = data[i]['Exam2']}
                             if (j === 8) {temp[j] = data[i]['Final']}
-                            if (j === 9) {temp[j] = data[i]['Project']}
-                            if (j === 10) {temp[j] = data[i]['Overall']}
+                            if (j === 9) {temp[j] = data[i]['Participation']}
+                            if (j === 10) {temp[j] = data[i]['Project']}
+                            if (j === 11) {temp[j] = data[i]['Overall']}
                         } else if (simulation_type === "check_book" || simulation_type === "check_book2" || simulation_type === "check_book3") {    // check book 1, 2, 3
                             if (j === 0) {temp[j] = data[i]['number']}
                             if (j === 1) {temp[j] = data[i]['date']}
@@ -393,6 +394,7 @@ class Utils {
             col_head.push("Exam1");
             col_head.push("Exam2");
             col_head.push("Final");
+            col_head.push("Participation");
             col_head.push("Project");
             col_head.push("Overall");
         }
