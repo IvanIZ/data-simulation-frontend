@@ -1134,6 +1134,29 @@ class Academic extends Component {
     // calculate kepress action
     else if (action_type === "key_press") {
 
+      if (currently_editing) {
+        console.log("currently editing");
+         // left arrow
+        if (e.keyCode === 37) {
+          user_actions.push([this.state.name, "left_arrow", select_i, select_j, null, this.state.curr_table, select_i + 1, col_headers[select_j], curr_time]);
+        }
+
+        // up arrow
+        else if (e.keyCode === 38) {
+          user_actions.push([this.state.name, "up_arrow", select_i, select_j, null, this.state.curr_table, select_i + 1, col_headers[select_j], curr_time]);
+        }
+
+        // right arrow
+        else if (e.keyCode === 39) {
+          user_actions.push([this.state.name, "right_arrow", select_i, select_j, null, this.state.curr_table, select_i + 1, col_headers[select_j], curr_time]);
+        }
+
+        // down arrow
+        else if (e.keyCode === 40) {
+          user_actions.push([this.state.name, "down_arrow", select_i, select_j, null, this.state.curr_table, select_i + 1, col_headers[select_j], curr_time]);
+        }
+      }
+
       if (change_detected) {
         // handle enter press
         if (e.key === "Enter") {
