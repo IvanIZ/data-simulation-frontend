@@ -41,8 +41,11 @@ let team_comments_display = [];
 
 // A JSON object that keeps track of previous layout changes
 let layout_changes = {
+  incoming: false,
   layout_changed: false,
-  changes: [] // 1st element: action;  2nd element: index
+  changes: [], // 1st element: action;  2nd element: index
+  start_idx: 0, 
+  socketID: ""
 }
 
 let col_headers = []
@@ -84,6 +87,7 @@ let transaction_button = "";
 let pending_changes = {
   data:[], // 2d array to store difference: y, value, x, 
   try_message: "SENT MESSAGE! SUCCESS!", 
+  socketID: "",
   user: ""
 }
 
@@ -154,6 +158,8 @@ class Academic extends Component {
     // this.socket = io('localhost:3001');
 
     this.socket.on('RECEIVE_ID', function(id){
+      layout_changes.socketID = id;
+      pending_changes.socketID = id;
       change_id(id);
     });
 
@@ -219,25 +225,81 @@ class Academic extends Component {
 
     const addMessage = data => {
       let change_table = data.data
-      for (var x = 0; x < change_table.length; x++) {
+      for (var x = 0; x < change_table.length; x++) { // [table_name, change_type, value, search_attribute, update_attribute]
+
+        // skip layout changes
+        if (change_table[x][1] === "layout_change") {
+          continue;
+        }
+
         // Extract data
         let table = change_table[x][0]; // table corresponds to this change  
-        let j = change_table[x][1] - 1   // 0 --> y_coord
         let value = change_table[x][2] // 1 --> actual value
-        let i = change_table[x][3] - 1 // 2 --> x_coord
 
         // reflect each update to its corresponding table
         try {
           if (table === "attendance" && typeof attendance_display !== "undefined") {
-            attendance_display[i][j] = value;
+            
+            for (var i = 0; i < attendance_display.length; i++) {
+              // find the correct row
+              if (attendance_display[i][0] === change_table[x][3]) {
+
+                for (var j = 0; j < attendance_col_headers.length; j++) {
+                  if (attendance_col_headers[j] === change_table[x][4]) {
+                    attendance_display[i][j] = value;
+                  }
+                }
+              }
+            }
+
           } else if (table === "cs225_gradebook") {
-              greadebook_display[i][j] = value;
+            for (var i = 0; i < greadebook_display.length; i++) {
+              // find the correct row
+              if (greadebook_display[i][0] === change_table[x][3]) {
+                
+                for (var j = 0; j < grade_book_col_headers.length; j++) {
+                  if (grade_book_col_headers[j] === change_table[x][4]) {
+                    greadebook_display[i][j] = value;
+                  }
+                }
+              }
+            }
           } else if (table === "students") {
-            students_display[i][j] = value;
+            for (var i = 0; i < students_display.length; i++) {
+              // find the correct row
+              if (students_display[i][0] === change_table[x][3]) {
+                
+                for (var j = 0; j < student_col_headers.length; j++) {
+                  if (student_col_headers[j] === change_table[x][4]) {
+                    students_display[i][j] = value;
+                  }
+                }
+              }
+            }
           } else if (table === "team_grades") {
-            team_grades_display[i][j] = value;
+            for (var i = 0; i < team_grades_display.length; i++) {
+              // find the correct row
+              if (team_grades_display[i][0] === change_table[x][3]) {
+                
+                for (var j = 0; j < team_grades_col_headers.length; j++) {
+                  if (team_grades_col_headers[j] === change_table[x][4]) {
+                    team_grades_display[i][j] = value;
+                  }
+                }
+              }
+            }
           } else if (table === "team_comments") {
-            team_comments_display[i][j] = value;
+            for (var i = 0; i < team_comments_display.length; i++) {
+              // find the correct row
+              if (team_comments_display[i][0] === change_table[x][3]) {
+                
+                for (var j = 0; j < team_comments_col_headers.length; j++) {
+                  if (team_comments_col_headers[j] === change_table[x][4]) {
+                    team_comments_display[i][j] = value;
+                  }
+                }
+              }
+            }
           }
         } catch (error) {
           console.log(error);
@@ -259,6 +321,43 @@ class Academic extends Component {
 
   // fetch 50 rows of data into the buffer
   async componentDidMount() {
+
+    // process layout changes from socket
+    this.socket.on('LAYOUT_CHANGES_TO_CLIENT', function(new_layout_changes) {
+      if (new_layout_changes.socketID !== socket_id) {
+        process_layout_changes(new_layout_changes);
+      }
+    });
+
+    const process_layout_changes = new_layout_changes => {
+      console.log("the new layout change is: ", new_layout_changes);
+      for (var i = 0; i < new_layout_changes.changes.length; i++) {
+        let curr_changes = new_layout_changes.changes[i]; //[action_type, direction, index, table_name]
+
+        layout_changes.incoming = true; // set incoming to true so that the system knows the changes come from other users
+
+        // get the current table for current change to process
+        let table_instance = "";
+        if (curr_changes[3] === "attendance") {
+          table_instance = this.hotTableComponent.current.hotInstance;
+        } else if (curr_changes[3] === "cs225_gradebook") {
+          table_instance = this.hotTableComponent1.current.hotInstance;
+        } else if (curr_changes[3] === "students") {
+          table_instance = this.hotTableComponent2.current.hotInstance;
+        } else if (curr_changes[3] === "team_grades") {
+          table_instance = this.hotTableComponent3.current.hotInstance;
+        } else if (curr_changes[3] === "team_comments") {
+          table_instance = this.hotTableComponent4.current.hotInstance;
+        }
+
+        // process current layout change
+        if (curr_changes[0] === "insert_r") {
+            // nothing to handle yet
+        } else if (curr_changes[0] === "remove_r") {
+          table_instance.alter('remove_row', curr_changes[2], 1);
+        }
+      }
+    }
 
     // REMOVED FOR THE FIRST USER STUDY -------------------------------------------------------------------------------------------
 
@@ -515,35 +614,61 @@ class Academic extends Component {
     });
 
     this.hotTableComponent.current.hotInstance.addHook('afterCreateRow', function(index, amount, source) {
-      console.log("insert index is: ", index);
-      if (source === "ContextMenu.rowBelow") {
-        layout_changes.layout_changed = true;
-        layout_changes.changes.push(["insert_r", "below", index]);
+      if (layout_changes.incoming === true) {
+        layout_changes.incoming = false
       } else {
-        layout_changes.layout_changed = true;
-        layout_changes.changes.push(["insert_r", "above", index]);
+        if (source === "ContextMenu.rowBelow") {
+          layout_changes.layout_changed = true;
+          layout_changes.changes.push(["insert_r", "below", index, "attendance"]);
+        } else {
+          layout_changes.layout_changed = true;
+          layout_changes.changes.push(["insert_r", "above", index, "attendance"]);
+        }
       }
     });
 
     this.hotTableComponent.current.hotInstance.addHook('afterCreateCol', function(index, amount, source) {
-      console.log("insert index is: ", index);
-      if (source === "ContextMenu.columnRight") {
-        layout_changes.layout_changed = true;
-        layout_changes.changes.push(["insert_c", "right", index]);
+      if (layout_changes.incoming === true) {
+        layout_changes.incoming = false;
       } else {
-        layout_changes.layout_changed = true;
-        layout_changes.changes.push(["insert_c", "left", index]);
+        if (source === "ContextMenu.columnRight") {
+          layout_changes.layout_changed = true;
+          layout_changes.changes.push(["insert_c", "right", index, "attendance"]);
+        } else {
+          layout_changes.layout_changed = true;
+          layout_changes.changes.push(["insert_c", "left", index, "attendance"]);
+        }
       }
     });
 
+    this.hotTableComponent.current.hotInstance.addHook('beforeRemoveRow', function(index, amount) {
+      // [table_name, change_type, operation, direction, search_attribute]
+      let temp = []
+      temp[0] = "attendance";
+      temp[1] = "layout_change";
+      temp[2] = "remove_r";
+      temp[3] = null;
+      temp[4] = attendance_display[index][0];
+      pending_changes.data.push(temp);
+    });
+
     this.hotTableComponent.current.hotInstance.addHook('afterRemoveRow', function(index, amount, physicalRows, source) {
-      layout_changes.layout_changed = true;
-      layout_changes.changes.push(["remove_r", null, index]);
+      console.log("after remove row index: ", index);
+      if (layout_changes.incoming === true) {
+        layout_changes.incoming = false;
+      } else {
+        layout_changes.layout_changed = true;
+        layout_changes.changes.push(["remove_r", null, index, "attendance"]);
+      }
     });
 
     this.hotTableComponent.current.hotInstance.addHook('afterRemoveCol', function(index, amount, physicalRows, source) {
-      layout_changes.layout_changed = true;
-      layout_changes.changes.push(["remove_c", null, index]);
+      if (layout_changes.incoming === true) {
+        layout_changes.incoming = false;
+      } else {
+        layout_changes.layout_changed = true;
+        layout_changes.changes.push(["remove_c", null, index, "attendance"]);
+      }
     });
 
     // SECOND COMPONENT REF ========================================================================================
@@ -589,35 +714,60 @@ class Academic extends Component {
     });
 
     this.hotTableComponent1.current.hotInstance.addHook('afterCreateRow', function(index, amount, source) {
-      console.log("insert index is: ", index);
-      if (source === "ContextMenu.rowBelow") {
-        layout_changes.layout_changed = true;
-        layout_changes.changes.push(["insert_r", "below", index]);
+      if (layout_changes.incoming === true) {
+        layout_changes.incoming = false;
       } else {
-        layout_changes.layout_changed = true;
-        layout_changes.changes.push(["insert_r", "above", index]);
+        if (source === "ContextMenu.rowBelow") {
+          layout_changes.layout_changed = true;
+          layout_changes.changes.push(["insert_r", "below", index, "cs225_gradebook"]);
+        } else {
+          layout_changes.layout_changed = true;
+          layout_changes.changes.push(["insert_r", "above", index, "cs225_gradebook"]);
+        }
       }
     });
 
     this.hotTableComponent1.current.hotInstance.addHook('afterCreateCol', function(index, amount, source) {
-      console.log("insert index is: ", index);
-      if (source === "ContextMenu.columnRight") {
-        layout_changes.layout_changed = true;
-        layout_changes.changes.push(["insert_c", "right", index]);
+      if (layout_changes.incoming === true) {
+        layout_changes.incoming = false;
       } else {
-        layout_changes.layout_changed = true;
-        layout_changes.changes.push(["insert_c", "left", index]);
+        if (source === "ContextMenu.columnRight") {
+          layout_changes.layout_changed = true;
+          layout_changes.changes.push(["insert_c", "right", index, "cs225_gradebook"]);
+        } else {
+          layout_changes.layout_changed = true;
+          layout_changes.changes.push(["insert_c", "left", index, "cs225_gradebook"]);
+        }
       }
     });
 
+    this.hotTableComponent1.current.hotInstance.addHook('beforeRemoveRow', function(index, amount) {
+      // [table_name, change_type, operation, direction, search_attribute]
+      let temp = []
+      temp[0] = "cs225_gradebook";
+      temp[1] = "layout_change";
+      temp[2] = "remove_r";
+      temp[3] = null;
+      temp[4] = greadebook_display[index][0];
+      pending_changes.data.push(temp);
+    });
+
     this.hotTableComponent1.current.hotInstance.addHook('afterRemoveRow', function(index, amount, physicalRows, source) {
-      layout_changes.layout_changed = true;
-      layout_changes.changes.push(["remove_r", null, index]);
+      if (layout_changes.incoming === true) {
+        layout_changes.incoming = false;
+      } else {
+        layout_changes.layout_changed = true;
+        layout_changes.changes.push(["remove_r", null, index, "cs225_gradebook"]);
+      }
     });
 
     this.hotTableComponent1.current.hotInstance.addHook('afterRemoveCol', function(index, amount, physicalRows, source) {
-      layout_changes.layout_changed = true;
-      layout_changes.changes.push(["remove_c", null, index]);
+      if (layout_changes.incoming === true) {
+        layout_changes.incoming = false;
+      } else {
+        layout_changes.layout_changed = true;
+        layout_changes.changes.push(["remove_c", null, index, "cs225_gradebook"]);
+      }
     });
 
     // THIRD COMPONENT REF ========================================================================================
@@ -663,35 +813,60 @@ class Academic extends Component {
     });
 
     this.hotTableComponent2.current.hotInstance.addHook('afterCreateRow', function(index, amount, source) {
-      console.log("insert index is: ", index);
-      if (source === "ContextMenu.rowBelow") {
-        layout_changes.layout_changed = true;
-        layout_changes.changes.push(["insert_r", "below", index]);
+      if (layout_changes.incoming === true) {
+        layout_changes.incoming = false;
       } else {
-        layout_changes.layout_changed = true;
-        layout_changes.changes.push(["insert_r", "above", index]);
+        if (source === "ContextMenu.rowBelow") {
+          layout_changes.layout_changed = true;
+          layout_changes.changes.push(["insert_r", "below", index, "students"]);
+        } else {
+          layout_changes.layout_changed = true;
+          layout_changes.changes.push(["insert_r", "above", index, "students"]);
+        }
       }
     });
 
     this.hotTableComponent2.current.hotInstance.addHook('afterCreateCol', function(index, amount, source) {
-      console.log("insert index is: ", index);
-      if (source === "ContextMenu.columnRight") {
-        layout_changes.layout_changed = true;
-        layout_changes.changes.push(["insert_c", "right", index]);
+      if (layout_changes.incoming === true) {
+        layout_changes.incoming = false;
       } else {
-        layout_changes.layout_changed = true;
-        layout_changes.changes.push(["insert_c", "left", index]);
+        if (source === "ContextMenu.columnRight") {
+          layout_changes.layout_changed = true;
+          layout_changes.changes.push(["insert_c", "right", index, "students"]);
+        } else {
+          layout_changes.layout_changed = true;
+          layout_changes.changes.push(["insert_c", "left", index, "students"]);
+        }
       }
     });
 
+    this.hotTableComponent2.current.hotInstance.addHook('beforeRemoveRow', function(index, amount) {
+      // [table_name, change_type, operation, direction, search_attribute]
+      let temp = []
+      temp[0] = "students";
+      temp[1] = "layout_change";
+      temp[2] = "remove_r";
+      temp[3] = null;
+      temp[4] = students_display[index][0];
+      pending_changes.data.push(temp);
+    });
+
     this.hotTableComponent2.current.hotInstance.addHook('afterRemoveRow', function(index, amount, physicalRows, source) {
-      layout_changes.layout_changed = true;
-      layout_changes.changes.push(["remove_r", null, index]);
+      if (layout_changes.incoming === true) {
+        layout_changes.incoming = false;
+      } else {
+        layout_changes.layout_changed = true;
+        layout_changes.changes.push(["remove_r", null, index, "students"]);
+      }
     });
 
     this.hotTableComponent2.current.hotInstance.addHook('afterRemoveCol', function(index, amount, physicalRows, source) {
-      layout_changes.layout_changed = true;
-      layout_changes.changes.push(["remove_c", null, index]);
+      if (layout_changes.incoming === true) {
+        layout_changes.incoming = false;
+      } else {
+        layout_changes.layout_changed = true;
+        layout_changes.changes.push(["remove_c", null, index, "students"]);
+      }
     });
 
     // FOURTH COMPONENT REF ========================================================================================
@@ -737,35 +912,60 @@ class Academic extends Component {
     });
 
     this.hotTableComponent3.current.hotInstance.addHook('afterCreateRow', function(index, amount, source) {
-      console.log("insert index is: ", index);
-      if (source === "ContextMenu.rowBelow") {
-        layout_changes.layout_changed = true;
-        layout_changes.changes.push(["insert_r", "below", index]);
+      if (layout_changes.incoming === true) {
+        layout_changes.incoming = false;
       } else {
-        layout_changes.layout_changed = true;
-        layout_changes.changes.push(["insert_r", "above", index]);
+        if (source === "ContextMenu.rowBelow") {
+          layout_changes.layout_changed = true;
+          layout_changes.changes.push(["insert_r", "below", index, "team_grades"]);
+        } else {
+          layout_changes.layout_changed = true;
+          layout_changes.changes.push(["insert_r", "above", index, "team_grades"]);
+        }
       }
     });
 
     this.hotTableComponent3.current.hotInstance.addHook('afterCreateCol', function(index, amount, source) {
-      console.log("insert index is: ", index);
-      if (source === "ContextMenu.columnRight") {
-        layout_changes.layout_changed = true;
-        layout_changes.changes.push(["insert_c", "right", index]);
+      if (layout_changes.incoming === true) {
+        layout_changes.incoming = false;
       } else {
-        layout_changes.layout_changed = true;
-        layout_changes.changes.push(["insert_c", "left", index]);
+        if (source === "ContextMenu.columnRight") {
+          layout_changes.layout_changed = true;
+          layout_changes.changes.push(["insert_c", "right", index, "team_grades"]);
+        } else {
+          layout_changes.layout_changed = true;
+          layout_changes.changes.push(["insert_c", "left", index, "team_grades"]);
+        }
       }
     });
 
+    this.hotTableComponent3.current.hotInstance.addHook('beforeRemoveRow', function(index, amount) {
+      // [table_name, change_type, operation, direction, search_attribute]
+      let temp = []
+      temp[0] = "team_grades";
+      temp[1] = "layout_change";
+      temp[2] = "remove_r";
+      temp[3] = null;
+      temp[4] = team_grades_display[index][0];
+      pending_changes.data.push(temp);
+    });
+
     this.hotTableComponent3.current.hotInstance.addHook('afterRemoveRow', function(index, amount, physicalRows, source) {
-      layout_changes.layout_changed = true;
-      layout_changes.changes.push(["remove_r", null, index]);
+      if (layout_changes.incoming === true) {
+        layout_changes.incoming = false;
+      } else {
+        layout_changes.layout_changed = true;
+        layout_changes.changes.push(["remove_r", null, index, "team_grades"]);
+      }
     });
 
     this.hotTableComponent3.current.hotInstance.addHook('afterRemoveCol', function(index, amount, physicalRows, source) {
-      layout_changes.layout_changed = true;
-      layout_changes.changes.push(["remove_c", null, index]);
+      if (layout_changes.incoming === true) {
+        layout_changes.incoming = false;
+      } else {
+        layout_changes.layout_changed = true;
+        layout_changes.changes.push(["remove_c", null, index, "team_grades"]);
+      }
     });
 
     // FIFTH COMPONENT REF ========================================================================================
@@ -811,35 +1011,60 @@ class Academic extends Component {
     });
 
     this.hotTableComponent4.current.hotInstance.addHook('afterCreateRow', function(index, amount, source) {
-      console.log("insert index is: ", index);
-      if (source === "ContextMenu.rowBelow") {
-        layout_changes.layout_changed = true;
-        layout_changes.changes.push(["insert_r", "below", index]);
+      if (layout_changes.incoming === true) {
+        layout_changes.incoming = false;
       } else {
-        layout_changes.layout_changed = true;
-        layout_changes.changes.push(["insert_r", "above", index]);
+        if (source === "ContextMenu.rowBelow") {
+          layout_changes.layout_changed = true;
+          layout_changes.changes.push(["insert_r", "below", index, "team_comments"]);
+        } else {
+          layout_changes.layout_changed = true;
+          layout_changes.changes.push(["insert_r", "above", index, "team_comments"]);
+        }
       }
     });
 
     this.hotTableComponent4.current.hotInstance.addHook('afterCreateCol', function(index, amount, source) {
-      console.log("insert index is: ", index);
-      if (source === "ContextMenu.columnRight") {
-        layout_changes.layout_changed = true;
-        layout_changes.changes.push(["insert_c", "right", index]);
+      if (layout_changes.incoming === true) {
+        layout_changes.incoming = false;
       } else {
-        layout_changes.layout_changed = true;
-        layout_changes.changes.push(["insert_c", "left", index]);
+        if (source === "ContextMenu.columnRight") {
+          layout_changes.layout_changed = true;
+          layout_changes.changes.push(["insert_c", "right", index, "team_comments"]);
+        } else {
+          layout_changes.layout_changed = true;
+          layout_changes.changes.push(["insert_c", "left", index, "team_comments"]);
+        }
       }
     });
 
+    this.hotTableComponent4.current.hotInstance.addHook('beforeRemoveRow', function(index, amount) {
+      // [table_name, change_type, operation, direction, search_attribute]
+      let temp = []
+      temp[0] = "team_comments";
+      temp[1] = "layout_change";
+      temp[2] = "remove_r";
+      temp[3] = null;
+      temp[4] = team_comments_display[index][0];
+      pending_changes.data.push(temp);
+    });
+
     this.hotTableComponent4.current.hotInstance.addHook('afterRemoveRow', function(index, amount, physicalRows, source) {
-      layout_changes.layout_changed = true;
-      layout_changes.changes.push(["remove_r", null, index]);
+      if (layout_changes.incoming === true) {
+        layout_changes.incoming = false;
+      } else {
+        layout_changes.layout_changed = true;
+        layout_changes.changes.push(["remove_r", null, index, "team_comments"]);
+      }
     });
 
     this.hotTableComponent4.current.hotInstance.addHook('afterRemoveCol', function(index, amount, physicalRows, source) {
-      layout_changes.layout_changed = true;
-      layout_changes.changes.push(["remove_c", null, index]);
+      if (layout_changes.incoming === true) {
+        layout_changes.incoming = false;
+      } else {
+        layout_changes.layout_changed = true;
+        layout_changes.changes.push(["remove_c", null, index, "team_comments"]);
+      }
     });
   }
 
@@ -931,28 +1156,35 @@ class Academic extends Component {
       
       pending_changes.user = this.state.user_name
   
-      let temp = [];
-      let y_coord = parseInt(chn_copy[0][0]) + 1;
-      let x_coord = parseInt(chn_copy[0][1]) + 1;
+      let temp = []; // [table_name, change_type, value, search_attribute, update_attribute]
+      let y_coord = parseInt(chn_copy[0][0]);
+      let x_coord = parseInt(chn_copy[0][1]);
       let actual_value = chn_copy[0][3];
       temp[0] = this.state.curr_table;
-      temp[1] = x_coord;
+      temp[1] = "cell_change";
       temp[2] = actual_value;
-      temp[3] = y_coord;
       
       // find the correct attribute
       if (this.state.curr_table === "attendance") {
-        temp[4] = attendance_col_headers[x_coord - 1];
+        temp[3] = attendance_display[y_coord][0]; // search attribute NetID
+        temp[4] = attendance_col_headers[x_coord];
+
       } else if (this.state.curr_table === "cs225_gradebook") {
-        temp[4] = grade_book_col_headers[x_coord - 1];
-      } else if (this.state.curr_table === "student_status") {
-        temp[4] = student_status_col_headers[x_coord - 1];
+        temp[3] = greadebook_display[y_coord][0]; // search attribute NetID
+        temp[4] = grade_book_col_headers[x_coord];
+
       } else if (this.state.curr_table === "students") {
-        temp[4] = student_col_headers[x_coord - 1];
+        temp[3] = greadebook_display[y_coord][0]; // search attribute NetID
+        temp[4] = student_col_headers[x_coord];
+
       } else if (this.state.curr_table === "team_grades") {
-        temp[4] = team_grades_col_headers[x_coord - 1];
+        temp[3] = greadebook_display[y_coord][0]; // search attribute Team
+        temp[4] = team_grades_col_headers[x_coord];
+
       } else if (this.state.curr_table === "team_comments") {
-        temp[4] = team_comments_col_headers[x_coord - 1];
+        temp[3] = greadebook_display[y_coord][0]; // search attribute Team
+        temp[4] = team_comments_col_headers[x_coord];
+
       }
 
       pending_changes.data.push(temp);
@@ -1004,8 +1236,18 @@ class Academic extends Component {
   }
 
   commit_transaction = () => {
+    // send cell changes to the socket
     if (pending_changes.data.length !== 0) {
       this.socket.emit('SEND_MESSAGE', pending_changes);
+    }
+
+    // send layout changes to the socket
+    if (layout_changes.changes.length !== 0) {
+      this.socket.emit('LAYOUT_CHANGES_TO_SOCKET', layout_changes);
+
+      // reset layout changes
+      layout_changes.changes.length = 0;
+      layout_changes.start_idx = 0;
     }
   }
 
@@ -1019,15 +1261,15 @@ class Academic extends Component {
     if (layout_changes.layout_changed) { 
 
       // add in all layout changes
-      for (var i = 0; i < layout_changes.changes.length; i++) {
+      for (var i = layout_changes.start_idx; i < layout_changes.changes.length; i++) {
         let layout_change_type = layout_changes.changes[i][0];
         let layout_change_direction = layout_changes.changes[i][1];
         let change_index = layout_changes.changes[i][2];
         user_actions.push([this.state.name, layout_change_type, change_index, layout_change_direction, null, this.state.curr_table, null, null, curr_time]); 
+        layout_changes.start_idx++;
       }
 
       // clear up current layout_changes recorder
-      layout_changes.changes.length = 0;
       layout_changes.layout_changed = false;
     }
 
@@ -1434,6 +1676,10 @@ class Academic extends Component {
     }
   }
 
+  insert_row = () => {
+    this.hotTableComponent.current.hotInstance.alter('remove_row', 4, 1);
+  }
+
   render() {
     if (this.state.redirect) {
       return <Redirect to={this.state.redirect_link} />
@@ -1463,6 +1709,8 @@ class Academic extends Component {
                     <Button size='lg' className='display-button' color="info" onClick={this.request_read_lock} >Read Lock</Button> */}
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     <Button size='lg' className='display-button' color="info" onClick={this.record_read_cell} >Read Cell</Button>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <Button size='lg' className='display-button' color="info" onClick={this.insert_row} >Alert</Button>
                   </p>
                   {this.state.edit_message}
 
