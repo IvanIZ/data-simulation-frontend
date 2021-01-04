@@ -1871,6 +1871,10 @@ class Academic extends Component {
       user_actions.push([this.state.name, "READ", select_i, select_j, feature, this.state.curr_table, select_i + 1, col_headers[select_j], curr_time]);
     }
   }
+
+  indicate_error = () => {
+    user_actions.push([this.state.name, "ERR", "ERR", "ERR", "ERR", "ERR", "ERR", "ERR", "ERR"]);
+  }
   
   render() {
     if (this.state.redirect) {
@@ -1903,7 +1907,7 @@ class Academic extends Component {
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     <Button size='lg' className='display-button' color="info" onClick={this.record_read_cell} >Read Cell</Button>
                     &nbsp;&nbsp;&nbsp;&nbsp;
-                    <Button size='lg' className='display-button' color="info" onClick={this.insert_row} >Alert</Button>
+                    <Button size='lg' className='display-button' color="info" onClick={this.indicate_error} >Alert</Button>
                   </p>
                   {this.state.edit_message}
 
