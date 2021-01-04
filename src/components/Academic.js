@@ -88,7 +88,8 @@ let pending_changes = {
   data:[], // 2d array to store difference: y, value, x, 
   try_message: "SENT MESSAGE! SUCCESS!", 
   socketID: "",
-  user: ""
+  user: "", 
+  incoming: false
 }
 
 let socket_id = "";
@@ -174,11 +175,6 @@ class Academic extends Component {
       change_current_user(data);
     });
 
-    // receive updates on spreadsheet from other users
-    this.socket.on('RECEIVE_MESSAGE', function(data){
-      addMessage(data);
-    });
-
     // update the last edit message, as well as the entire edit history
     this.socket.on('UPDATE_EDIT_MESSAGE', function(message_package) {
       update_edit_message(message_package);
@@ -223,91 +219,6 @@ class Academic extends Component {
       })
     }
 
-    const addMessage = data => {
-      let change_table = data.data
-      for (var x = 0; x < change_table.length; x++) { // [table_name, change_type, value, search_attribute, update_attribute]
-
-        // skip layout changes
-        if (change_table[x][1] === "layout_change") {
-          continue;
-        }
-
-        // Extract data
-        let table = change_table[x][0]; // table corresponds to this change  
-        let value = change_table[x][2] // 1 --> actual value
-
-        // reflect each update to its corresponding table
-        try {
-          if (table === "attendance" && typeof attendance_display !== "undefined") {
-            
-            for (var i = 0; i < attendance_display.length; i++) {
-              // find the correct row
-              if (attendance_display[i][0] === change_table[x][3]) {
-
-                for (var j = 0; j < attendance_col_headers.length; j++) {
-                  if (attendance_col_headers[j] === change_table[x][4]) {
-                    attendance_display[i][j] = value;
-                  }
-                }
-              }
-            }
-
-          } else if (table === "cs225_gradebook") {
-            for (var i = 0; i < greadebook_display.length; i++) {
-              // find the correct row
-              if (greadebook_display[i][0] === change_table[x][3]) {
-                
-                for (var j = 0; j < grade_book_col_headers.length; j++) {
-                  if (grade_book_col_headers[j] === change_table[x][4]) {
-                    greadebook_display[i][j] = value;
-                  }
-                }
-              }
-            }
-          } else if (table === "students") {
-            for (var i = 0; i < students_display.length; i++) {
-              // find the correct row
-              if (students_display[i][0] === change_table[x][3]) {
-                
-                for (var j = 0; j < student_col_headers.length; j++) {
-                  if (student_col_headers[j] === change_table[x][4]) {
-                    students_display[i][j] = value;
-                  }
-                }
-              }
-            }
-          } else if (table === "team_grades") {
-            for (var i = 0; i < team_grades_display.length; i++) {
-              // find the correct row
-              if (team_grades_display[i][0] === change_table[x][3]) {
-                
-                for (var j = 0; j < team_grades_col_headers.length; j++) {
-                  if (team_grades_col_headers[j] === change_table[x][4]) {
-                    team_grades_display[i][j] = value;
-                  }
-                }
-              }
-            }
-          } else if (table === "team_comments") {
-            for (var i = 0; i < team_comments_display.length; i++) {
-              // find the correct row
-              if (team_comments_display[i][0] === change_table[x][3]) {
-                
-                for (var j = 0; j < team_comments_col_headers.length; j++) {
-                  if (team_comments_col_headers[j] === change_table[x][4]) {
-                    team_comments_display[i][j] = value;
-                  }
-                }
-              }
-            }
-          }
-        } catch (error) {
-          console.log(error);
-        }
-      }
-  };
-
-
     this.toggleSelectionPrompt = this.toggleSelectionPrompt.bind()
     this.toggleNavbar = this.toggleNavbar.bind()
     this.toggleInstructionModal = this.toggleInstructionModal.bind();
@@ -322,39 +233,131 @@ class Academic extends Component {
   // fetch 50 rows of data into the buffer
   async componentDidMount() {
 
-    // process layout changes from socket
-    this.socket.on('LAYOUT_CHANGES_TO_CLIENT', function(new_layout_changes) {
-      if (new_layout_changes.socketID !== socket_id) {
-        process_layout_changes(new_layout_changes);
-      }
+    // receive updates on spreadsheet from other users
+    this.socket.on('RECEIVE_MESSAGE', function(data){
+      addMessage(data);
     });
 
-    const process_layout_changes = new_layout_changes => {
-      console.log("the new layout change is: ", new_layout_changes);
-      for (var i = 0; i < new_layout_changes.changes.length; i++) {
-        let curr_changes = new_layout_changes.changes[i]; //[action_type, direction, index, table_name]
+    const addMessage = data => {
+      // ignore if these actions come from this user itself
+      if (data.socketID === socket_id) {
+        return;
+      }
 
-        layout_changes.incoming = true; // set incoming to true so that the system knows the changes come from other users
+      let change_table = data.data
+      for (var x = 0; x < change_table.length; x++) {
 
-        // get the current table for current change to process
-        let table_instance = "";
-        if (curr_changes[3] === "attendance") {
-          table_instance = this.hotTableComponent.current.hotInstance;
-        } else if (curr_changes[3] === "cs225_gradebook") {
-          table_instance = this.hotTableComponent1.current.hotInstance;
-        } else if (curr_changes[3] === "students") {
-          table_instance = this.hotTableComponent2.current.hotInstance;
-        } else if (curr_changes[3] === "team_grades") {
-          table_instance = this.hotTableComponent3.current.hotInstance;
-        } else if (curr_changes[3] === "team_comments") {
-          table_instance = this.hotTableComponent4.current.hotInstance;
+        // [table_name, change_type, update_value, update_attribute, search_attribute1, search_attribute2, y_coord, x_coord] for cell changes
+        // [table_name, change_type, operation, direction, search_attribute, socket_id] for remove row
+        // [table_name, change_type, operation, value, search_attribute, socket_id] for insert row
+        if (change_table[x][1] === "layout_change") {
+          if (change_table[x][5] === socket_id) {
+            continue;
+          } else {
+            process_layout_changes(change_table[x]);
+            continue;
+          }
         }
 
-        // process current layout change
-        if (curr_changes[0] === "insert_r") {
-            // nothing to handle yet
-        } else if (curr_changes[0] === "remove_r") {
-          table_instance.alter('remove_row', curr_changes[2], 1);
+        // Extract data
+        let table = change_table[x][0]; // table corresponds to this change  
+        let value = change_table[x][2] // 1 --> actual value
+
+        // reflect each update to its corresponding table
+        try { // [table_name, change_type, update_value, update_attribute, search_attribute1, search_attribute2, y_coord, x_coord] for cell changes
+          let x_coord = change_table[x][7];
+
+          if (table === "attendance") {
+            for (var i = 0; i < attendance_display.length; i++) {
+              if (attendance_display[i][0] === change_table[x][4] || attendance_display[i][1] === change_table[x][5]) {
+                attendance_display[i][x_coord] = value;
+              }
+            }
+            
+          } else if (table === "cs225_gradebook") {
+            for (var i = 0; i < greadebook_display.length; i++) {
+              if (greadebook_display[i][0] === change_table[x][4] || greadebook_display[i][1] === change_table[x][5]) {
+                greadebook_display[i][x_coord] = value;
+              }
+            }
+            
+          } else if (table === "students") {
+            for (var i = 0; i < students_display.length; i++) {
+              if (students_display[i][0] === change_table[x][4] || students_display[i][1] === change_table[x][5]) {
+                students_display[i][x_coord] = value;
+              }
+            }
+            
+          } else if (table === "team_grades") {
+            for (var i = 0; i < team_grades_display.length; i++) {
+              if (team_grades_display[i][0] === change_table[x][4] || team_grades_display[i][1] === change_table[x][5]) {
+                team_grades_display[i][x_coord] = value;
+              }
+            }
+            
+          } else if (table === "team_comments") {
+            for (var i = 0; i < team_comments_display.length; i++) {
+              if (team_comments_display[i][0] === change_table[x][4] || team_comments_display[i][1] === change_table[x][5]) {
+                team_comments_display[i][x_coord] = value;
+              }
+            }
+            
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      }
+  };
+
+    const process_layout_changes = curr_changes => {
+      console.log("the new layout change is: ", curr_changes);
+      // [table_name, change_type, operation, direction, search_attribute, socket_id] for remove row
+      // [table_name, change_type, operation, value, search_attribute, socket_id, y_coord] for insert row
+
+      // get the current table for current change to process
+      let table_instance = "";
+      let table = "";
+      let headers = "";
+      if (curr_changes[0] === "attendance") {
+        table_instance = this.hotTableComponent.current.hotInstance;
+        table = attendance_display;
+        headers = attendance_col_headers;
+      } else if (curr_changes[0] === "cs225_gradebook") {
+        table_instance = this.hotTableComponent1.current.hotInstance;
+        table = greadebook_display;
+        headers = grade_book_col_headers;
+      } else if (curr_changes[0] === "students") {
+        table_instance = this.hotTableComponent2.current.hotInstance;
+        table = students_display;
+        headers = student_col_headers;
+      } else if (curr_changes[0] === "team_grades") {
+        table_instance = this.hotTableComponent3.current.hotInstance;
+        table = team_grades_display;
+        headers = team_grades_col_headers;
+      } else if (curr_changes[0] === "team_comments") {
+        table_instance = this.hotTableComponent4.current.hotInstance;
+        table = team_comments_display;
+        headers = team_comments_col_headers;
+      }
+
+      if (curr_changes[2] === "remove_r") {
+        // search for the row to delete
+        for (var index = 0; index < table.length; index++) {
+          if (table[index][0] === curr_changes[4]) {
+            pending_changes.incoming = true;
+            layout_changes.incoming = true;
+            table_instance.alter('remove_row', index, 1);
+            break;
+          }
+        }
+
+      } else if (curr_changes[2] === "insert_r") {
+
+        // find the column for writing in the first value
+        for (var j = 0; j < headers.length; j++) {
+          if (headers[j] === curr_changes[4]) {
+            table[curr_changes[6]][j] = curr_changes[3];
+          }
         }
       }
     }
@@ -643,13 +646,18 @@ class Academic extends Component {
 
     this.hotTableComponent.current.hotInstance.addHook('beforeRemoveRow', function(index, amount) {
       // [table_name, change_type, operation, direction, search_attribute]
-      let temp = []
-      temp[0] = "attendance";
-      temp[1] = "layout_change";
-      temp[2] = "remove_r";
-      temp[3] = null;
-      temp[4] = attendance_display[index][0];
-      pending_changes.data.push(temp);
+      if (pending_changes.incoming === true) {
+        pending_changes.incoming = false;
+      } else {
+        let temp = []
+        temp[0] = "attendance";
+        temp[1] = "layout_change";
+        temp[2] = "remove_r";
+        temp[3] = null;
+        temp[4] = attendance_display[index][0];
+        temp[5] = socket_id;
+        pending_changes.data.push(temp);
+      }
     });
 
     this.hotTableComponent.current.hotInstance.addHook('afterRemoveRow', function(index, amount, physicalRows, source) {
@@ -743,13 +751,18 @@ class Academic extends Component {
 
     this.hotTableComponent1.current.hotInstance.addHook('beforeRemoveRow', function(index, amount) {
       // [table_name, change_type, operation, direction, search_attribute]
-      let temp = []
-      temp[0] = "cs225_gradebook";
-      temp[1] = "layout_change";
-      temp[2] = "remove_r";
-      temp[3] = null;
-      temp[4] = greadebook_display[index][0];
-      pending_changes.data.push(temp);
+      if (pending_changes.incoming === true) {
+        pending_changes.incoming = false;
+      } else {
+        let temp = []
+        temp[0] = "cs225_gradebook";
+        temp[1] = "layout_change";
+        temp[2] = "remove_r";
+        temp[3] = null;
+        temp[4] = greadebook_display[index][0];
+        temp[5] = socket_id;
+        pending_changes.data.push(temp);
+      }
     });
 
     this.hotTableComponent1.current.hotInstance.addHook('afterRemoveRow', function(index, amount, physicalRows, source) {
@@ -842,13 +855,18 @@ class Academic extends Component {
 
     this.hotTableComponent2.current.hotInstance.addHook('beforeRemoveRow', function(index, amount) {
       // [table_name, change_type, operation, direction, search_attribute]
-      let temp = []
-      temp[0] = "students";
-      temp[1] = "layout_change";
-      temp[2] = "remove_r";
-      temp[3] = null;
-      temp[4] = students_display[index][0];
-      pending_changes.data.push(temp);
+      if (pending_changes.incoming === true) {
+        pending_changes.incoming = false;
+      } else {
+        let temp = []
+        temp[0] = "students";
+        temp[1] = "layout_change";
+        temp[2] = "remove_r";
+        temp[3] = null;
+        temp[4] = students_display[index][0];
+        temp[5] = socket_id;
+        pending_changes.data.push(temp);
+      }
     });
 
     this.hotTableComponent2.current.hotInstance.addHook('afterRemoveRow', function(index, amount, physicalRows, source) {
@@ -941,13 +959,18 @@ class Academic extends Component {
 
     this.hotTableComponent3.current.hotInstance.addHook('beforeRemoveRow', function(index, amount) {
       // [table_name, change_type, operation, direction, search_attribute]
-      let temp = []
-      temp[0] = "team_grades";
-      temp[1] = "layout_change";
-      temp[2] = "remove_r";
-      temp[3] = null;
-      temp[4] = team_grades_display[index][0];
-      pending_changes.data.push(temp);
+      if (pending_changes.incoming === true) {
+        pending_changes.incoming = false;
+      } else {
+        let temp = []
+        temp[0] = "team_grades";
+        temp[1] = "layout_change";
+        temp[2] = "remove_r";
+        temp[3] = null;
+        temp[4] = team_grades_display[index][0];
+        temp[5] = socket_id;
+        pending_changes.data.push(temp);
+      }
     });
 
     this.hotTableComponent3.current.hotInstance.addHook('afterRemoveRow', function(index, amount, physicalRows, source) {
@@ -1040,13 +1063,18 @@ class Academic extends Component {
 
     this.hotTableComponent4.current.hotInstance.addHook('beforeRemoveRow', function(index, amount) {
       // [table_name, change_type, operation, direction, search_attribute]
-      let temp = []
-      temp[0] = "team_comments";
-      temp[1] = "layout_change";
-      temp[2] = "remove_r";
-      temp[3] = null;
-      temp[4] = team_comments_display[index][0];
-      pending_changes.data.push(temp);
+      if (pending_changes.incoming === true) {
+        pending_changes.incoming = false;
+      } else {
+        let temp = []
+        temp[0] = "team_comments";
+        temp[1] = "layout_change";
+        temp[2] = "remove_r";
+        temp[3] = null;
+        temp[4] = team_comments_display[index][0];
+        temp[5] = socket_id;
+        pending_changes.data.push(temp);
+      }
     });
 
     this.hotTableComponent4.current.hotInstance.addHook('afterRemoveRow', function(index, amount, physicalRows, source) {
@@ -1143,6 +1171,7 @@ class Academic extends Component {
 
       // extract features of the new value  [row, col, prev, new]
       let feature = "";
+      let prev_value = chn_copy[0][2];
       if (isNaN(chn_copy[0][3])) {
         feature = "STR";
       } else if (chn_copy[0][3].length === 0) {
@@ -1166,24 +1195,192 @@ class Academic extends Component {
       
       // find the correct attribute
       if (this.state.curr_table === "attendance") {
-        temp[3] = attendance_display[y_coord][0]; // search attribute NetID
-        temp[4] = attendance_col_headers[x_coord];
+        // check for insertion 
+        let search_key_idx = 0;
+        let insertion = true;
+        for (var j = 0; j < attendance_display[y_coord].length; j++) {
+          if (j === x_coord) {
+            if (prev_value === "") {
+              continue;
+            } else {
+              insertion = false;
+              break;
+            }
+          }
+          if (attendance_display[y_coord][j] !== "") {
+            search_key_idx = j;
+            insertion = false;
+            break;
+          }
+        }
+
+        if (insertion) {  // [table_name, change_type, operation, value, search_attribute] for insert
+          temp[1] = "layout_change";
+          temp[2] = "insert_r";
+          temp[3] = actual_value;
+          temp[4] = attendance_col_headers[x_coord];
+          temp[5] = socket_id;
+          temp[6] = y_coord;
+        } else {
+          // [table_name, change_type, update_value, update_attribute, search_attribute1, search_attribute2, y_coord, x_coord] for cell changes
+          temp[3] = attendance_col_headers[x_coord];
+          temp[4] = attendance_display[y_coord][0];
+          temp[5] = attendance_display[y_coord][1];
+          temp[6] = y_coord;
+          temp[7] = x_coord;
+        }
 
       } else if (this.state.curr_table === "cs225_gradebook") {
-        temp[3] = greadebook_display[y_coord][0]; // search attribute NetID
-        temp[4] = grade_book_col_headers[x_coord];
+        // check for insertion 
+        let insertion = true;
+        let search_key_idx = 0;
+        for (var j = 0; j < greadebook_display[y_coord].length; j++) {
+          if (j === x_coord) {
+            if (prev_value === "") {
+              continue;
+            } else {
+              insertion = false;
+              break;
+            }
+          }
+          if (greadebook_display[y_coord][j] !== "") {
+            search_key_idx = j;
+            insertion = false;
+            break;
+          }
+        }
+
+        if (insertion) {  // [table_name, change_type, operation, value, search_attribute] for insert
+          temp[1] = "layout_change";
+          temp[2] = "insert_r";
+          temp[3] = actual_value;
+          temp[4] = grade_book_col_headers[x_coord];
+          temp[5] = socket_id;
+          temp[6] = y_coord;
+        } else {
+          // [table_name, change_type, update_value, update_attribute, search_attribute1, search_attribute2, y_coord, x_coord] for cell changes
+          temp[3] = grade_book_col_headers[x_coord];
+          temp[4] = greadebook_display[y_coord][0];
+          temp[5] = greadebook_display[y_coord][1];
+          temp[6] = y_coord;
+          temp[7] = x_coord;
+        }
 
       } else if (this.state.curr_table === "students") {
-        temp[3] = greadebook_display[y_coord][0]; // search attribute NetID
-        temp[4] = student_col_headers[x_coord];
+        // check for insertion 
+        let insertion = true;
+        let search_key_idx = 0;
+        for (var j = 0; j < students_display[y_coord].length; j++) {
+          if (j === x_coord) {
+            if (prev_value === "") {
+              continue;
+            } else {
+              insertion = false;
+              break;
+            }
+          }
+          if (students_display[y_coord][j] !== "") {
+            search_key_idx = j;
+            insertion = false;
+            break;
+          }
+        }
+
+        if (insertion) {  // [table_name, change_type, operation, value, search_attribute] for insert
+          temp[1] = "layout_change";
+          temp[2] = "insert_r";
+          temp[3] = actual_value;
+          temp[4] = student_col_headers[x_coord];
+          temp[5] = socket_id;
+          temp[6] = y_coord;
+        } else {
+          // [table_name, change_type, update_value, update_attribute, search_attribute1, search_attribute2, y_coord, x_coord] for cell changes
+          temp[3] = student_col_headers[x_coord];
+          temp[4] = students_display[y_coord][0];
+          temp[5] = students_display[y_coord][1];
+          temp[6] = y_coord;
+          temp[7] = x_coord;
+        }
 
       } else if (this.state.curr_table === "team_grades") {
-        temp[3] = greadebook_display[y_coord][0]; // search attribute Team
-        temp[4] = team_grades_col_headers[x_coord];
+        // check for insertion 
+        let insertion = true;
+        let search_key_idx = 0;
+        for (var j = 0; j < team_grades_display[y_coord].length; j++) {
+          if (j === x_coord) {
+            if (prev_value === "") {
+              continue;
+            } else {
+              insertion = false;
+              break;
+            }
+          }
+          if (team_grades_display[y_coord][j] !== "") {
+            insertion = false;
+            search_key_idx = j;
+            break;
+          }
+        }
+
+        if (insertion) {  // [table_name, change_type, operation, value, search_attribute] for insert
+          temp[1] = "layout_change";
+          temp[2] = "insert_r";
+          temp[3] = actual_value;
+          temp[4] = team_grades_col_headers[x_coord];
+          temp[5] = socket_id;
+          temp[6] = y_coord;
+        } else {
+          // [table_name, change_type, update_value, update_attribute, search_attribute1, search_attribute2, y_coord, x_coord] for cell changes
+          temp[3] = team_grades_col_headers[x_coord];
+          if (x_coord === 0) {
+            temp[4] = prev_value;
+          } else {
+            temp[4] = team_grades_display[y_coord][0];
+          }
+          temp[5] = null;
+          temp[6] = y_coord;
+          temp[7] = x_coord;
+        }
 
       } else if (this.state.curr_table === "team_comments") {
-        temp[3] = greadebook_display[y_coord][0]; // search attribute Team
-        temp[4] = team_comments_col_headers[x_coord];
+        // check for insertion 
+        let insertion = true;
+        let search_key_idx = 0;
+        for (var j = 0; j < team_comments_display[y_coord].length; j++) {
+          if (j === x_coord) {
+            if (prev_value === "") {
+              continue;
+            } else {
+              insertion = false;
+              break;
+            }
+          }
+          if (team_comments_display[y_coord][j] !== "") {
+            insertion = false;
+            search_key_idx = j;
+            break;
+          }
+        }
+
+        if (insertion) {  // [table_name, change_type, operation, value, search_attribute] for insert
+          temp[1] = "layout_change";
+          temp[2] = "insert_r";
+          temp[3] = actual_value;
+          temp[4] = team_comments_col_headers[x_coord];
+          temp[5] = socket_id;
+          temp[6] = y_coord;
+        } else {
+          // [table_name, change_type, update_value, update_attribute, search_attribute1, search_attribute2, y_coord, x_coord] for cell changes
+          temp[3] = team_comments_col_headers[x_coord];
+          if (x_coord === 0) {
+            temp[4] = prev_value;
+          } else {
+            temp[4] = team_comments_display[y_coord][0];
+          }
+          temp[5] = null;
+          temp[6] = y_coord;
+          temp[7] = x_coord;
+        }
 
       }
 
@@ -1231,7 +1428,7 @@ class Academic extends Component {
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({pending_changes})
       };
-      fetch('https://spreadsheetactions.herokuapp.com/academic/update', requestOptions,  {mode: 'no-cors'})
+      // fetch('https://spreadsheetactions.herokuapp.com/academic/update', requestOptions,  {mode: 'no-cors'})
     }, 500);
   }
 
@@ -1243,7 +1440,6 @@ class Academic extends Component {
 
     // send layout changes to the socket
     if (layout_changes.changes.length !== 0) {
-      this.socket.emit('LAYOUT_CHANGES_TO_SOCKET', layout_changes);
 
       // reset layout changes
       layout_changes.changes.length = 0;
@@ -1675,11 +1871,7 @@ class Academic extends Component {
       user_actions.push([this.state.name, "READ", select_i, select_j, feature, this.state.curr_table, select_i + 1, col_headers[select_j], curr_time]);
     }
   }
-
-  insert_row = () => {
-    this.hotTableComponent.current.hotInstance.alter('remove_row', 4, 1);
-  }
-
+  
   render() {
     if (this.state.redirect) {
       return <Redirect to={this.state.redirect_link} />
@@ -1692,8 +1884,9 @@ class Academic extends Component {
           </Jumbotron >
           <div>
             <Jumbotron >
-                  <h1 className="display-3">Hi {this.state.name}, welcome to Academic Simulation!</h1>
-                  <p className="lead">This is a simple web interface that allows you to upload spreadsheets and retrieve data.</p>
+                  <h1 className="display-3">Hi {this.state.name}!</h1>
+                  {/* <h1 className="display-3">Hi {this.state.name}, welcome to Academic Simulation!</h1> */}
+                  {/* <p className="lead">This is a simple web interface that allows you to upload spreadsheets and retrieve data.</p> */}
                   <hr className="my-2" />
                   {this.state.user_text_block}
                   <p className="lead">
