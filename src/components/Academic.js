@@ -58,7 +58,6 @@ let team_comments_col_headers = [];
 let table_loaded = false;
 
 let user_actions = []
-let recorded_time = 0;
 
 let SCROLL_SIZE = 5;
 
@@ -222,7 +221,6 @@ class Academic extends Component {
     this.toggleSelectionPrompt = this.toggleSelectionPrompt.bind()
     this.toggleNavbar = this.toggleNavbar.bind()
     this.toggleInstructionModal = this.toggleInstructionModal.bind();
-    this.toggleRedirectConfirmModal = this.toggleRedirectConfirmModal.bind();
     this.toggleNameModal = this.toggleNameModal.bind();
     this.toggleRestartModal = this.toggleRestartModal.bind();
     this.toggleCompleteConfirmModal = this.toggleCompleteConfirmModal.bind();
@@ -269,35 +267,35 @@ class Academic extends Component {
 
           if (table === "attendance") {
             for (var i = 0; i < attendance_display.length; i++) {
-              if (attendance_display[i][0] === change_table[x][4] || attendance_display[i][1] === change_table[x][5]) {
+              if ((attendance_display[i][0] === change_table[x][4] && change_table[x][4] !== "") || (attendance_display[i][1] === change_table[x][5] && change_table[x][5] !== "")) {
                 attendance_display[i][x_coord] = value;
               }
             }
             
           } else if (table === "cs225_gradebook") {
             for (var i = 0; i < greadebook_display.length; i++) {
-              if (greadebook_display[i][0] === change_table[x][4] || greadebook_display[i][1] === change_table[x][5]) {
+              if ((greadebook_display[i][0] === change_table[x][4] && change_table[x][4] !== "") || (greadebook_display[i][1] === change_table[x][5] && change_table[x][5] !== "")) {
                 greadebook_display[i][x_coord] = value;
               }
             }
             
           } else if (table === "students") {
             for (var i = 0; i < students_display.length; i++) {
-              if (students_display[i][0] === change_table[x][4] || students_display[i][1] === change_table[x][5]) {
+              if ((students_display[i][0] === change_table[x][4] && change_table[x][4] !== "") || (students_display[i][1] === change_table[x][5] && change_table[x][5] !== "")) {
                 students_display[i][x_coord] = value;
               }
             }
             
           } else if (table === "team_grades") {
             for (var i = 0; i < team_grades_display.length; i++) {
-              if (team_grades_display[i][0] === change_table[x][4] || team_grades_display[i][1] === change_table[x][5]) {
+              if ((team_grades_display[i][0] === change_table[x][4] && change_table[x][4] !== "") || (team_grades_display[i][1] === change_table[x][5] && change_table[x][5] !== "")) {
                 team_grades_display[i][x_coord] = value;
               }
             }
             
           } else if (table === "team_comments") {
             for (var i = 0; i < team_comments_display.length; i++) {
-              if (team_comments_display[i][0] === change_table[x][4] || team_comments_display[i][1] === change_table[x][5]) {
+              if ((team_comments_display[i][0] === change_table[x][4] && change_table[x][4] !== "") || (team_comments_display[i][1] === change_table[x][5] && change_table[x][5] !== "")) {
                 team_comments_display[i][x_coord] = value;
               }
             }
@@ -307,7 +305,7 @@ class Academic extends Component {
           console.log(error);
         }
       }
-  };
+    };
 
     const process_layout_changes = curr_changes => {
       console.log("the new layout change is: ", curr_changes);
@@ -568,9 +566,6 @@ class Academic extends Component {
 
     // REMOVED FOR THE FIRST USER STUDY -------------------------------------------------------------------------------------------
 
-    recorded_time = Date.now() / 1000;
-
-    // display_dataset_button = <Button size='lg' className='display-button' color="primary" onClick={this.display} >Display Dataset</Button> 
     transaction_button = <Button size='lg' className='display-button' color="primary" onClick={this.start_transaction} >Start Transaction</Button>
 
 
@@ -1130,12 +1125,6 @@ class Academic extends Component {
     })
   }
 
-  toggleRedirectConfirmModal = () => {
-    this.setState({
-      isRedirectConfirmOpen: !this.state.isRedirectConfirmOpen
-    })
-  }
-
   toggleNavbar = () => {
     this.setState({
       collapsed: !this.state.collapsed
@@ -1185,7 +1174,7 @@ class Academic extends Component {
       
       pending_changes.user = this.state.user_name
   
-      let temp = []; // [table_name, change_type, value, search_attribute, update_attribute]
+      let temp = []; 
       let y_coord = parseInt(chn_copy[0][0]);
       let x_coord = parseInt(chn_copy[0][1]);
       let actual_value = chn_copy[0][3];
@@ -1196,7 +1185,6 @@ class Academic extends Component {
       // find the correct attribute
       if (this.state.curr_table === "attendance") {
         // check for insertion 
-        let search_key_idx = 0;
         let insertion = true;
         for (var j = 0; j < attendance_display[y_coord].length; j++) {
           if (j === x_coord) {
@@ -1208,7 +1196,6 @@ class Academic extends Component {
             }
           }
           if (attendance_display[y_coord][j] !== "") {
-            search_key_idx = j;
             insertion = false;
             break;
           }
@@ -1224,8 +1211,18 @@ class Academic extends Component {
         } else {
           // [table_name, change_type, update_value, update_attribute, search_attribute1, search_attribute2, y_coord, x_coord] for cell changes
           temp[3] = attendance_col_headers[x_coord];
-          temp[4] = attendance_display[y_coord][0];
-          temp[5] = attendance_display[y_coord][1];
+
+          if (x_coord === 0) {
+            temp[4] = prev_value;
+          } else {
+            temp[4] = attendance_display[y_coord][0];
+          }
+
+          if (x_coord === 1) {
+            temp[5] = prev_value;
+          } else {
+            temp[5] = attendance_display[y_coord][1];
+          }
           temp[6] = y_coord;
           temp[7] = x_coord;
         }
@@ -1233,7 +1230,6 @@ class Academic extends Component {
       } else if (this.state.curr_table === "cs225_gradebook") {
         // check for insertion 
         let insertion = true;
-        let search_key_idx = 0;
         for (var j = 0; j < greadebook_display[y_coord].length; j++) {
           if (j === x_coord) {
             if (prev_value === "") {
@@ -1244,7 +1240,6 @@ class Academic extends Component {
             }
           }
           if (greadebook_display[y_coord][j] !== "") {
-            search_key_idx = j;
             insertion = false;
             break;
           }
@@ -1260,8 +1255,19 @@ class Academic extends Component {
         } else {
           // [table_name, change_type, update_value, update_attribute, search_attribute1, search_attribute2, y_coord, x_coord] for cell changes
           temp[3] = grade_book_col_headers[x_coord];
-          temp[4] = greadebook_display[y_coord][0];
-          temp[5] = greadebook_display[y_coord][1];
+
+          if (x_coord === 0) {
+            temp[4] = prev_value;
+          } else {
+            temp[4] = greadebook_display[y_coord][0];
+          }
+          
+          if (x_coord === 1) {
+            temp[5] = prev_value;
+          } else {
+            temp[5] = greadebook_display[y_coord][1];
+          }
+          
           temp[6] = y_coord;
           temp[7] = x_coord;
         }
@@ -1269,7 +1275,6 @@ class Academic extends Component {
       } else if (this.state.curr_table === "students") {
         // check for insertion 
         let insertion = true;
-        let search_key_idx = 0;
         for (var j = 0; j < students_display[y_coord].length; j++) {
           if (j === x_coord) {
             if (prev_value === "") {
@@ -1280,7 +1285,6 @@ class Academic extends Component {
             }
           }
           if (students_display[y_coord][j] !== "") {
-            search_key_idx = j;
             insertion = false;
             break;
           }
@@ -1296,8 +1300,18 @@ class Academic extends Component {
         } else {
           // [table_name, change_type, update_value, update_attribute, search_attribute1, search_attribute2, y_coord, x_coord] for cell changes
           temp[3] = student_col_headers[x_coord];
-          temp[4] = students_display[y_coord][0];
-          temp[5] = students_display[y_coord][1];
+          if (x_coord === 0) {
+            temp[4] = prev_value;
+          } else {
+            temp[4] = students_display[y_coord][0];
+          }
+          
+          if (x_coord === 1) {
+            temp[5] = prev_value;
+          } else {
+            temp[5] = students_display[y_coord][1];
+          }
+          
           temp[6] = y_coord;
           temp[7] = x_coord;
         }
@@ -1305,7 +1319,6 @@ class Academic extends Component {
       } else if (this.state.curr_table === "team_grades") {
         // check for insertion 
         let insertion = true;
-        let search_key_idx = 0;
         for (var j = 0; j < team_grades_display[y_coord].length; j++) {
           if (j === x_coord) {
             if (prev_value === "") {
@@ -1317,7 +1330,6 @@ class Academic extends Component {
           }
           if (team_grades_display[y_coord][j] !== "") {
             insertion = false;
-            search_key_idx = j;
             break;
           }
         }
@@ -1637,27 +1649,6 @@ class Academic extends Component {
     this.toggleCompleteConfirmModal();
   }
 
-  select_simulation = (e) => {
-    // e.preventDefault();
-    console.log("called this function with: ", e.target.name)
-    if (e.target.name === "academic") {
-      this.setState({
-        redirect_link: '/academic'
-      })
-    }
-    if (e.target.name === "financing") {
-      this.setState({
-        redirect_link: '/financing'
-      })
-    }
-    if (e.target.name === "management") {
-      this.setState({
-        redirect_link: '/management'
-      })
-    }
-    this.toggleRedirectConfirmModal();
-  }
-
   toggle = (tab) => {
     if (this.state.activeTab !== tab) {
         this.setState({ activeTab: tab });
@@ -1841,9 +1832,7 @@ class Academic extends Component {
       table = attendance_display;
     } else if (this.state.curr_table === "cs225_gradebook") {
       table = greadebook_display;
-    } else if (this.state.curr_table === "student_status") {
-      table = students_display;
-    } else if (this.state.curr_table === "students") {
+    }  else if (this.state.curr_table === "students") {
       table = students_display;
     } else if (this.state.curr_table === "team_grades") {
       table = team_grades_display;
