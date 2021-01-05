@@ -351,11 +351,28 @@ class Academic extends Component {
 
       } else if (curr_changes[2] === "insert_r") {
 
-        // find the column for writing in the first value
-        for (var j = 0; j < headers.length; j++) {
-          if (headers[j] === curr_changes[4]) {
-            table[curr_changes[6]][j] = curr_changes[3];
+        // find the first empty row
+        for (var i = 0; i < table.length; i++) {
+
+          // test if current row is empty
+          let empty = true;
+          for (var j = 0; j < table[i].length; j++) {
+            if (table[i][j] !== "") {
+              empty = false;
+              break;
+            }
           }
+
+          // find the first empty row, do insertion
+          if (empty) {
+            for (var j = 0; j < headers.length; j++) {
+              if (headers[j] === curr_changes[4]) {
+                table[i][j] = curr_changes[3];
+              }
+            }
+            break;
+          }
+
         }
       }
     }
