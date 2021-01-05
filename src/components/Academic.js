@@ -1440,7 +1440,7 @@ class Academic extends Component {
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({pending_changes})
       };
-      // fetch('https://spreadsheetactions.herokuapp.com/academic/update', requestOptions,  {mode: 'no-cors'})
+      fetch('https://spreadsheetactions.herokuapp.com/academic/update', requestOptions,  {mode: 'no-cors'})
     }, 500);
   }
 
