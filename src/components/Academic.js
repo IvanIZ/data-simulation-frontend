@@ -39,6 +39,8 @@ let students_display = [];
 let team_grades_display = [];
 let team_comments_display = [];
 
+let in_transaction = false;
+
 // A JSON object that keeps track of previous layout changes
 let layout_changes = {
   incoming: false,
@@ -628,6 +630,10 @@ class Academic extends Component {
       currently_editing = true;
     });
 
+    this.hotTableComponent.current.hotInstance.addHook('beforeCreateRow', function(data, coords) {
+      return false;
+    });
+
     this.hotTableComponent.current.hotInstance.addHook('afterCreateRow', function(index, amount, source) {
       if (layout_changes.incoming === true) {
         layout_changes.incoming = false
@@ -640,6 +646,10 @@ class Academic extends Component {
           layout_changes.changes.push(["insert_r", "above", index, "attendance"]);
         }
       }
+    });
+
+    this.hotTableComponent.current.hotInstance.addHook('beforeCreateCol', function(data, coords) {
+      return false;
     });
 
     this.hotTableComponent.current.hotInstance.addHook('afterCreateCol', function(index, amount, source) {
@@ -657,6 +667,12 @@ class Academic extends Component {
     });
 
     this.hotTableComponent.current.hotInstance.addHook('beforeRemoveRow', function(index, amount) {
+
+      // prevent remove row if not in a transaction
+      if (!in_transaction) {
+        return false;
+      }
+
       // [table_name, change_type, operation, direction, search_attribute]
       if (pending_changes.incoming === true) {
         pending_changes.incoming = false;
@@ -680,6 +696,10 @@ class Academic extends Component {
         layout_changes.layout_changed = true;
         layout_changes.changes.push(["remove_r", null, index, "attendance"]);
       }
+    });
+
+    this.hotTableComponent.current.hotInstance.addHook('beforeRemoveCol', function(index, amount) {
+      return false;
     });
 
     this.hotTableComponent.current.hotInstance.addHook('afterRemoveCol', function(index, amount, physicalRows, source) {
@@ -733,6 +753,10 @@ class Academic extends Component {
       currently_editing = true;
     });
 
+    this.hotTableComponent1.current.hotInstance.addHook('beforeCreateRow', function(data, coords) {
+      return false;
+    });
+
     this.hotTableComponent1.current.hotInstance.addHook('afterCreateRow', function(index, amount, source) {
       if (layout_changes.incoming === true) {
         layout_changes.incoming = false;
@@ -745,6 +769,10 @@ class Academic extends Component {
           layout_changes.changes.push(["insert_r", "above", index, "cs225_gradebook"]);
         }
       }
+    });
+
+    this.hotTableComponent1.current.hotInstance.addHook('beforeCreateCol', function(data, coords) {
+      return false;
     });
 
     this.hotTableComponent1.current.hotInstance.addHook('afterCreateCol', function(index, amount, source) {
@@ -762,6 +790,11 @@ class Academic extends Component {
     });
 
     this.hotTableComponent1.current.hotInstance.addHook('beforeRemoveRow', function(index, amount) {
+      // prevent remove row if not in a transaction
+      if (!in_transaction) {
+        return false;
+      }
+
       // [table_name, change_type, operation, direction, search_attribute]
       if (pending_changes.incoming === true) {
         pending_changes.incoming = false;
@@ -784,6 +817,10 @@ class Academic extends Component {
         layout_changes.layout_changed = true;
         layout_changes.changes.push(["remove_r", null, index, "cs225_gradebook"]);
       }
+    });
+
+    this.hotTableComponent1.current.hotInstance.addHook('beforeRemoveCol', function(index, amount) {
+      return false;
     });
 
     this.hotTableComponent1.current.hotInstance.addHook('afterRemoveCol', function(index, amount, physicalRows, source) {
@@ -837,6 +874,10 @@ class Academic extends Component {
       currently_editing = true;
     });
 
+    this.hotTableComponent2.current.hotInstance.addHook('beforeCreateRow', function(data, coords) {
+      return false;
+    });
+
     this.hotTableComponent2.current.hotInstance.addHook('afterCreateRow', function(index, amount, source) {
       if (layout_changes.incoming === true) {
         layout_changes.incoming = false;
@@ -849,6 +890,10 @@ class Academic extends Component {
           layout_changes.changes.push(["insert_r", "above", index, "students"]);
         }
       }
+    });
+
+    this.hotTableComponent2.current.hotInstance.addHook('beforeCreateCol', function(data, coords) {
+      return false;
     });
 
     this.hotTableComponent2.current.hotInstance.addHook('afterCreateCol', function(index, amount, source) {
@@ -866,6 +911,12 @@ class Academic extends Component {
     });
 
     this.hotTableComponent2.current.hotInstance.addHook('beforeRemoveRow', function(index, amount) {
+
+      // prevent remove row if not in a transaction
+      if (!in_transaction) {
+        return false;
+      }
+
       // [table_name, change_type, operation, direction, search_attribute]
       if (pending_changes.incoming === true) {
         pending_changes.incoming = false;
@@ -888,6 +939,10 @@ class Academic extends Component {
         layout_changes.layout_changed = true;
         layout_changes.changes.push(["remove_r", null, index, "students"]);
       }
+    });
+
+    this.hotTableComponent2.current.hotInstance.addHook('beforeRemoveCol', function(index, amount) {
+      return false;
     });
 
     this.hotTableComponent2.current.hotInstance.addHook('afterRemoveCol', function(index, amount, physicalRows, source) {
@@ -941,6 +996,10 @@ class Academic extends Component {
       currently_editing = true;
     });
 
+    this.hotTableComponent3.current.hotInstance.addHook('beforeCreateRow', function(data, coords) {
+      return false;
+    });
+
     this.hotTableComponent3.current.hotInstance.addHook('afterCreateRow', function(index, amount, source) {
       if (layout_changes.incoming === true) {
         layout_changes.incoming = false;
@@ -953,6 +1012,10 @@ class Academic extends Component {
           layout_changes.changes.push(["insert_r", "above", index, "team_grades"]);
         }
       }
+    });
+
+    this.hotTableComponent3.current.hotInstance.addHook('beforeCreateCol', function(data, coords) {
+      return false;
     });
 
     this.hotTableComponent3.current.hotInstance.addHook('afterCreateCol', function(index, amount, source) {
@@ -970,6 +1033,12 @@ class Academic extends Component {
     });
 
     this.hotTableComponent3.current.hotInstance.addHook('beforeRemoveRow', function(index, amount) {
+
+      // prevent remove row if not in a transaction
+      if (!in_transaction) {
+        return false;
+      }
+
       // [table_name, change_type, operation, direction, search_attribute]
       if (pending_changes.incoming === true) {
         pending_changes.incoming = false;
@@ -993,6 +1062,11 @@ class Academic extends Component {
         layout_changes.changes.push(["remove_r", null, index, "team_grades"]);
       }
     });
+
+    this.hotTableComponent3.current.hotInstance.addHook('beforeRemoveCol', function(index, amount) {
+      return false;
+    });
+
 
     this.hotTableComponent3.current.hotInstance.addHook('afterRemoveCol', function(index, amount, physicalRows, source) {
       if (layout_changes.incoming === true) {
@@ -1045,6 +1119,10 @@ class Academic extends Component {
       currently_editing = true;
     });
 
+    this.hotTableComponent4.current.hotInstance.addHook('beforeCreateRow', function(data, coords) {
+      return false;
+    });
+
     this.hotTableComponent4.current.hotInstance.addHook('afterCreateRow', function(index, amount, source) {
       if (layout_changes.incoming === true) {
         layout_changes.incoming = false;
@@ -1057,6 +1135,10 @@ class Academic extends Component {
           layout_changes.changes.push(["insert_r", "above", index, "team_comments"]);
         }
       }
+    });
+
+    this.hotTableComponent4.current.hotInstance.addHook('beforeCreateCol', function(data, coords) {
+      return false;
     });
 
     this.hotTableComponent4.current.hotInstance.addHook('afterCreateCol', function(index, amount, source) {
@@ -1074,6 +1156,12 @@ class Academic extends Component {
     });
 
     this.hotTableComponent4.current.hotInstance.addHook('beforeRemoveRow', function(index, amount) {
+
+      // prevent remove row if not in a transaction
+      if (!in_transaction) {
+        return false;
+      }
+      
       // [table_name, change_type, operation, direction, search_attribute]
       if (pending_changes.incoming === true) {
         pending_changes.incoming = false;
@@ -1097,6 +1185,11 @@ class Academic extends Component {
         layout_changes.changes.push(["remove_r", null, index, "team_comments"]);
       }
     });
+
+    this.hotTableComponent4.current.hotInstance.addHook('beforeRemoveCol', function(index, amount) {
+      return false;
+    });
+
 
     this.hotTableComponent4.current.hotInstance.addHook('afterRemoveCol', function(index, amount, physicalRows, source) {
       if (layout_changes.incoming === true) {
@@ -1428,7 +1521,8 @@ class Academic extends Component {
     pending_changes.data = []
     this.setState({
       transaction_mode: true
-    })
+    });
+    in_transaction = true;
     transaction_button = <Button size='lg' className='display-button' color="primary" onClick={this.end_transaction} >End Transaction</Button> 
     setTimeout(() => {
       user_actions.push([this.state.name, "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", curr_time]);
@@ -1443,6 +1537,7 @@ class Academic extends Component {
     this.setState({
       transaction_mode: false
     });
+    in_transaction = false;
     transaction_button = <Button size='lg' className='display-button' color="primary" onClick={this.start_transaction} >Start Transaction</Button>
 
     // signal backend to release locks | Removed for the first user study
@@ -1465,7 +1560,7 @@ class Academic extends Component {
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({pending_changes})
       };
-      fetch('https://spreadsheetactions.herokuapp.com/academic/update', requestOptions,  {mode: 'no-cors'})
+      // fetch('https://spreadsheetactions.herokuapp.com/academic/update', requestOptions,  {mode: 'no-cors'})
     }, 500);
   }
 
@@ -1787,6 +1882,7 @@ class Academic extends Component {
       this.setState({
         transaction_mode: false
       });
+      in_transaction = false;
       transaction_button = <Button size='lg' className='display-button' color="primary" onClick={this.start_transaction} >Start Transaction</Button>
     }
 

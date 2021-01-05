@@ -35,6 +35,8 @@ let check_book3_display = [];
 let allowance_display = [];
 let table_loaded = false;
 
+let in_transaction = false;
+
 let simulation_type = "";
 
 // A JSON object that keeps track of previous layout changes
@@ -406,6 +408,10 @@ class Financing extends Component {
       currently_editing = true;
     });
 
+    this.hotTableComponent.current.hotInstance.addHook('beforeCreateRow', function(data, coords) {
+      return false;
+    });
+
     this.hotTableComponent.current.hotInstance.addHook('afterCreateRow', function(index, amount, source) {
       if (layout_changes.incoming === true) {
         layout_changes.incoming = false
@@ -418,6 +424,10 @@ class Financing extends Component {
           layout_changes.changes.push(["insert_r", "above", index, "monthly_expense"]);
         }
       }
+    });
+
+    this.hotTableComponent.current.hotInstance.addHook('beforeCreateCol', function(data, coords) {
+      return false;
     });
 
     this.hotTableComponent.current.hotInstance.addHook('afterCreateCol', function(index, amount, source) {
@@ -435,6 +445,11 @@ class Financing extends Component {
     });
 
     this.hotTableComponent.current.hotInstance.addHook('beforeRemoveRow', function(index, amount) {
+      // prevent remove row if not in a transaction
+      if (!in_transaction) {
+        return false;
+      }
+
       // [table_name, change_type, operation, direction, search_attribute]
       if (pending_changes.incoming === true) {
         pending_changes.incoming = false;
@@ -458,6 +473,10 @@ class Financing extends Component {
         layout_changes.layout_changed = true;
         layout_changes.changes.push(["remove_r", null, index, "monthly_expense"]);
       }
+    });
+
+    this.hotTableComponent.current.hotInstance.addHook('beforeRemoveCol', function(index, amount) {
+      return false;
     });
 
     this.hotTableComponent.current.hotInstance.addHook('afterRemoveCol', function(index, amount, physicalRows, source) {
@@ -511,6 +530,10 @@ class Financing extends Component {
       currently_editing = true;
     });
 
+    this.hotTableComponent1.current.hotInstance.addHook('beforeCreateRow', function(data, coords) {
+      return false;
+    });
+
     this.hotTableComponent1.current.hotInstance.addHook('afterCreateRow', function(index, amount, source) {
       if (layout_changes.incoming === true) {
         layout_changes.incoming = false;
@@ -523,6 +546,10 @@ class Financing extends Component {
           layout_changes.changes.push(["insert_r", "above", index, "check_book"]);
         }
       }
+    });
+
+    this.hotTableComponent1.current.hotInstance.addHook('beforeCreateCol', function(data, coords) {
+      return false;
     });
 
     this.hotTableComponent1.current.hotInstance.addHook('afterCreateCol', function(index, amount, source) {
@@ -540,6 +567,11 @@ class Financing extends Component {
     });
 
     this.hotTableComponent1.current.hotInstance.addHook('beforeRemoveRow', function(index, amount) {
+      // prevent remove row if not in a transaction
+      if (!in_transaction) {
+        return false;
+      }
+
       // [table_name, change_type, operation, direction, search_attribute]
       if (pending_changes.incoming === true) {
         pending_changes.incoming = false;
@@ -562,6 +594,10 @@ class Financing extends Component {
         layout_changes.layout_changed = true;
         layout_changes.changes.push(["remove_r", null, index, "check_book"]);
       }
+    });
+
+    this.hotTableComponent1.current.hotInstance.addHook('beforeRemoveCol', function(index, amount) {
+      return false;
     });
 
     this.hotTableComponent1.current.hotInstance.addHook('afterRemoveCol', function(index, amount, physicalRows, source) {
@@ -615,6 +651,10 @@ class Financing extends Component {
       currently_editing = true;
     });
 
+    this.hotTableComponent2.current.hotInstance.addHook('beforeCreateRow', function(data, coords) {
+      return false;
+    });
+
     this.hotTableComponent2.current.hotInstance.addHook('afterCreateRow', function(index, amount, source) {
       if (layout_changes.incoming === true) {
         layout_changes.incoming = false;
@@ -627,6 +667,10 @@ class Financing extends Component {
           layout_changes.changes.push(["insert_r", "above", index, "check_book2"]);
         }
       }
+    });
+
+    this.hotTableComponent2.current.hotInstance.addHook('beforeCreateCol', function(data, coords) {
+      return false;
     });
 
     this.hotTableComponent2.current.hotInstance.addHook('afterCreateCol', function(index, amount, source) {
@@ -644,6 +688,11 @@ class Financing extends Component {
     });
 
     this.hotTableComponent2.current.hotInstance.addHook('beforeRemoveRow', function(index, amount) {
+      // prevent remove row if not in a transaction
+      if (!in_transaction) {
+        return false;
+      }
+
       // [table_name, change_type, operation, direction, search_attribute]
       if (pending_changes.incoming === true) {
         pending_changes.incoming = false;
@@ -666,6 +715,10 @@ class Financing extends Component {
         layout_changes.layout_changed = true;
         layout_changes.changes.push(["remove_r", null, index, "check_book2"]);
       }
+    });
+
+    this.hotTableComponent2.current.hotInstance.addHook('beforeRemoveCol', function(index, amount) {
+      return false;
     });
 
     this.hotTableComponent2.current.hotInstance.addHook('afterRemoveCol', function(index, amount, physicalRows, source) {
@@ -719,6 +772,10 @@ class Financing extends Component {
       currently_editing = true;
     });
 
+    this.hotTableComponent3.current.hotInstance.addHook('beforeCreateRow', function(data, coords) {
+      return false;
+    });
+
     this.hotTableComponent3.current.hotInstance.addHook('afterCreateRow', function(index, amount, source) {
       if (layout_changes.incoming === true) {
         layout_changes.incoming = false;
@@ -731,6 +788,10 @@ class Financing extends Component {
           layout_changes.changes.push(["insert_r", "above", index, "check_book3"]);
         }
       }
+    });
+
+    this.hotTableComponent3.current.hotInstance.addHook('beforeCreateCol', function(data, coords) {
+      return false;
     });
 
     this.hotTableComponent3.current.hotInstance.addHook('afterCreateCol', function(index, amount, source) {
@@ -748,6 +809,11 @@ class Financing extends Component {
     });
 
     this.hotTableComponent3.current.hotInstance.addHook('beforeRemoveRow', function(index, amount) {
+      // prevent remove row if not in a transaction
+      if (!in_transaction) {
+        return false;
+      }
+
       // [table_name, change_type, operation, direction, search_attribute]
       if (pending_changes.incoming === true) {
         pending_changes.incoming = false;
@@ -770,6 +836,10 @@ class Financing extends Component {
         layout_changes.layout_changed = true;
         layout_changes.changes.push(["remove_r", null, index, "check_book3"]);
       }
+    });
+
+    this.hotTableComponent3.current.hotInstance.addHook('beforeRemoveCol', function(index, amount) {
+      return false;
     });
 
     this.hotTableComponent3.current.hotInstance.addHook('afterRemoveCol', function(index, amount, physicalRows, source) {
@@ -823,6 +893,10 @@ class Financing extends Component {
       currently_editing = true;
     });
 
+    this.hotTableComponent4.current.hotInstance.addHook('beforeCreateRow', function(data, coords) {
+      return false;
+    });
+
     this.hotTableComponent4.current.hotInstance.addHook('afterCreateRow', function(index, amount, source) {
       if (layout_changes.incoming === true) {
         layout_changes.incoming = false;
@@ -835,6 +909,10 @@ class Financing extends Component {
           layout_changes.changes.push(["insert_r", "above", index, "allowance"]);
         }
       }
+    });
+
+    this.hotTableComponent4.current.hotInstance.addHook('beforeCreateCol', function(data, coords) {
+      return false;
     });
 
     this.hotTableComponent4.current.hotInstance.addHook('afterCreateCol', function(index, amount, source) {
@@ -852,6 +930,11 @@ class Financing extends Component {
     });
 
     this.hotTableComponent4.current.hotInstance.addHook('beforeRemoveRow', function(index, amount) {
+      // prevent remove row if not in a transaction
+      if (!in_transaction) {
+        return false;
+      }
+
       // [table_name, change_type, operation, direction, search_attribute]
       if (pending_changes.incoming === true) {
         pending_changes.incoming = false;
@@ -874,6 +957,10 @@ class Financing extends Component {
         layout_changes.layout_changed = true;
         layout_changes.changes.push(["remove_r", null, index, "allowance"]);
       }
+    });
+
+    this.hotTableComponent4.current.hotInstance.addHook('beforeRemoveCol', function(index, amount) {
+      return false;
     });
 
     this.hotTableComponent4.current.hotInstance.addHook('afterRemoveCol', function(index, amount, physicalRows, source) {
@@ -1192,20 +1279,30 @@ class Financing extends Component {
   }
 
   start_transaction = () => {
+    // get current chicago time
+    const date = new Date();
+    let curr_time = date.toLocaleString('en-US', { timeZone: 'America/Chicago' });
+
     pending_changes.data = []
     this.setState({
       transaction_mode: true
-    })
+    });
+    in_transaction = true;
     transaction_button = <Button size='lg' className='display-button' color="primary" onClick={this.end_transaction} >End Transaction</Button> 
     setTimeout(() => {
-      user_actions.push([this.state.name, "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", ]);
+      user_actions.push([this.state.name, "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", curr_time]);
     }, 200);
   }
 
   end_transaction = () => {
+    // get current chicago time
+    const date = new Date();
+    let curr_time = date.toLocaleString('en-US', { timeZone: 'America/Chicago' });
+
     this.setState({
       transaction_mode: false
     });
+    in_transaction = false;
     transaction_button = <Button size='lg' className='display-button' color="primary" onClick={this.start_transaction} >Start Transaction</Button>
 
     // signal backend to release locks | Removed for the first user study
@@ -1219,7 +1316,7 @@ class Financing extends Component {
           user_actions.pop();
         }
       }
-      user_actions.push([this.state.name, "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION"]);
+      user_actions.push([this.state.name, "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", curr_time]);
       this.commit_transaction();
 
       // send updates to the database
@@ -1541,6 +1638,15 @@ class Financing extends Component {
   }
 
   restart = () => {
+    // rollback current transaction
+    if (this.state.transaction_mode) {
+      this.setState({
+        transaction_mode: false
+      });
+      in_transaction = false;
+      transaction_button = <Button size='lg' className='display-button' color="primary" onClick={this.start_transaction} >Start Transaction</Button>
+    }
+
     // reset all display
     monthly_expense_display = [];
     check_book_display = [];
