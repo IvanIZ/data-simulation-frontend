@@ -16,7 +16,7 @@ class Utils {
         if (simulation_type === "attendance") {
             ATT_NUM = 18;
         } else if (simulation_type === "grade_book") {
-            ATT_NUM = 12;
+            ATT_NUM = 8;
         }
         else if (simulation_type === "check_book" || simulation_type === "check_book2" || simulation_type === "check_book3") {
             ATT_NUM = 6;
@@ -80,16 +80,12 @@ class Utils {
                         if (simulation_type === "grade_book") {      // grade book 
                             if (j === 0) {temp[j] = data[i]['NetID']}
                             if (j === 1) {temp[j] = data[i]['name']}
-                            if (j === 2) {temp[j] = data[i]['MP1']}
-                            if (j === 3) {temp[j] = data[i]['MP2']}
-                            if (j === 4) {temp[j] = data[i]['Lab1']}
-                            if (j === 5) {temp[j] = data[i]['Lab2']}
-                            if (j === 6) {temp[j] = data[i]['Exam1']}
-                            if (j === 7) {temp[j] = data[i]['Exam2']}
-                            if (j === 8) {temp[j] = data[i]['Final']}
-                            if (j === 9) {temp[j] = data[i]['Participation']}
-                            if (j === 10) {temp[j] = data[i]['Project']}
-                            if (j === 11) {temp[j] = data[i]['Overall']}
+                            if (j === 2) {temp[j] = data[i]['MP']}
+                            if (j === 3) {temp[j] = data[i]['Lab']}
+                            if (j === 4) {temp[j] = data[i]['Final']}
+                            if (j === 5) {temp[j] = data[i]['Participation']}
+                            if (j === 6) {temp[j] = data[i]['Project']}
+                            if (j === 7) {temp[j] = data[i]['Overall']}
                         } else if (simulation_type === "check_book" || simulation_type === "check_book2" || simulation_type === "check_book3") {    // check book 1, 2, 3
                             if (j === 0) {temp[j] = data[i]['number']}
                             if (j === 1) {temp[j] = data[i]['date']}
@@ -175,8 +171,8 @@ class Utils {
                             if (j === 6) {temp[j] = data[i]['overall']}
                         } else if (simulation_type === "team_comments") { //team comments
                             if (j === 0) {temp[j] = data[i]['Team']}
-                            if (j === 1) {temp[j] = data[i]['comments1']}
-                            if (j === 2) {temp[j] = data[i]['comments2']}
+                            if (j === 1) {temp[j] = data[i]['comment1']}
+                            if (j === 2) {temp[j] = data[i]['comment2']}
                         } else if (simulation_type === "allowance") {
                             if (j === 0) {temp[j] = data[i]['child']}
                             if (j === 1) {temp[j] = data[i]['allowance']}
@@ -209,7 +205,7 @@ class Utils {
 
         } else if (simulation_type === "grade_book") {
             this.load_gradebook(buffer);
-            ATT_NUM = 17;
+            ATT_NUM = 13;
             this.add_empty_rows(10, ATT_NUM, buffer);
 
         }
@@ -387,12 +383,8 @@ class Utils {
         if (simulation_type === "grade_book") {  // grade book
             col_head.push("NetID");
             col_head.push("Name");
-            col_head.push("MP1");
-            col_head.push("MP2");
-            col_head.push("Lab1");
-            col_head.push("Lab2");
-            col_head.push("Exam1");
-            col_head.push("Exam2");
+            col_head.push("MP");
+            col_head.push("Lab");
             col_head.push("Final");
             col_head.push("Participation");
             col_head.push("Project");
@@ -495,8 +487,8 @@ class Utils {
 
         if (simulation_type === "team_comments") {  // team comments
             col_head.push("Team");
-            col_head.push("Comments1");
-            col_head.push("Comments2");
+            col_head.push("Comment1");
+            col_head.push("Comment2");
         }   
 
         if (simulation_type === "allowance") {  // allowance

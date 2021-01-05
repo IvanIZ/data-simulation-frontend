@@ -1404,17 +1404,25 @@ class Academic extends Component {
   }
 
   start_transaction = () => {
+    // get current chicago time
+    const date = new Date();
+    let curr_time = date.toLocaleString('en-US', { timeZone: 'America/Chicago' });
+
     pending_changes.data = []
     this.setState({
       transaction_mode: true
     })
     transaction_button = <Button size='lg' className='display-button' color="primary" onClick={this.end_transaction} >End Transaction</Button> 
     setTimeout(() => {
-      user_actions.push([this.state.name, "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", ]);
+      user_actions.push([this.state.name, "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", "START_TRANSACTION", curr_time]);
     }, 200);
   }
 
   end_transaction = () => {
+    // get current chicago time
+    const date = new Date();
+    let curr_time = date.toLocaleString('en-US', { timeZone: 'America/Chicago' });
+
     this.setState({
       transaction_mode: false
     });
@@ -1431,7 +1439,7 @@ class Academic extends Component {
           user_actions.pop();
         }
       }
-      user_actions.push([this.state.name, "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION"]);
+      user_actions.push([this.state.name, "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", "END_TRANSACTION", curr_time]);
       this.commit_transaction();
 
       // send updates to the database
@@ -1756,6 +1764,15 @@ class Academic extends Component {
   }
 
   restart = () => {
+
+    // rollback current transaction
+    if (this.state.transaction_mode) {
+      this.setState({
+        transaction_mode: false
+      });
+      transaction_button = <Button size='lg' className='display-button' color="primary" onClick={this.start_transaction} >Start Transaction</Button>
+    }
+
     // reset all display
     attendance_display = [];
     greadebook_display = [];
