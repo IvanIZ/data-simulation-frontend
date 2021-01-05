@@ -171,7 +171,7 @@ class Utils {
                             if (j === 2) {temp[j] = data[i]['presentation']}
                             if (j === 3) {temp[j] = data[i]['codes']}
                             if (j === 4) {temp[j] = data[i]['report']}
-                            if (j === 5) {temp[j] = data[i]['Peer Reviews']}
+                            if (j === 5) {temp[j] = data[i]['Peer_Reviews']}
                             if (j === 6) {temp[j] = data[i]['overall']}
                         } else if (simulation_type === "team_comments") { //team comments
                             if (j === 0) {temp[j] = data[i]['Team']}
