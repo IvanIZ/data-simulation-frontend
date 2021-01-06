@@ -84,6 +84,8 @@ let currently_editing = false;
 let select_i = -1; 
 let select_j = -1;
 
+let allow_create_row = false;
+
 let transaction_button = "";
 let pending_changes = {
   data:[], // 2d array to store difference: y, value, x, 
@@ -244,6 +246,7 @@ class Academic extends Component {
         return;
       }
 
+      console.log("the changes to other users are: ", data)
       let change_table = data.data
       for (var x = 0; x < change_table.length; x++) {
 
@@ -264,7 +267,9 @@ class Academic extends Component {
         let value = change_table[x][2] // 1 --> actual value
 
         // reflect each update to its corresponding table
-        try { // [table_name, change_type, update_value, update_attribute, search_attribute1, search_attribute2, y_coord, x_coord] for cell changes
+        try { 
+          // [table_name, change_type, update_value, update_attribute, search_attribute1, search_attribute2, y_coord, x_coord] for cell changes
+          // [table_name, change_type, update_value, update_attribute, search_attribute1, search_attribute2, y_coord, x_coord, prev_value] for special remove
           let x_coord = change_table[x][7];
 
           if (table === "attendance") {
@@ -282,12 +287,19 @@ class Academic extends Component {
             }
             
           } else if (table === "students") {
-            for (var i = 0; i < students_display.length; i++) {
-              if ((students_display[i][0] === change_table[x][4] && change_table[x][4] !== "") || (students_display[i][1] === change_table[x][5] && change_table[x][5] !== "")) {
-                students_display[i][x_coord] = value;
+            if (change_table[x][1] === "special_remove") {
+              for (var i = 0; i < students_display.length; i++) {
+                if (students_display[i][0] === change_table[x][8] || students_display[i][1] === change_table[x][8] || students_display[i][2] === change_table[x][8]) {
+                  students_display[i][x_coord] = value;
+                }
+              }
+            } else {
+              for (var i = 0; i < students_display.length; i++) {
+                if ((students_display[i][0] === change_table[x][4] && change_table[x][4] !== "") || (students_display[i][1] === change_table[x][5] && change_table[x][5] !== "") || (students_display[i][2] === change_table[x][8] && change_table[x][8] !== "")) {
+                  students_display[i][x_coord] = value;
+                }
               }
             }
-            
           } else if (table === "team_grades") {
             for (var i = 0; i < team_grades_display.length; i++) {
               if ((team_grades_display[i][0] === change_table[x][4] && change_table[x][4] !== "") || (team_grades_display[i][1] === change_table[x][5] && change_table[x][5] !== "")) {
@@ -346,7 +358,9 @@ class Academic extends Component {
           if (table[index][0] === curr_changes[4]) {
             pending_changes.incoming = true;
             layout_changes.incoming = true;
+            in_transaction = true;
             table_instance.alter('remove_row', index, 1);
+            in_transaction = false;
             break;
           }
         }
@@ -365,8 +379,32 @@ class Academic extends Component {
             }
           }
 
-          // find the first empty row, do insertion
+          // find the first empty row
           if (empty) {
+            // check if there's an uncommitted insert. If so, push it down
+            let insert_uncommitted = false;
+            let num_insert_uncommitted = 0;
+            if (in_transaction) {
+              for (var k = 0; k < pending_changes.data.length; k++) {
+                if (pending_changes.data[k][2] === "insert_r") {
+                  insert_uncommitted = true;
+                  num_insert_uncommitted++;
+                }
+              }
+            }
+
+            // found uncommitted insert, insert a row in the middle
+            if (insert_uncommitted) {
+              i = i - num_insert_uncommitted;
+              allow_create_row = true;
+              table_instance.alter('insert_row', i, 1);
+              if (change_detected && chn_copy[0][0] === i) {
+                change_detected = false;
+              }
+              allow_create_row = false;
+            }
+
+            // Do insertion
             for (var j = 0; j < headers.length; j++) {
               if (headers[j] === curr_changes[4]) {
                 table[i][j] = curr_changes[3];
@@ -631,7 +669,11 @@ class Academic extends Component {
     });
 
     this.hotTableComponent.current.hotInstance.addHook('beforeCreateRow', function(data, coords) {
-      return false;
+      if (allow_create_row) {
+        return true;
+      } else {
+        return false;
+      }
     });
 
     this.hotTableComponent.current.hotInstance.addHook('afterCreateRow', function(index, amount, source) {
@@ -673,7 +715,7 @@ class Academic extends Component {
         return false;
       }
 
-      // [table_name, change_type, operation, direction, search_attribute]
+      // [table_name, change_type, operation, direction, search_attribute, socket_id] for remove row
       if (pending_changes.incoming === true) {
         pending_changes.incoming = false;
       } else {
@@ -754,7 +796,11 @@ class Academic extends Component {
     });
 
     this.hotTableComponent1.current.hotInstance.addHook('beforeCreateRow', function(data, coords) {
-      return false;
+      if (allow_create_row) {
+        return true;
+      } else {
+        return false;
+      }
     });
 
     this.hotTableComponent1.current.hotInstance.addHook('afterCreateRow', function(index, amount, source) {
@@ -795,7 +841,7 @@ class Academic extends Component {
         return false;
       }
 
-      // [table_name, change_type, operation, direction, search_attribute]
+      // [table_name, change_type, operation, direction, search_attribute, socket_id] for remove row
       if (pending_changes.incoming === true) {
         pending_changes.incoming = false;
       } else {
@@ -875,7 +921,11 @@ class Academic extends Component {
     });
 
     this.hotTableComponent2.current.hotInstance.addHook('beforeCreateRow', function(data, coords) {
-      return false;
+      if (allow_create_row) {
+        return true;
+      } else {
+        return false;
+      }
     });
 
     this.hotTableComponent2.current.hotInstance.addHook('afterCreateRow', function(index, amount, source) {
@@ -917,7 +967,7 @@ class Academic extends Component {
         return false;
       }
 
-      // [table_name, change_type, operation, direction, search_attribute]
+      // [table_name, change_type, operation, direction, search_attribute, socket_id] for remove row
       if (pending_changes.incoming === true) {
         pending_changes.incoming = false;
       } else {
@@ -997,7 +1047,11 @@ class Academic extends Component {
     });
 
     this.hotTableComponent3.current.hotInstance.addHook('beforeCreateRow', function(data, coords) {
-      return false;
+      if (allow_create_row) {
+        return true;
+      } else {
+        return false;
+      }
     });
 
     this.hotTableComponent3.current.hotInstance.addHook('afterCreateRow', function(index, amount, source) {
@@ -1039,7 +1093,7 @@ class Academic extends Component {
         return false;
       }
 
-      // [table_name, change_type, operation, direction, search_attribute]
+      // [table_name, change_type, operation, direction, search_attribute, socket_id] for remove row
       if (pending_changes.incoming === true) {
         pending_changes.incoming = false;
       } else {
@@ -1120,7 +1174,11 @@ class Academic extends Component {
     });
 
     this.hotTableComponent4.current.hotInstance.addHook('beforeCreateRow', function(data, coords) {
-      return false;
+      if (allow_create_row) {
+        return true;
+      } else {
+        return false;
+      }
     });
 
     this.hotTableComponent4.current.hotInstance.addHook('afterCreateRow', function(index, amount, source) {
@@ -1162,7 +1220,7 @@ class Academic extends Component {
         return false;
       }
       
-      // [table_name, change_type, operation, direction, search_attribute]
+      // [table_name, change_type, operation, direction, search_attribute, socket_id] for remove row
       if (pending_changes.incoming === true) {
         pending_changes.incoming = false;
       } else {
@@ -1294,6 +1352,23 @@ class Academic extends Component {
       
       // find the correct attribute
       if (this.state.curr_table === "attendance") {
+
+        // check if current cell change remove the last cell in row
+        let last_cell = true
+        for (var j = 0; j < attendance_display[y_coord].length; j++) {
+
+          // find a non-empty cell, so not last_cell
+          if (attendance_display[y_coord][j] !== "") {
+            last_cell = false;
+            break;
+          }
+        }
+
+        // if previous is empty already, not last_cell
+        if (prev_value === "") {
+          last_cell = false;
+        }
+
         // check for insertion 
         let insertion = true;
         for (var j = 0; j < attendance_display[y_coord].length; j++) {
@@ -1311,7 +1386,7 @@ class Academic extends Component {
           }
         }
 
-        if (insertion) {  // [table_name, change_type, operation, value, search_attribute] for insert
+        if (insertion) {  // [table_name, change_type, operation, value, search_attribute, socket_id, y_coord] for insert row
           temp[1] = "layout_change";
           temp[2] = "insert_r";
           temp[3] = actual_value;
@@ -1337,7 +1412,30 @@ class Academic extends Component {
           temp[7] = x_coord;
         }
 
+        // previous cell is not empty, and after change the entire row is empty --> last cell. Treat as a special remove
+        if (last_cell) {
+          // [table_name, change_type, update_value, update_attribute, search_attribute1, search_attribute2, y_coord, x_coord, prev_value] for special remove
+          temp[1] = "special_remove";
+          temp[8] = prev_value;
+        }
+
       } else if (this.state.curr_table === "cs225_gradebook") {
+        // check if current cell change remove the last cell in row
+        let last_cell = true
+        for (var j = 0; j < greadebook_display[y_coord].length; j++) {
+
+          // find a non-empty cell, so not last_cell
+          if (greadebook_display[y_coord][j] !== "") {
+            last_cell = false;
+            break;
+          }
+        }
+
+        // if previous is empty already, not last_cell
+        if (prev_value === "") {
+          last_cell = false;
+        }
+
         // check for insertion 
         let insertion = true;
         for (var j = 0; j < greadebook_display[y_coord].length; j++) {
@@ -1355,7 +1453,7 @@ class Academic extends Component {
           }
         }
 
-        if (insertion) {  // [table_name, change_type, operation, value, search_attribute] for insert
+        if (insertion) {  // [table_name, change_type, operation, value, search_attribute, socket_id, y_coord] for insert row
           temp[1] = "layout_change";
           temp[2] = "insert_r";
           temp[3] = actual_value;
@@ -1382,7 +1480,30 @@ class Academic extends Component {
           temp[7] = x_coord;
         }
 
+        // previous cell is not empty, and after change the entire row is empty --> last cell. Treat as a special remove
+        if (last_cell) {
+          // [table_name, change_type, update_value, update_attribute, search_attribute1, search_attribute2, y_coord, x_coord, prev_value] for special remove
+          temp[1] = "special_remove";
+          temp[8] = prev_value;
+        }
+
       } else if (this.state.curr_table === "students") {
+        // check if current cell change remove the last cell in row
+        let last_cell = true
+        for (var j = 0; j < students_display[y_coord].length; j++) {
+
+          // find a non-empty cell, so not last_cell
+          if (students_display[y_coord][j] !== "") {
+            last_cell = false;
+            break;
+          }
+        }
+
+        // if previous is empty already, not last_cell
+        if (prev_value === "") {
+          last_cell = false;
+        }
+
         // check for insertion 
         let insertion = true;
         for (var j = 0; j < students_display[y_coord].length; j++) {
@@ -1400,7 +1521,7 @@ class Academic extends Component {
           }
         }
 
-        if (insertion) {  // [table_name, change_type, operation, value, search_attribute] for insert
+        if (insertion) {  // [table_name, change_type, operation, value, search_attribute, socket_id, y_coord] for insert row
           temp[1] = "layout_change";
           temp[2] = "insert_r";
           temp[3] = actual_value;
@@ -1408,7 +1529,7 @@ class Academic extends Component {
           temp[5] = socket_id;
           temp[6] = y_coord;
         } else {
-          // [table_name, change_type, update_value, update_attribute, search_attribute1, search_attribute2, y_coord, x_coord] for cell changes
+          // [table_name, change_type, update_value, update_attribute, search_attribute1, search_attribute2, y_coord, x_coord, search_attribute3] for cell changes
           temp[3] = student_col_headers[x_coord];
           if (x_coord === 0) {
             temp[4] = prev_value;
@@ -1424,9 +1545,37 @@ class Academic extends Component {
           
           temp[6] = y_coord;
           temp[7] = x_coord;
+          if (x_coord === 2) {
+            temp[8] = prev_value;
+          } else {
+            temp[8] = students_display[y_coord][2];
+          }
+        }
+
+        // previous cell is not empty, and after change the entire row is empty --> last cell. Treat as a special remove
+        if (last_cell) {
+          // [table_name, change_type, update_value, update_attribute, search_attribute1, search_attribute2, y_coord, x_coord, prev_value] for special remove
+          temp[1] = "special_remove";
+          temp[8] = prev_value;
         }
 
       } else if (this.state.curr_table === "team_grades") {
+        // check if current cell change remove the last cell in row
+        let last_cell = true
+        for (var j = 0; j < team_grades_display[y_coord].length; j++) {
+
+          // find a non-empty cell, so not last_cell
+          if (team_grades_display[y_coord][j] !== "") {
+            last_cell = false;
+            break;
+          }
+        }
+
+        // if previous is empty already, not last_cell
+        if (prev_value === "") {
+          last_cell = false;
+        }
+
         // check for insertion 
         let insertion = true;
         for (var j = 0; j < team_grades_display[y_coord].length; j++) {
@@ -1444,7 +1593,7 @@ class Academic extends Component {
           }
         }
 
-        if (insertion) {  // [table_name, change_type, operation, value, search_attribute] for insert
+        if (insertion) {  // [table_name, change_type, operation, value, search_attribute, socket_id, y_coord] for insert row
           temp[1] = "layout_change";
           temp[2] = "insert_r";
           temp[3] = actual_value;
@@ -1464,7 +1613,30 @@ class Academic extends Component {
           temp[7] = x_coord;
         }
 
+        // previous cell is not empty, and after change the entire row is empty --> last cell. Treat as a special remove
+        if (last_cell) {
+          // [table_name, change_type, update_value, update_attribute, search_attribute1, search_attribute2, y_coord, x_coord, prev_value] for special remove
+          temp[1] = "special_remove";
+          temp[8] = prev_value;
+        }
+
       } else if (this.state.curr_table === "team_comments") {
+        // check if current cell change remove the last cell in row
+        let last_cell = true
+        for (var j = 0; j < team_comments_display[y_coord].length; j++) {
+
+          // find a non-empty cell, so not last_cell
+          if (team_comments_display[y_coord][j] !== "") {
+            last_cell = false;
+            break;
+          }
+        }
+
+        // if previous is empty already, not last_cell
+        if (prev_value === "") {
+          last_cell = false;
+        }
+
         // check for insertion 
         let insertion = true;
         let search_key_idx = 0;
@@ -1484,7 +1656,7 @@ class Academic extends Component {
           }
         }
 
-        if (insertion) {  // [table_name, change_type, operation, value, search_attribute] for insert
+        if (insertion) {  // [table_name, change_type, operation, value, search_attribute, socket_id, y_coord] for insert row
           temp[1] = "layout_change";
           temp[2] = "insert_r";
           temp[3] = actual_value;
@@ -1502,6 +1674,13 @@ class Academic extends Component {
           temp[5] = null;
           temp[6] = y_coord;
           temp[7] = x_coord;
+        }
+
+        // previous cell is not empty, and after change the entire row is empty --> last cell. Treat as a special remove
+        if (last_cell) {
+          // [table_name, change_type, update_value, update_attribute, search_attribute1, search_attribute2, y_coord, x_coord, prev_value] for special remove
+          temp[1] = "special_remove";
+          temp[8] = prev_value;
         }
 
       }
@@ -1993,6 +2172,13 @@ class Academic extends Component {
 
   indicate_error = () => {
     user_actions.push([this.state.name, "ERR", "ERR", "ERR", "ERR", "ERR", "ERR", "ERR", "ERR"]);
+    console.log("the pending changes are: ", pending_changes.data)
+  }
+
+  refresh = () => {
+    this.setState({
+      refresh: this.state.refresh
+    })
   }
   
   render() {
@@ -2019,10 +2205,12 @@ class Academic extends Component {
                     <Button size='lg' className='display-button' color="info" onClick={this.store_training_data} >Complete Simulation</Button>
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     <Button size='lg' className='display-button' color="info" onClick={this.restart} >Restart Simulation</Button>
-                    &nbsp;&nbsp;&nbsp;&nbsp;
-                    <Button size='lg' className='display-button' color="info" onClick={this.toggleInstructionModal} >Instruction</Button>
+                    {/* &nbsp;&nbsp;&nbsp;&nbsp;
+                    <Button size='lg' className='display-button' color="info" onClick={this.toggleInstructionModal} >Instruction</Button> */}
                     {/* &nbsp;&nbsp;&nbsp;&nbsp;
                     <Button size='lg' className='display-button' color="info" onClick={this.request_read_lock} >Read Lock</Button> */}
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <Button size='lg' className='display-button' color="info" onClick={this.refresh} >Refresh</Button>
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     <Button size='lg' className='display-button' color="info" onClick={this.record_read_cell} >Read Cell</Button>
                     &nbsp;&nbsp;&nbsp;&nbsp;
