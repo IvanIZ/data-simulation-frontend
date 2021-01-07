@@ -35,7 +35,7 @@ class Utils {
         } else if (simulation_type === "students") {
             ATT_NUM = 4;
         } else if (simulation_type === "team_grades") {
-            ATT_NUM = 7;
+            ATT_NUM = 6;
         } else if (simulation_type === "team_comments") {
             ATT_NUM = 3;
         } else if (simulation_type === "allowance") {
@@ -163,12 +163,11 @@ class Utils {
                             if (j === 3) {temp[j] = data[i]['team']}
                         } else if (simulation_type === "team_grades") { // team grades
                             if (j === 0) {temp[j] = data[i]['team']}
-                            if (j === 1) {temp[j] = data[i]['proposal']}
-                            if (j === 2) {temp[j] = data[i]['presentation']}
-                            if (j === 3) {temp[j] = data[i]['codes']}
-                            if (j === 4) {temp[j] = data[i]['report']}
-                            if (j === 5) {temp[j] = data[i]['Peer_Reviews']}
-                            if (j === 6) {temp[j] = data[i]['overall']}
+                            if (j === 1) {temp[j] = data[i]['presentation']}
+                            if (j === 2) {temp[j] = data[i]['codes']}
+                            if (j === 3) {temp[j] = data[i]['report']}
+                            if (j === 4) {temp[j] = data[i]['Peer_Reviews']}
+                            if (j === 5) {temp[j] = data[i]['overall']}
                         } else if (simulation_type === "team_comments") { //team comments
                             if (j === 0) {temp[j] = data[i]['Team']}
                             if (j === 1) {temp[j] = data[i]['comment1']}
@@ -383,12 +382,12 @@ class Utils {
         if (simulation_type === "grade_book") {  // grade book
             col_head.push("NetID");
             col_head.push("Name");
-            col_head.push("MP");
-            col_head.push("Lab");
-            col_head.push("Final");
-            col_head.push("Participation");
-            col_head.push("Project");
-            col_head.push("Overall");
+            col_head.push("MP (30)");
+            col_head.push("Lab (20)");
+            col_head.push("Final (20)");
+            col_head.push("Participation (10)");
+            col_head.push("Project (20)");
+            col_head.push("Overall (100)");
         }
         if (simulation_type === "check_book" || simulation_type === "check_book2" || simulation_type === "check_book3") {  // check book
             col_head.push("Number");
@@ -477,12 +476,11 @@ class Utils {
 
         if (simulation_type === "team_grades") { // team grades
             col_head.push("Team");
-            col_head.push("Proposal");
-            col_head.push("Presentation");
-            col_head.push("Codes");
-            col_head.push("Report");
-            col_head.push("Peer Reviews");
-            col_head.push("Overall");
+            col_head.push("Presentation (20)");
+            col_head.push("Codes (40)");
+            col_head.push("Report (20)");
+            col_head.push("Peer Reviews (20)");
+            col_head.push("Overall (100)");
         }
 
         if (simulation_type === "team_comments") {  // team comments

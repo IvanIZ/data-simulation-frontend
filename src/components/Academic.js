@@ -1780,82 +1780,6 @@ class Academic extends Component {
       layout_changes.layout_changed = false;
     }
 
-    // // handle scroll actions
-    // if (action_type === "scroll") {
-
-    //   let scroll_diff = prev_scrolltop - e.target.scrollTop;
-    //   let action_length = user_actions.length;
-
-    //   // don't hace scroll_diff === 0 because each scroll on mouse will result in two identical function calls
-    //   if (scroll_diff > 0) {
-        
-    //     // check if previous is a large up scroll. If so, do nothing
-    //     if (action_length >= 1 && user_actions[action_length - 1][1] === "up_scroll_l") {
-    //       // deliberately do nothing here
-    //     }
-
-    //     // check for combining 6 small up scrolls
-    //     else if (action_length >= SCROLL_SIZE) {
-    //       let combine = true;
-    //       for (var i = 0; i < SCROLL_SIZE; i++) {
-    //           if (user_actions[action_length - 1 - i][1] !== "up_scroll_s") {
-    //             combine = false;
-    //             break;
-    //           }
-    //       }
-
-    //       if (combine) {
-    //         for (var i = 0; i < SCROLL_SIZE; i++) {
-    //             user_actions.pop();
-    //         }
-    //         user_actions.push([this.state.name, "up_scroll_l", null, null, null, this.state.curr_table, null, null, curr_time]);
-    //       }
-
-    //       else {
-    //         user_actions.push([this.state.name, "up_scroll_s", null, null, null, this.state.curr_table, null, null, curr_time]);
-    //       }
-    //     }
-
-    //     else {
-    //       user_actions.push([this.state.name, "up_scroll_s", null, null, null, this.state.curr_table, null, null, curr_time]);
-    //     }
-
-    //   } else if (scroll_diff < 0) {
-
-    //     // check if previous is a large down scroll. If so, do nothing
-    //     if (action_length >= 1 && user_actions[action_length - 1][1] === "down_scroll_l") {
-    //         // deliberately do nothing here
-    //     }
-
-    //     // check for combining 6 small scrolls
-    //     else if (action_length >= SCROLL_SIZE) {
-    //       let combine = true;
-    //       for (var i = 0; i < SCROLL_SIZE; i++) {
-    //           if (user_actions[action_length - 1 - i][1] !== "down_scroll_s") {
-    //             combine = false;
-    //             break;
-    //           }
-    //       }
-          
-    //       if (combine) {
-    //         for (var i = 0; i < SCROLL_SIZE; i++) {
-    //             user_actions.pop();
-    //         }
-    //         user_actions.push([this.state.name, "down_scroll_l", null, null, null, this.state.curr_table, null, null, curr_time]);
-    //       }
-
-    //       else {
-    //         user_actions.push([this.state.name, "down_scroll_s", null, null, null, this.state.curr_table, null, null, curr_time]);
-    //       }
-    //     } 
-
-    //     else {
-    //       user_actions.push([this.state.name, "down_scroll_s", null, null, null, this.state.curr_table, null, null, curr_time]);
-    //     }
-    //   }
-    //   this.handleScroll(e);
-    // }
-
     // calculate click action
     else if (action_type === "click") {
 
@@ -2341,7 +2265,7 @@ class Academic extends Component {
                 <NavLink
                     className={classnames({ active: this.state.activeTab === '1' })}
                     onClick={() => { this.toggle('1'); }}>
-                    Attendance Table
+                    Attendance
                 </NavLink>
             </NavItem>
             <NavItem>
@@ -2415,7 +2339,7 @@ class Academic extends Component {
             </TabPane>
             <TabPane tabId="3">
                 <h4>
-                    Students Table
+                    Students
                 </h4> 
                 <div id = "display_portion" tabIndex="3">
                     <HotTable className="handsontable" id ="display_table" data={students_display} ref={this.hotTableComponent2} id={this.id}
