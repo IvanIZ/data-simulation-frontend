@@ -2123,8 +2123,8 @@ class Academic extends Component {
                     {transaction_button}
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     <Button size='lg' className='display-button' color="info" onClick={this.store_training_data} >Submit Simulation</Button>
-                    &nbsp;&nbsp;&nbsp;&nbsp;
-                    <Button size='lg' className='display-button' color="info" onClick={e => this.restart(true)} >Reload Simulation</Button>
+                    {/* &nbsp;&nbsp;&nbsp;&nbsp;
+                    <Button size='lg' className='display-button' color="info" onClick={e => this.restart(true)} >Reload Simulation</Button> */}
                     {/* &nbsp;&nbsp;&nbsp;&nbsp;
                     <Button size='lg' className='display-button' color="info" onClick={this.toggleInstructionModal} >Instruction</Button> */}
                     {/* &nbsp;&nbsp;&nbsp;&nbsp;
