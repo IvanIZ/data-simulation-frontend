@@ -1978,7 +1978,7 @@ class Academic extends Component {
     }
   }
 
-  restart = () => {
+  restart = (reset_user_actions) => {
 
     // rollback current transaction
     if (this.state.transaction_mode) {
@@ -2010,7 +2010,9 @@ class Academic extends Component {
     this.reload_tables();
 
     // clear recorded actions
-    user_actions = [];
+    if (reset_user_actions) {
+      user_actions = [];
+    }
 
     // set tab
     this.setState({
@@ -2099,12 +2101,6 @@ class Academic extends Component {
     console.log("the pending changes are: ", pending_changes.data)
   }
 
-  refresh = () => {
-    this.setState({
-      refresh: this.state.refresh
-    })
-  }
-  
   render() {
     if (this.state.redirect) {
       return <Redirect to={this.state.redirect_link} />
@@ -2126,15 +2122,15 @@ class Academic extends Component {
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     {transaction_button}
                     &nbsp;&nbsp;&nbsp;&nbsp;
-                    <Button size='lg' className='display-button' color="info" onClick={this.store_training_data} >Complete Simulation</Button>
+                    <Button size='lg' className='display-button' color="info" onClick={this.store_training_data} >Submit Simulation</Button>
                     &nbsp;&nbsp;&nbsp;&nbsp;
-                    <Button size='lg' className='display-button' color="info" onClick={this.restart} >Restart Simulation</Button>
+                    <Button size='lg' className='display-button' color="info" onClick={e => this.restart(true)} >Reload Simulation</Button>
                     {/* &nbsp;&nbsp;&nbsp;&nbsp;
                     <Button size='lg' className='display-button' color="info" onClick={this.toggleInstructionModal} >Instruction</Button> */}
                     {/* &nbsp;&nbsp;&nbsp;&nbsp;
                     <Button size='lg' className='display-button' color="info" onClick={this.request_read_lock} >Read Lock</Button> */}
                     &nbsp;&nbsp;&nbsp;&nbsp;
-                    <Button size='lg' className='display-button' color="info" onClick={this.refresh} >Refresh</Button>
+                    <Button size='lg' className='display-button' color="info" onClick={e => this.restart(false)} >Refresh</Button>
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     <Button size='lg' className='display-button' color="info" onClick={this.record_read_cell} >Read Cell</Button>
                     &nbsp;&nbsp;&nbsp;&nbsp;
@@ -2206,9 +2202,9 @@ class Academic extends Component {
                   </Modal>
 
                   <Modal size='lg' isOpen={this.state.isRestartModalOpen} toggle={this.toggleRestartModal}>
-                    <ModalHeader toggle={this.toggleRestartModal}>Restart Confirmation</ModalHeader>
+                    <ModalHeader toggle={this.toggleRestartModal}>Restart/Reload Confirmation</ModalHeader>
                     <ModalBody>
-                      Your simulation has been restarted. All the changes that haven't been committed yet are clearned. 
+                      Your simulation has been restarted/reloaded.
                     </ModalBody>
                     <ModalFooter>
                       <Button size='lg' className='display-button' color="info" onClick={this.close_restart_comfirmation}>Got It</Button>
