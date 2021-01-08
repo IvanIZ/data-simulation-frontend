@@ -273,15 +273,17 @@ class Academic extends Component {
           let x_coord = change_table[x][7];
 
           if (table === "attendance") {
+            console.log("attendance change table: ", change_table[x]);
             for (var i = 0; i < attendance_display.length; i++) {
-              if ((attendance_display[i][0] === change_table[x][4] && change_table[x][4] !== "") || (attendance_display[i][1] === change_table[x][5] && change_table[x][5] !== "")) {
+              if (attendance_display[i][1] === change_table[x][5] && change_table[x][5] !== "") {
                 attendance_display[i][x_coord] = value;
               }
             }
             
           } else if (table === "cs225_gradebook") {
+            console.log("gradebook change table: ", change_table[x]);
             for (var i = 0; i < greadebook_display.length; i++) {
-              if ((greadebook_display[i][0] === change_table[x][4] && change_table[x][4] !== "") || (greadebook_display[i][1] === change_table[x][5] && change_table[x][5] !== "")) {
+              if (greadebook_display[i][1] === change_table[x][5] && change_table[x][5] !== "") {
                 greadebook_display[i][x_coord] = value;
               }
             }
@@ -301,15 +303,17 @@ class Academic extends Component {
               }
             }
           } else if (table === "team_grades") {
+            console.log("team grade change table: ", change_table[x]);
             for (var i = 0; i < team_grades_display.length; i++) {
-              if ((team_grades_display[i][0] === change_table[x][4] && change_table[x][4] !== "") || (team_grades_display[i][1] === change_table[x][5] && change_table[x][5] !== "")) {
+              if (team_grades_display[i][0] === change_table[x][4] && change_table[x][4] !== "") {
                 team_grades_display[i][x_coord] = value;
               }
             }
             
           } else if (table === "team_comments") {
+            console.log("team comments change table: ", change_table[x]);
             for (var i = 0; i < team_comments_display.length; i++) {
-              if ((team_comments_display[i][0] === change_table[x][4] && change_table[x][4] !== "") || (team_comments_display[i][1] === change_table[x][5] && change_table[x][5] !== "")) {
+              if (team_comments_display[i][0] === change_table[x][4] && change_table[x][4] !== "") {
                 team_comments_display[i][x_coord] = value;
               }
             }
@@ -1394,19 +1398,15 @@ class Academic extends Component {
           temp[5] = socket_id;
           temp[6] = y_coord;
         } else {
-          // [table_name, change_type, update_value, update_attribute, search_attribute1, search_attribute2, y_coord, x_coord] for cell changes
+          // [table_name, change_type, update_value, update_attribute, search_attribute1=null, search_attribute2, y_coord, x_coord] for cell changes
           temp[3] = attendance_col_headers[x_coord];
 
-          if (x_coord === 0) {
-            temp[4] = prev_value;
-          } else {
-            temp[4] = attendance_display[y_coord][0];
-          }
+          temp[4] = null;
 
-          if (x_coord === 1) {
+          if (x_coord === 0) {
             temp[5] = prev_value;
           } else {
-            temp[5] = attendance_display[y_coord][1];
+            temp[5] = attendance_display[y_coord][0];
           }
           temp[6] = y_coord;
           temp[7] = x_coord;
@@ -1464,16 +1464,12 @@ class Academic extends Component {
           // [table_name, change_type, update_value, update_attribute, search_attribute1, search_attribute2, y_coord, x_coord] for cell changes
           temp[3] = grade_book_col_headers[x_coord];
 
-          if (x_coord === 0) {
-            temp[4] = prev_value;
-          } else {
-            temp[4] = greadebook_display[y_coord][0];
-          }
+          temp[4] = null;
           
-          if (x_coord === 1) {
+          if (x_coord === 0) {
             temp[5] = prev_value;
           } else {
-            temp[5] = greadebook_display[y_coord][1];
+            temp[5] = greadebook_display[y_coord][0];
           }
           
           temp[6] = y_coord;

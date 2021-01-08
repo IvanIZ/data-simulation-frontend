@@ -14,9 +14,9 @@ class Utils {
 
         let ATT_NUM = 0;
         if (simulation_type === "attendance") {
-            ATT_NUM = 18;
+            ATT_NUM = 17;
         } else if (simulation_type === "grade_book") {
-            ATT_NUM = 8;
+            ATT_NUM = 7;
         }
         else if (simulation_type === "check_book" || simulation_type === "check_book2" || simulation_type === "check_book3") {
             ATT_NUM = 6;
@@ -58,34 +58,32 @@ class Utils {
                     var temp = []
                     for (var j = 0; j < ATT_NUM; j++) {
                         if (simulation_type === "attendance") {  // attendance
-                            if (j === 0) {temp[j] = data[i]['NetID'];}
-                            if (j === 1) { temp[j] = data[i]['name'];}
-                            if (j === 2) {temp[j] = data[i]['Week1']}
-                            if (j === 3) {temp[j] = data[i]['Week2']}
-                            if (j === 4) {temp[j] = data[i]['Week3']}
-                            if (j === 5) {temp[j] = data[i]['Week4']}
-                            if (j === 6) {temp[j] = data[i]['Week5']}
-                            if (j === 7) {temp[j] = data[i]['Week6']}
-                            if (j === 8) {temp[j] = data[i]['Week7']}
-                            if (j === 9) {temp[j] = data[i]['Week8']}
-                            if (j === 10) {temp[j] = data[i]['Week9']}
-                            if (j === 11) {temp[j] = data[i]['Week10']}
-                            if (j === 12) {temp[j] = data[i]['Week11']}
-                            if (j === 13) {temp[j] = data[i]['Week12']}
-                            if (j === 14) {temp[j] = data[i]['Week13']}
-                            if (j === 15) {temp[j] = data[i]['Week14']}
-                            if (j === 16) {temp[j] = data[i]['Week15']}
-                            if (j === 17) {temp[j] = data[i]['Week16']}
+                            if (j === 0) { temp[j] = data[i]['name'];}
+                            if (j === 1) {temp[j] = data[i]['Week1']}
+                            if (j === 2) {temp[j] = data[i]['Week2']}
+                            if (j === 3) {temp[j] = data[i]['Week3']}
+                            if (j === 4) {temp[j] = data[i]['Week4']}
+                            if (j === 5) {temp[j] = data[i]['Week5']}
+                            if (j === 6) {temp[j] = data[i]['Week6']}
+                            if (j === 7) {temp[j] = data[i]['Week7']}
+                            if (j === 8) {temp[j] = data[i]['Week8']}
+                            if (j === 9) {temp[j] = data[i]['Week9']}
+                            if (j === 10) {temp[j] = data[i]['Week10']}
+                            if (j === 11) {temp[j] = data[i]['Week11']}
+                            if (j === 12) {temp[j] = data[i]['Week12']}
+                            if (j === 13) {temp[j] = data[i]['Week13']}
+                            if (j === 14) {temp[j] = data[i]['Week14']}
+                            if (j === 15) {temp[j] = data[i]['Week15']}
+                            if (j === 16) {temp[j] = data[i]['Week16']}
                         }
                         if (simulation_type === "grade_book") {      // grade book 
-                            if (j === 0) {temp[j] = data[i]['NetID']}
-                            if (j === 1) {temp[j] = data[i]['name']}
-                            if (j === 2) {temp[j] = data[i]['MP']}
-                            if (j === 3) {temp[j] = data[i]['Lab']}
-                            if (j === 4) {temp[j] = data[i]['Final']}
-                            if (j === 5) {temp[j] = data[i]['Participation']}
-                            if (j === 6) {temp[j] = data[i]['Project']}
-                            if (j === 7) {temp[j] = data[i]['Overall']}
+                            if (j === 0) {temp[j] = data[i]['name']}
+                            if (j === 1) {temp[j] = data[i]['MP']}
+                            if (j === 2) {temp[j] = data[i]['Lab']}
+                            if (j === 3) {temp[j] = data[i]['Final']}
+                            if (j === 4) {temp[j] = data[i]['Participation']}
+                            if (j === 5) {temp[j] = data[i]['Project']}
+                            if (j === 6) {temp[j] = data[i]['Overall']}
                         } else if (simulation_type === "check_book" || simulation_type === "check_book2" || simulation_type === "check_book3") {    // check book 1, 2, 3
                             if (j === 0) {temp[j] = data[i]['number']}
                             if (j === 1) {temp[j] = data[i]['date']}
@@ -360,7 +358,6 @@ class Utils {
 
     fill_col_headers = (col_head, simulation_type) => {
         if (simulation_type === "attendance") {  // attendance
-            col_head.push("NetID");
             col_head.push("Name");
             col_head.push("Week1");
             col_head.push("Week2");
@@ -380,7 +377,6 @@ class Utils {
             col_head.push("Week16");
         }
         if (simulation_type === "grade_book") {  // grade book
-            col_head.push("NetID");
             col_head.push("Name");
             col_head.push("MP (30)");
             col_head.push("Lab (20)");
