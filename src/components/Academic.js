@@ -1847,6 +1847,7 @@ class Academic extends Component {
         }
       }
       this.check_cell_change();
+      currently_editing = false;
     }
     console.log(user_actions);
   }
@@ -2061,6 +2062,12 @@ class Academic extends Component {
     const date = new Date();
     let curr_time = date.toLocaleString('en-US', { timeZone: 'America/Chicago' });
 
+    // get previous action
+    if (user_actions.length === 0) {
+      return;
+    }
+    let prev_action = user_actions[user_actions.length - 1];
+
     // find the correct table
     let table = "";
     if (this.state.curr_table === "attendance") {
@@ -2075,25 +2082,27 @@ class Academic extends Component {
       table = team_comments_display;
     }
 
-    // extract features of the new value  [row, col, prev, new]
-    let feature = "EMPTY";
-    if (table[select_i][select_j] !== null && table[select_i][select_j].length !== 0 && isNaN(table[select_i][select_j])) {
-      feature = "STR";
-    } else if (table[select_i][select_j] !== null && table[select_i][select_j].length !== 0 && !isNaN(table[select_i][select_j])) {
-      feature = "DIGIT";
-    }
+    // user_actions.push([this.state.name, "select_r", select_i, null, null, this.state.curr_table, null, null, curr_time]) for select row
+    // user_actions.push([this.state.name, "select_c", select_j, null, null, this.state.curr_table, null, null, curr_time]) for select column
+    if (prev_action[1] === "click") {
 
-    if (user_actions.length !== 0) {
-      let prev_action = user_actions[user_actions.length - 1];
-      if (prev_action[1] == "READ" && prev_action[2] == select_i && prev_action[3] == select_j) {
-        // do nothing
-      } else {
-        user_actions.push([this.state.name, "READ", select_i, select_j, feature, this.state.curr_table, select_i + 1, col_headers[select_j], curr_time]);
+      // extract features of the new value  [row, col, prev, new]
+      let feature = "EMPTY";
+      if (table[select_i][select_j] !== null && table[select_i][select_j].length !== 0 && isNaN(table[select_i][select_j])) {
+        feature = "STR";
+      } else if (table[select_i][select_j] !== null && table[select_i][select_j].length !== 0 && !isNaN(table[select_i][select_j])) {
+        feature = "DIGIT";
       }
-
-    } else {
-      user_actions.push([this.state.name, "READ", select_i, select_j, feature, this.state.curr_table, select_i + 1, col_headers[select_j], curr_time]);
-    }
+      user_actions.pop();
+      user_actions.push([this.state.name, "READ_CELL", select_i, select_j, feature, this.state.curr_table, select_i + 1, col_headers[select_j], curr_time]);
+      
+    } else if (prev_action[1] === "select_r") {
+      user_actions.pop();
+      user_actions.push([this.state.name, "READ_ROW", prev_action[2], null, null, prev_action[5], null, null, prev_action[8]]);
+    } else if (prev_action[1] === "select_c") {
+      user_actions.pop();
+      user_actions.push([this.state.name, "READ_COL", prev_action[2], null, null, prev_action[5], null, null, prev_action[8]]);
+    } 
   }
 
   indicate_error = () => {
@@ -2121,7 +2130,7 @@ class Academic extends Component {
                   <p className="lead">
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     {transaction_button}
-                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <Button size='lg' className='display-button' color="info" onClick={this.store_training_data} >Submit Simulation</Button>
                     {/* &nbsp;&nbsp;&nbsp;&nbsp;
                     <Button size='lg' className='display-button' color="info" onClick={e => this.restart(true)} >Reload Simulation</Button> */}
@@ -2129,11 +2138,11 @@ class Academic extends Component {
                     <Button size='lg' className='display-button' color="info" onClick={this.toggleInstructionModal} >Instruction</Button> */}
                     {/* &nbsp;&nbsp;&nbsp;&nbsp;
                     <Button size='lg' className='display-button' color="info" onClick={this.request_read_lock} >Read Lock</Button> */}
-                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <Button size='lg' className='display-button' color="info" onClick={e => this.restart(false)} >Refresh</Button>
-                    &nbsp;&nbsp;&nbsp;&nbsp;
-                    <Button size='lg' className='display-button' color="info" onClick={this.record_read_cell} >Read Cell</Button>
-                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <Button size='lg' className='display-button' color="info" onClick={this.record_read_cell} >Read</Button>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <Button size='lg' className='display-button' color="info" onClick={this.indicate_error} >Alert</Button>
                   </p>
                   {this.state.edit_message}
