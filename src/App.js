@@ -19,11 +19,11 @@ class App extends Component {
                 <div>
                   {/* <Navbar /> */}
                   <Switch>
-                    <Route path="/" component={Simulations} exact/>
+                    <Route path="/home" component={Simulations}/>
                     <Route path="/academic" component={Academic}/>
                     <Route path="/financing" component={Financing}/>
                     <Route path="/management" component={Management}/>
-                    <Route path="/employees" component={Employees}/>
+                    <Route path="/" component={Employees} exact/>
                   </Switch>
                 </div> 
             </BrowserRouter>

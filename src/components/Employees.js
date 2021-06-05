@@ -1030,13 +1030,15 @@ class Employees extends Component {
       this.toggleInstructionModal();
     } else {
       table_loaded = true;
-      utils.load_employees_tables(employees_schema, tables);
       setTimeout(() => {
-          current_table = tables[0];
-          this.setState({
-            isInstructionOpen: false
-          })
-      }, 1500);
+          utils.load_employees_tables(employees_schema, tables);
+          setTimeout(() => {              
+              current_table = tables[0];
+              this.setState({
+                isInstructionOpen: false
+              })
+          }, 1000);
+      }, 2000);
       this.setState({
         isNameModalOpen: true
       })
@@ -1119,6 +1121,8 @@ class Employees extends Component {
         <Jumbotron >
                   {this.state.user_text_block}
                   <p className="lead">
+                     &nbsp;&nbsp;&nbsp;&nbsp;
+                    <Button size='lg' className='display-button' color="info" onClick={this.toggleInstructionModal} >Instruction</Button>
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <Button size='lg' className='display-button' color="info" onClick={this.store_training_data} >Submit Simulation</Button>
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -1130,15 +1134,20 @@ class Employees extends Component {
             </Jumbotron>
         <Modal size='lg' isOpen={this.state.isInstructionOpen} >
                     <ModalBody>
-                        <h2>Welcome</h2>
-                        Welcome to Academic Simulation! This instruction can be accessed at any time by clicking the "Instruction" button on this webpage. 
-                        Under this simulation, there are three tables: "Attendance" table, "Gradebook" table, and a "Student Status" table. This simulation has two parts.  
+                        <h5>Introduction</h5>
+                        Welcome to Employees Scenario Simulation! This webpage represents a virtual Excel document that contains multiple files for managing employee information
+                        in a company. We've also sent you a schema diagram and an introduction document that can help you to get familiar with the scenario. In addition, an excel 
+                        document named "event_list" is also sent to you via email. The "event_list" document records a list of events that will happen under this scenario. 
                         <hr className="my-2" />
 
-                    </ModalBody>
-                    <ModalFooter>
+                        <h5>Your Job</h5>
+                        Your job is to perform all the related data management tasks by following the events listed in the "event_list" one by one in chronological order. When you are done, press the "Submit Simulation" 
+                        button to finish the simulation. After submission, please DO NOT close or refresh the page before we have confirmed that your submission is received. You can reopen 
+                        this instruction page at any time by clicking on the "Instruction" button. Thank you for your participation!   
+                        <hr className="my-2" />
+
                         <Button size='lg' className='display-button' color="info" onClick={this.load_tables}>Got it!</Button>
-                    </ModalFooter>
+                    </ModalBody>
                   </Modal>
 
                   
