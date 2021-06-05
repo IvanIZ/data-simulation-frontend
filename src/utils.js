@@ -1,4 +1,89 @@
 class Utils {
+    load_employees_tables = (employee_schema, tables) => {
+        console.log("the schema is: ", employee_schema.titles);
+
+        for (var i = 0; i < 6; i++) {
+            if (i == 0) {
+                let title_table = [];
+                for (var row = 0; row < employee_schema.titles.length; row++) {
+                    let title_tuple = []
+                    title_tuple[0] = employee_schema.titles[row].A;
+                    title_tuple[1] = employee_schema.titles[row].B;
+                    title_tuple[2] = employee_schema.titles[row].C;
+                    title_tuple[3] = employee_schema.titles[row].D;
+                    title_table[row] = title_tuple;
+                }
+                tables[0] = title_table
+            }
+
+            if (i == 1) {
+                let salary_table = [];
+                for (var row = 0; row < employee_schema.salaries.length; row++) {
+                    let salaries_tuple = []
+                    salaries_tuple[0] = employee_schema.salaries[row].A;
+                    salaries_tuple[1] = employee_schema.salaries[row].B;
+                    salaries_tuple[2] = employee_schema.salaries[row].C;
+                    salaries_tuple[3] = employee_schema.salaries[row].D;
+                    salary_table[row] = salaries_tuple;
+                }
+                tables[1] = salary_table
+            }
+
+            if (i == 2) {
+                let employees_table = [];
+                for (var row = 0; row < employee_schema.employees.length; row++) {
+                    let employees_tuple = []
+                    employees_tuple[0] = employee_schema.employees[row].A;
+                    employees_tuple[1] = employee_schema.employees[row].B;
+                    employees_tuple[2] = employee_schema.employees[row].C;
+                    employees_tuple[3] = employee_schema.employees[row].D;
+                    employees_tuple[4] = employee_schema.employees[row].E;
+                    employees_tuple[5] = employee_schema.employees[row].F;
+                    employees_table[row] = employees_tuple;
+                }
+                tables[2] = employees_table
+            }
+
+            if (i == 3) {
+                let dept_manager_table = [];
+                for (var row = 0; row < employee_schema.dept_manager.length; row++) {
+                    let dept_manager_tuple = []
+                    dept_manager_tuple[0] = employee_schema.dept_manager[row].A;
+                    dept_manager_tuple[1] = employee_schema.dept_manager[row].B;
+                    dept_manager_tuple[2] = employee_schema.dept_manager[row].C;
+                    dept_manager_tuple[3] = employee_schema.dept_manager[row].D;
+                    dept_manager_table[row] = dept_manager_tuple;
+                }
+                tables[3] = dept_manager_table
+            }
+
+            if (i == 4) {
+                let dept_emp_table = [];
+                for (var row = 0; row < employee_schema.dept_emp.length; row++) {
+                    let dept_emp_tuple = []
+                    dept_emp_tuple[0] = employee_schema.dept_emp[row].A;
+                    dept_emp_tuple[1] = employee_schema.dept_emp[row].B;
+                    dept_emp_tuple[2] = employee_schema.dept_emp[row].C;
+                    dept_emp_tuple[3] = employee_schema.dept_emp[row].D;
+                    dept_emp_table[row] = dept_emp_tuple;
+                }
+                tables[4] = dept_emp_table
+            }
+
+            if (i == 5) {
+                let departments_table = [];
+                for (var row = 0; row < employee_schema.departments.length; row++) {
+                    let departments_tuple = []
+                    departments_tuple[0] = employee_schema.departments[row].A;
+                    departments_tuple[1] = employee_schema.departments[row].B;
+                    departments_table[row] = departments_tuple;
+                }
+                tables[5] = departments_table
+            }
+        }
+    }
+
+
     load_simulation_v2 = (index, simulation_type, buffer, error_indicater, col_headers) => {
         console.log("simulation type is: ", simulation_type);
         this.fill_col_headers(col_headers, simulation_type);
