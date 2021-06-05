@@ -139,8 +139,8 @@ class Employees extends Component {
       lastVisibleRow: 21
     }
 
-    // this.socket = io('https://spreadsheetactions.herokuapp.com/');
-    this.socket = io('localhost:3001');
+    this.socket = io('https://spreadsheetactions.herokuapp.com/');
+    // this.socket = io('localhost:3001');
 
     // receive existing tables
     this.socket.on('UPDATE_FRONTEND_TABLE', function(data){
