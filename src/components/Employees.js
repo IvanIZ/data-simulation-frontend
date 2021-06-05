@@ -926,9 +926,9 @@ class Employees extends Component {
   store_training_data = () => {
     // get current chicago time
     const date = new Date();
-    let curr_time = date.toLocaleString('en-US', { timeZone: 'America/Chicago' });
+    let curr_time = date.getHours() * 3600 + date.getMinutes() * 60 + date.getSeconds();
     
-    user_actions.push([this.state.name, "END_TRAINING_DATA", null, null, null, this.state.curr_table, null, null, curr_time]);
+    user_actions.push([this.state.name, "END_TRAINING_DATA", curr_time, curr_time, null, null, null, null, this.state.curr_table, null, null, null, null, null, curr_time - last_QA_time]);
     let action_package = {
       user_actions: user_actions
     }
