@@ -1098,10 +1098,10 @@ class Employees extends Component {
 
   indicate_error = () => {
     user_actions.push([this.state.name, "ERR", "ERR", "ERR", "ERR", "ERR", "ERR", "ERR", "ERR", "ERR", "ERR", "ERR", "ERR", "ERR", "ERR"]);
-    console.log("the pending changes are: ", pending_changes.data)
   }
 
   track_mouse = (e) => {
+    console.log("calling track mouse")
       this.setState({
         clientX: e.clientX,
         clientY: e.clientY,
@@ -1112,8 +1112,8 @@ class Employees extends Component {
 
   render() {
     return (
-      // onClick={e => this.track_action(e, "click")}
-      <div onClick={e => this.track_action(e, "click")} onMouseMove={e => this.track_mouse(e)} onKeyUp={e => this.track_action(e, "key_press")} className="App">
+      // onMouseMove={e => this.track_mouse(e)}
+      <div onClick={e => this.track_action(e, "click")} onMouseDown={e => this.track_mouse(e)} onKeyUp={e => this.track_action(e, "key_press")} className="App">
         <script src="node_modules/handsontable/dist/handsontable.full.min.js"></script>
         <link href="node_modules/handsontable/dist/handsontable.full.min.css" rel="stylesheet" media="screen"></link>
         <hr />
@@ -1169,6 +1169,17 @@ class Employees extends Component {
                     </ModalBody>
                     <ModalFooter>
                       <Button size='lg' className='display-button' color="info" onClick={this.close_restart_comfirmation}>Got It</Button>
+                    </ModalFooter>
+                  </Modal>
+
+                  <Modal size='lg' isOpen={this.state.isCompleteConfirmationModalOpen} toggle={this.toggleCompleteConfirmModal}>
+                    <ModalHeader toggle={this.toggleCompleteConfirmModal}>Complete Confirmation</ModalHeader>
+                    <ModalBody>
+                      You have completed the simulation! Please do not refresh or close this webpage until we have confirmed that your submission is received. If you think you have 
+                      submitted by mistake, please inform us immediately. Thanks!
+                    </ModalBody>
+                    <ModalFooter>
+                      <Button size='lg' className='display-button' color="info" onClick={this.close_confirmation}>Got It</Button>
                     </ModalFooter>
                   </Modal>
 
